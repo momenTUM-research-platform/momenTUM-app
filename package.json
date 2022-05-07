@@ -33,6 +33,7 @@
         "@ionic-native/streaming-media": "^5.36.0",
         "@ionic/angular": "^6.1.4",
         "@ionic/storage": "^3.0.6",
+        "@ionic/storage-angular": "^3.0.6",
         "@ngx-translate/core": "^14.0.0",
         "@ngx-translate/http-loader": "^7.0.0",
         "chart.js": "^3.7.1",
@@ -56,12 +57,13 @@
         "rm": "0.1.8",
         "rxjs": "~7.5.5",
         "sass-loader": "^12.6.0",
+        "storage-angular": "^0.0.1",
         "tslib": "^2.4.0",
         "zone.js": "~0.11.5"
     },
     "devDependencies": {
-        "@angular-devkit/build-angular": "~13.3.5",
         "@angular-devkit/architect": "^0.1303.5",
+        "@angular-devkit/build-angular": "~13.3.5",
         "@angular-devkit/core": "^13.3.5",
         "@angular-devkit/schematics": "^13.3.5",
         "@angular/cli": "~13.3.5",
