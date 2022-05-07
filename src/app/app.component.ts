@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { SurveyDataService } from '../app/services/survey-data.service';
 import * as moment from 'moment';
 import { AlertController } from '@ionic/angular';
-
+import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +25,8 @@ export class AppComponent implements OnInit {
     private surveyDataService: SurveyDataService,
     private router : Router,
     private ngZone : NgZone,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private storage: Storage
   ) {
 
     this.initializeApp();
@@ -33,10 +34,14 @@ export class AppComponent implements OnInit {
 
   async ngOnInit() {
     await this.platform.ready();
+
+    await this.storage.create();
     
     this.platform.pause.subscribe(() => {
       this.isAppInForeground = new Promise(resolve => { this.readyApp = resolve });
     });
+   
+      
     
     this.platform.resume.subscribe(() => {
       this.readyApp();
