@@ -44,7 +44,10 @@ Generate the native project, if it does not already exist. (You can only install
 #### Just incase, you can disable capacitor integration by:
     $ ionic integrations disable capacitor
 also delete the ```capacitor.config.json``` file
-#### 4. Running with cordova
+#### 4. Open Emulator
+<br>
+
+#### 5. Running with cordova
     $ ionic cordova run ios -l --external
 #### Reference
 > https://ionicframework.com/docs/developing/ios#xcode-setup
@@ -66,7 +69,10 @@ Generate the native project, if it does not already exist. (You can only install
 #### Just incase, you can disable capacitor integration by:
     $ ionic integrations disable capacitor
 also delete the ```capacitor.config.json``` file
-#### 4. Running with cordova
+#### 4. Open Emulator
+<br>
+
+#### 5. Running with cordova
     $ ionic cordova run android -l
 #### Reference
 > https://ionicframework.com/docs/developing/android#installing-android-studio
