@@ -122,7 +122,9 @@ export class SurveyCacheService {
       }
 
       // dismiss the loading spinner
-      this.loadingService.dismiss()
+      if(this.loadingService) { // Added this condition
+        this.loadingService.dismiss()
+      }
     })
   }
 }

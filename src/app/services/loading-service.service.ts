@@ -37,7 +37,12 @@ export class LoadingService {
     this.isLoading = false
     this.isCaching = false
     const loader = await this.loadingController.getTop()
-    return await loader.dismiss()
+    if(loader) { // Added this condition
+     return loader.dismiss()
+    }else{
+      return; 
+    }
+    
   }
 
 }

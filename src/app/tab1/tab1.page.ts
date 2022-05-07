@@ -174,8 +174,10 @@ export class Tab1Page {
         this.loadStudyDetails()
       } else {
         this.hideEnrolOptions = false
-
-        this.loadingService.dismiss()
+        if(this.loadingService) { // Added this condition
+          this.loadingService.dismiss()
+        }
+        
       } 
     });
 
@@ -241,7 +243,9 @@ export class Tab1Page {
       if (validStudy) {
         this.enrolInStudy(data)
       } else {
-        this.loadingService.dismiss()
+        if(this.loadingService) { // Added this condition
+          this.loadingService.dismiss()
+        }
         this.displayEnrolError(isQRCode)
       }
     });  
@@ -256,7 +260,9 @@ export class Tab1Page {
         this.attemptToDownloadStudy(barcodeData.text, true)
       } 
      }).catch(err => {
+      if(this.loadingService) { // Added this condition
         this.loadingService.dismiss()
+      }
         this.displayBarcodeError()
      });
   }
@@ -394,7 +400,9 @@ export class Tab1Page {
       // hide loading controller if not caching
       if (!this.loadingService.isCaching) {
         setTimeout(() => {
-          this.loadingService.dismiss()
+          if(this.loadingService) { // Added this condition
+            this.loadingService.dismiss()
+          }
         }, 1000)
       }
     })
