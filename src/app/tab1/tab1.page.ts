@@ -231,16 +231,20 @@ export class Tab1Page {
       // in order to determine if it's a schema study before continuing
       let validStudy = false
       try {
+        
         // checks if the returned text is parseable as JSON, and whether it contains
         // some of the key fields used by schema so it can determine whether it is
         // actually a schema study URL
+        console.log("JSON Data is: " + data);
         validStudy = JSON.parse(data['data']).properties !== undefined
                   && JSON.parse(data['data']).modules !== undefined
                   && JSON.parse(data['data']).properties.study_id !== undefined
       } catch(e) {
+        console.log("JSON Invalid format: exception: "+ e.message);
         validStudy = false
       }
       if (validStudy) {
+        console.log("Enrolling in a study.... ");
         this.enrolInStudy(data)
       } else {
         if(this.loadingService) { // Added this condition

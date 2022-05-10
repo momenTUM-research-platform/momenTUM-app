@@ -23,15 +23,20 @@ export class SurveyDataService {
    * @param surveyURL The web URL where a survey is hosted.
    */
   getRemoteData(surveyURL: string) {
+    console.log(surveyURL);
   return new Promise(resolve => {
     this.http2.setRequestTimeout(7)
     this.http2.post(surveyURL, {seed: 'f2d91e73'}, {}).then(data => {
         resolve(data)
+        
       }).catch(error => {
+        console.log("Error message:" + error);
         resolve(error)
       });
     });
   }
+
+ 
 
   async saveToLocalStorage(key, data) {
     this.storage.set(key, data)
@@ -158,10 +163,10 @@ export class SurveyDataService {
       this.httpClient
       .post(postURL, bodyData)
       .subscribe({
-        next: (v) => console.log("NOTICE HERE: " + v),
+        next: (v) => {resolve(v); console.log("Notice Here: " + v);},
         error: (e) => { console.error(e); resolve(false); },
-        complete: () => {console.info('complete'); resolve(true)}
-    }
+        complete: () => {console.info('Complete'); resolve(true)}
+        }
         
       );
     });
