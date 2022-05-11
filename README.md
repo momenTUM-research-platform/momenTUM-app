@@ -39,7 +39,7 @@ The following guide shows how to use Cordova to build for Browser, Android and i
 ## iOS Preview
 #### 1. Xcode installation with an emulator
 Note: If you don't already have an xcode and an emulator installed, follow the following guide
-to install it. [Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
+to install it. <br>[Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
 #### 2. Cordova Setup 
     $ npm install -g ios-sim
     $ brew install ios-deploy
