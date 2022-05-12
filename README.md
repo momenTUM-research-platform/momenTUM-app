@@ -39,7 +39,7 @@ The following guide shows how to use Cordova to build for Browser, Android and i
 ## iOS Preview
 #### 1. Xcode installation with an emulator
 Note: If you don't already have an xcode and an emulator installed, follow the following guide
-to install it. [Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
+to install it. <br>[Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
 #### 2. Cordova Setup 
     $ npm install -g ios-sim
     $ brew install ios-deploy
@@ -55,10 +55,10 @@ Generate the native project, if it does not already exist. (You can only install
 ## Android Preview
 #### 1. Android Studio and Android SDK installation
 Note: If you don't already have android studio or an emulator installed, follow the following guide
-to install it. [here](https://ionicframework.com/docs/developing/android#android-studio)
+to install it. <br>[Guide here](https://ionicframework.com/docs/developing/android#android-studio)
 #### 2. Cordova Setup
 Additional setup is required for Cordova to support programmatic builds. This section is not necessary for Capacitor.
-> Install java [here](https://ionicframework.com/docs/developing/android#java) <br>
+> Install Java [here](https://ionicframework.com/docs/developing/android#java) <br>
 > Install Gradle [here](https://ionicframework.com/docs/developing/android#gradle)
 #### 3. Project Setup​
 Generate the native project, if it does not already exist. (You can only install one)
