@@ -5,6 +5,14 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
+  },
+  {
+    path: 'survey/:task_id',
+    loadChildren: () => import('./survey/survey.module').then(m => m.SurveyPageModule)
+  },
+  {
+    path: 'home',
+    loadChildren: () => import('./tab1/tab1.module').then(m => m.Tab1PageModule)
   }
 ];
 @NgModule({
@@ -13,4 +21,4 @@ const routes: Routes = [
   ],
   exports: [RouterModule]
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

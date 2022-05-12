@@ -163,7 +163,7 @@ export class SurveyDataService {
       this.httpClient
       .post(postURL, bodyData)
       .subscribe({
-        next: (v) => {resolve(v); console.log("Notice Here: " + v);},
+        next: (v) => {resolve(v); console.log("Notice Here Survey: " + v);},
         error: (e) => { console.error(e); resolve(false); },
         complete: () => {console.info('Complete'); resolve(true)}
         }
