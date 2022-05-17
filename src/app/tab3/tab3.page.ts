@@ -61,8 +61,10 @@ export class Tab3Page {
       // to show/hide additional options
       const studyObject = values[0]
       if (studyObject !== null) {
+        console.log("I found a study!");
         this.isEnrolled = true
         this.study = JSON.parse(studyObject)
+        
       } else {
         this.isEnrolled = false
       }

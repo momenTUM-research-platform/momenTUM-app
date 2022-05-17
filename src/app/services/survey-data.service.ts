@@ -49,6 +49,7 @@ export class SurveyDataService {
   sendSurveyDataToServer(surveyData) {
     return Promise.all([this.storage.get("current-study"), this.storage.get("uuid"), this.studyTasksService.getAllTasks()]).then((values) => {
       const studyJSON = JSON.parse(values[0])
+      console.log('Hello', studyJSON);
       const uuid = values[1]
       const tasks = values[2]
       const dataUuid = this.uuidService.generateUUID("pending-data")
@@ -57,7 +58,7 @@ export class SurveyDataService {
       const bodyData = new FormData()
       bodyData.append("data_type", "survey_response")
       bodyData.append("user_id", uuid)
-      bodyData.append("study_id", studyJSON.properties.study_id)
+      bodyData.append("study_id", studyJSON?.properties.study_id)
       bodyData.append("module_index", surveyData.module_index)
       bodyData.append("module_name", surveyData.module_name)
       bodyData.append("responses", JSON.stringify(surveyData.responses))
@@ -66,7 +67,7 @@ export class SurveyDataService {
       bodyData.append("alert_time", surveyData.alert_time)
       bodyData.append("platform", this.platform.platforms()[0])
 
-      return this.attemptHttpPost(studyJSON.properties.post_url, bodyData).then((postSuccessful) => {
+      return this.attemptHttpPost(studyJSON?.properties.post_url, bodyData).then((postSuccessful) => {
         if (!postSuccessful) {
           var object = {}
           bodyData.forEach(function(value, key){
@@ -93,7 +94,7 @@ export class SurveyDataService {
       const bodyData = new FormData()
       bodyData.append("data_type", "log")
       bodyData.append("user_id", uuid)
-      bodyData.append("study_id", studyJSON.properties.study_id)
+      bodyData.append("study_id", studyJSON?.properties.study_id)
       bodyData.append("module_index", logEvent.module_index)
       bodyData.append("page", logEvent.page)
       bodyData.append("event", logEvent.event)
@@ -101,7 +102,7 @@ export class SurveyDataService {
       bodyData.append("timestamp_in_ms", logEvent.milliseconds)
       bodyData.append("platform", this.platform.platforms()[0])
 
-      return this.attemptHttpPost(studyJSON.properties.post_url, bodyData).then((postSuccessful) => {
+      return this.attemptHttpPost(studyJSON?.properties.post_url, bodyData).then((postSuccessful) => {
         if (!postSuccessful) {
           var object = {}
           bodyData.forEach(function(value, key){
@@ -131,7 +132,7 @@ export class SurveyDataService {
       }
       return {
         pendingLogKeys: pendingLogKeys,
-        post_url: studyJSON.properties.post_url
+        post_url: studyJSON?.properties.post_url
       }
     }).then((data) => {
       data.pendingLogKeys.map(pendingKey => {
@@ -163,8 +164,8 @@ export class SurveyDataService {
       this.httpClient
       .post(postURL, bodyData)
       .subscribe({
-        next: (v) => {resolve(v); console.log("Notice Here Survey: " + v);},
-        error: (e) => { console.error(e); resolve(false); },
+        next: (v) => {resolve(v); console.log("Notice Survey: " + v) ;},
+        error: (e) => { console.info('Error in attemptHttpPost ' + e || '' ); resolve(false); },
         complete: () => {console.info('Complete'); resolve(true)}
         }
         
