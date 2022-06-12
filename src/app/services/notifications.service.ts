@@ -121,7 +121,7 @@ export class NotificationsService {
 
     // get a set of completed task uuids
     let completedUUIDs = new Set()
-    for (let i = 0; i < study_tasks.length; i++) {
+    for (let i = 0; i < study_tasks?.length; i++) {
       if (study_tasks[i].completed) {
         completedUUIDs.add(study_tasks[i].uuid);
       }

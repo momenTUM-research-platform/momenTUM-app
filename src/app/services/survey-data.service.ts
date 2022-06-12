@@ -26,7 +26,8 @@ export class SurveyDataService {
     console.log(surveyURL);
   return new Promise(resolve => {
     this.http2.setRequestTimeout(7)
-    this.http2.post(surveyURL, {seed: 'f2d91e73'}, {}).then(data => {
+    // Now a get request
+    this.http2.get(surveyURL, {seed: 'f2d91e73'}, {}).then(data => {
         resolve(data)
         
       }).catch(error => {
@@ -37,7 +38,11 @@ export class SurveyDataService {
   }
 
  
-
+  /**
+   * Saves data to local storage
+   * @param key 
+   * @param data 
+   */
   async saveToLocalStorage(key, data) {
     this.storage.set(key, data)
   }

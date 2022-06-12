@@ -109,7 +109,7 @@ export class StudyTasksService {
 
             // create a task object
             const options = { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' } as const
-            const task_obj:Task = {
+            const task_obj: Task = {
               uuid: module_uuid,
               index: module_index,
               task_id: task_ID,
@@ -179,7 +179,7 @@ export class StudyTasksService {
 
       let last_header = ""
 
-      for (let i = 0; i < study_tasks.length; i++) {
+      for (let i = 0; i < study_tasks?.length; i++) {
         const task = study_tasks[i]
         // check if task has a pre_req 
         const unlocked = this.checkTaskIsUnlocked(task, study_tasks)
@@ -237,7 +237,7 @@ export class StudyTasksService {
 
     // get a set of completed task uuids
     let completedUUIDs = new Set();
-    for (let i = 0; i < study_tasks.length; i++) {
+    for (let i = 0; i < study_tasks?.length; i++) {
       if (study_tasks[i].completed) {
         completedUUIDs.add(study_tasks[i].uuid);
       }

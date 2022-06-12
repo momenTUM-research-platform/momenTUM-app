@@ -3,10 +3,16 @@ import { TestBed } from '@angular/core/testing';
 import { SurveyDataService } from './survey-data.service';
 
 describe('SurveyDataService', () => {
-  beforeEach(() => TestBed.configureTestingModule({}));
+
+  let service: SurveyDataService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(SurveyDataService);
+  });
 
   it('should be created', () => {
-    const service: SurveyDataService = TestBed.get(SurveyDataService);
     expect(service).toBeTruthy();
   });
+
 });

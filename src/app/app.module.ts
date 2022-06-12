@@ -60,5 +60,7 @@ export function LanguageLoader(http: HttpClient) {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]
+
+  
 })
 export class AppModule {}
