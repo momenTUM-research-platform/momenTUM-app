@@ -1,9 +1,70 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>pvt</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
+  <div id="content-container" class="pane">
+  <div id="pre-pane" class="pane"
+       *ngIf="state==='pre-state'">
+    <h1>
+      Instructions
+    </h1>
+    <p>
+      Welcome! PVT testing is easy to understand: it's just a reflex game. Some numbers will flash onto the screen suddenly, and your job will be to respond as soon as possible by touching the screen. When someone plays it, the screen looks something like this:
+    </p>
+    <div class="timer-container" id="tutorial-timer-container">
+      <p class="timer">
+        {{timer}}
+      </p>
+    </div>
+    <p>
+      The game will last for {{numOfTrials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
+    </p>
+    <p class="button-text"
+       id="start-test-button"
+       (click)="loadCountdown()">
+      < start test >
+    </p>
+  </div>
 
+  <div id="countdown-pane" class="pane"
+       *ngIf="state==='countdown-state'">
+    <h1>
+      Trial starts in {{countdown}}
+    </h1>
+  </div>
+
+  <div id="game-pane" class="pane"
+       *ngIf="state==='game-state'">
+    <ion-icon name="close"
+              size="large"
+              (click)="loadResults()">
+    </ion-icon>
+    <div class="timer-container" id="real-timer-container"
+         (mousedown)="reacted = true;">
+      <p class="timer" id="real-timer">
+        {{timer}}
+      </p>
+    </div>
+  </div>
+
+  <div id="post-pane" class="pane"
+       *ngIf="state==='post-state'">
+    <div id="result-titles"
+         *ngIf="showResults">
+      <p>
+        average:<br>
+        best:<br>
+        worst:<br>
+        entries:<br>
+      </p>
+    </div>
+    <div id="result-results"
+         *ngIf="showResults">
+      <p style="text-align: right">
+        {{average()}}<br>
+        {{best()}}<br>
+        {{worst()}}<br>
+        [ {{entries}} ]<br>
+      </p>
+    </div>
+  </div>
+</div>
 </ion-content>
+
