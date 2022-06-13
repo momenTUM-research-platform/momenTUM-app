@@ -72,6 +72,7 @@ export class StudyTasksService {
         if (mod.type === "video") module_type = "film-outline"
         if (mod.type === "audio") module_type = "headset-outline"
         if (mod.type === "info") module_type = "bulb-outline"
+        if (mod.type === "pvt") module_type = "alarm-outline"
 
         const module_name = studyObject.modules[i].name
         const module_index = i
@@ -99,7 +100,7 @@ export class StudyTasksService {
               // remove the randomInterval from the time
               taskTime.setMinutes(taskTime.getMinutes() - module_randomInterval)
 
-              // calc a random number between 0 and (randomInterval * 2) 
+              // calc a random number between 0 and (randomInterval * 2)
               // to account for randomInterval either side
               const randomMinutes = Math.random() * ((module_randomInterval * 2) - 0) + 0
 
@@ -125,7 +126,7 @@ export class StudyTasksService {
               timeout_after: module_timeout_after,
               time: taskTime.toString(),
               locale: taskTime.toLocaleString("en-US", options)
-            } 
+            }
 
             study_tasks.push(task_obj)
 
@@ -181,7 +182,7 @@ export class StudyTasksService {
 
       for (let i = 0; i < study_tasks.length; i++) {
         const task = study_tasks[i]
-        // check if task has a pre_req 
+        // check if task has a pre_req
         const unlocked = this.checkTaskIsUnlocked(task, study_tasks)
         const alertTime = new Date(Date.parse(task.time))
         const now = new Date()
@@ -214,7 +215,7 @@ export class StudyTasksService {
           }
         }
       }
-      
+
       // reverse the time_tasks list so newest is displayed first
       if (time_tasks.length > 0) {
         time_tasks.reverse()
@@ -229,9 +230,9 @@ export class StudyTasksService {
   }
 
   /**
-   * 
-   * @param task 
-   * @param study_tasks 
+   *
+   * @param task
+   * @param study_tasks
    */
   checkTaskIsUnlocked(task, study_tasks) {
 
