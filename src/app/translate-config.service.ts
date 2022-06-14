@@ -11,13 +11,14 @@ export class TranslateConfigService {
    * Get the default language of the current device
    */
   getDefaultLanguage() {
-    let language = this.translate.getBrowserLang();
+    const language = this.translate.getBrowserLang();
     this.translate.setDefaultLang(language);
     return language;
   }
 
   /**
    * Set the current language of the device
+   *
    * @param setLang The language to set
    */
   setLanguage(setLang: string) {

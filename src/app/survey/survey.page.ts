@@ -18,10 +18,10 @@ export class SurveyPage implements OnInit {
   @ViewChild(IonContent, { static: false }) content: IonContent;
 
   // the text to display as submit button label
-  submit_text: string = 'Submit';
+  submit_text = 'Submit';
 
   // variables to handle the sections
-  current_section: number = 1;
+  current_section = 1;
   num_sections: number;
   current_section_name: string;
 
@@ -71,7 +71,7 @@ export class SurveyPage implements OnInit {
     this.statusBar.backgroundColorByHexString('#0F2042');
 
     // necessary to update height of external embedded content
-    window.addEventListener('message', function (e) {
+    window.addEventListener('message', function(e) {
       if (e.data.hasOwnProperty('frameHeight')) {
         (<HTMLElement>(
           document.querySelector('iframe[src^="' + e.data.url + '"]')
@@ -169,7 +169,7 @@ export class SurveyPage implements OnInit {
         const randomGroups = {};
         for (let i = 0; i < this.survey.sections.length; i++) {
           for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-            let question = this.survey.sections[i].questions[j];
+            const question = this.survey.sections[i].questions[j];
             if (question.rand_group !== undefined) {
               // set a flag to indicate that this question shouldn't reappear via branching logic
               question.noToggle = true;
@@ -187,7 +187,7 @@ export class SurveyPage implements OnInit {
 
         // from each rand_group, select a random item to show
         const showThese = [];
-        for (let key in randomGroups) {
+        for (const key in randomGroups) {
           if (randomGroups.hasOwnProperty(key)) {
             // select a random value from each array and add it to the "showThese array"
             showThese.push(
@@ -293,9 +293,9 @@ export class SurveyPage implements OnInit {
             question.src
           );
           if (question.subtype === 'video')
-            question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            {question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
               question.thumb
-            );
+            );}
 
           // for external embedded content, sanitize the URLs to make them safe/work in html5 tags
         } else if (question.type === 'external') {
@@ -328,10 +328,10 @@ export class SurveyPage implements OnInit {
 
           // counterbalance the choices if necessary
           if (question.shuffle)
-            question.options = this.shuffle(question.options);
+            {question.options = this.shuffle(question.options);}
 
           // set the empty response to an array for checkbox questions
-          if (question.radio === 'false') question.response = [];
+          if (question.radio === 'false') {question.response = [];}
         }
       }
     }
@@ -339,6 +339,7 @@ export class SurveyPage implements OnInit {
 
   /**
    * Saves the response to a question and triggers and branching
+   *
    * @param question The question that has been answered
    */
   setAnswer(question) {
@@ -352,6 +353,7 @@ export class SurveyPage implements OnInit {
 
   /**
    * Fires every time a checkbox question is answered; converts the response(s) to a String
+   *
    * @param option The option selected in a checkbox group
    * @param question The question that has been answered
    */
@@ -369,8 +371,8 @@ export class SurveyPage implements OnInit {
     // otherwise add it to the response array
     if (responses.indexOf(option.text) > -1) {
       // remove it
-      let index = responses.indexOf(option.text);
-      if (index !== -1) responses.splice(index, 1);
+      const index = responses.indexOf(option.text);
+      if (index !== -1) {responses.splice(index, 1);}
     } else {
       responses.push(option.text);
     }
@@ -388,6 +390,7 @@ export class SurveyPage implements OnInit {
 
   /**
    * Opens an external file in the in app browser
+   *
    * @param url The url of the PDF file to open
    */
   openExternalFile(url) {
@@ -397,7 +400,7 @@ export class SurveyPage implements OnInit {
   toggleDynamicQuestions(question) {
     // if a question was hidden by rand_group
     // don't do any branching
-    if (question.noToggle !== undefined && question.noToggle) return;
+    if (question.noToggle !== undefined && question.noToggle) {return;}
 
     const id = question.id;
     // hide anything with the id as long as the value is equal
@@ -415,13 +418,13 @@ export class SurveyPage implements OnInit {
             const hideIf = this.survey.sections[i].questions[j].hide_if;
             const valueEquals = hideValue === question.response;
             if (valueEquals === hideIf)
-              this.survey.sections[i].questions[j].hideSwitch = false;
-            else this.survey.sections[i].questions[j].hideSwitch = true;
+              {this.survey.sections[i].questions[j].hideSwitch = false;}
+            else {this.survey.sections[i].questions[j].hideSwitch = true;}
           } else if (question.type === 'slider') {
             const direction = hideValue.substring(0, 1);
             const cutoff = parseInt(hideValue.substring(1, hideValue.length));
             let lesserThan = true;
-            if (direction === '>') lesserThan = false;
+            if (direction === '>') {lesserThan = false;}
             if (lesserThan) {
               if (question.response <= cutoff) {
                 this.questions[i].hideSwitch = true;
@@ -493,8 +496,8 @@ export class SurveyPage implements OnInit {
         this.surveyDataService.sendSurveyDataToServer({
           module_index: this.module_index,
           module_name: this.module_name,
-          responses: responses,
-          response_time: response_time,
+          responses,
+          response_time,
           response_time_in_ms: response_time_ms,
           alert_time: this.tasks[this.task_index].alert_time,
         });
@@ -520,7 +523,7 @@ export class SurveyPage implements OnInit {
             this.survey.sections[this.current_section - 1].name;
 
           if (this.current_section === this.num_sections)
-            this.submit_text = this.survey.submit_text;
+            {this.submit_text = this.survey.submit_text;}
 
           this.content.scrollToTop(0);
         });
@@ -533,13 +536,14 @@ export class SurveyPage implements OnInit {
 
   /**
    * Creates a Toast object to display a message to the user
+   *
    * @param message A message to display in the toast
    * @param position The position on the screen to display the toast
    */
   async showToast(message, position) {
     const toast = await this.toastController.create({
-      message: message,
-      position: position,
+      message,
+      position,
       keyboardClose: true,
       color: 'danger',
       buttons: [
@@ -557,12 +561,13 @@ export class SurveyPage implements OnInit {
   /**
    * Randomly shuffle an array
    * https://stackoverflow.com/a/2450976/1293256
-   * @param  {Array} array The array to shuffle
-   * @return {String}      The first item in the shuffled array
+   *
+   * @param array The array to shuffle
+   * @return      The first item in the shuffled array
    */
   shuffle(array) {
     let currentIndex = array.length;
-    let temporaryValue, randomIndex;
+    let temporaryValue; let randomIndex;
 
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {

@@ -28,12 +28,12 @@
         <ion-item lines="full" *ngFor="let question of survey.sections[this.current_section-1].questions" class="ion-text-wrap survey-item" [hidden]="!question.hideSwitch">
 
             <!-- instruction type -->
-            <div item-content *ngIf="question.type == 'instruction'">
+            <div item-content *ngIf="question.type === 'instruction'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
             </div>
 
             <!-- slider type -->
-            <div style="width:100%" item-content *ngIf="question.type == 'slider'">
+            <div style="width:100%" item-content *ngIf="question.type === 'slider'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
                 <ion-range [min]="question.min" [max]="question.max" [(ngModel)]="question.model" [pin]="true" [value]="question.model" (ionChange)="setAnswer(question)" color="secondary" style="font-size:small;">
@@ -43,37 +43,37 @@
             </div>
 
             <!-- video/audio/image type -->
-            <div style="width:100%;padding-right:6px !important;" item-content *ngIf="question.type == 'media'">
+            <div style="width:100%;padding-right:6px !important;" item-content *ngIf="question.type === 'media'">
                 <p *ngIf="question.text" [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
-                <video *ngIf="question.subtype == 'video'" controls="controls" controlsList="nodownload" [poster]="question.thumb" preload="metadata" webkit-playsinline="webkit-playsinline" class="videoPlayer">
+                <video *ngIf="question.subtype === 'video'" controls="controls" controlsList="nodownload" [poster]="question.thumb" preload="metadata" webkit-playsinline="webkit-playsinline" class="videoPlayer">
           <source [src]="question.src" />
         </video>
 
                 <!-- audio -->
-                <audio *ngIf="question.subtype == 'audio'" style="width:100%;" controls="controls" preload="metadata" controlsList="nodownload">
+                <audio *ngIf="question.subtype === 'audio'" style="width:100%;" controls="controls" preload="metadata" controlsList="nodownload">
           <source [src]="question.src" type="audio/mpeg">
         </audio>
 
                 <!-- image -->
-                <ion-img *ngIf="question.subtype == 'image'" style="width:100%;" [src]="question.src"></ion-img>
+                <ion-img *ngIf="question.subtype === 'image'" style="width:100%;" [src]="question.src"></ion-img>
 
             </div>
 
             <!-- text input -->
-            <div style="width:100%;" item-content *ngIf="question.type == 'text'">
+            <div style="width:100%;" item-content *ngIf="question.type === 'text'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
-                <ion-input *ngIf="question.subtype == 'short'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" type="text" autocomplete="on" autocorrect="on" placeholder="Enter response...">
+                <ion-input *ngIf="question.subtype === 'short'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" type="text" autocomplete="on" autocorrect="on" placeholder="Enter response...">
                 </ion-input>
 
-                <ion-input *ngIf="question.subtype == 'numeric'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" placeholder="Enter number..." type="number" pattern="\d*"></ion-input>
+                <ion-input *ngIf="question.subtype === 'numeric'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" placeholder="Enter number..." type="number" pattern="\d*"></ion-input>
 
-                <ion-textarea *ngIf="question.subtype == 'long'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" placeholder="Enter response..." auto-grow="true" rows="3"></ion-textarea>
+                <ion-textarea *ngIf="question.subtype === 'long'" [(ngModel)]="question.model" (ionBlur)="setAnswer(question)" style="font-size:small;" placeholder="Enter response..." auto-grow="true" rows="3"></ion-textarea>
             </div>
 
             <!-- multi -->
-            <div style="width:100%;" item-content *ngIf="question.type == 'multi'">
+            <div style="width:100%;" item-content *ngIf="question.type === 'multi'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
                 <div *ngIf="question.modal == true">
@@ -109,19 +109,19 @@
             </div>
 
             <!-- datetimepicker -->
-            <div item-content *ngIf="question.type == 'datetime'">
+            <div item-content *ngIf="question.type === 'datetime'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
-                <ion-datetime *ngIf="question.subtype == 'datetime'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY, hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
+                <ion-datetime *ngIf="question.subtype === 'datetime'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY, hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
 
-                <ion-datetime *ngIf="question.subtype == 'date'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY" (ionChange)="setAnswer(question)"></ion-datetime>
+                <ion-datetime *ngIf="question.subtype === 'date'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY" (ionChange)="setAnswer(question)"></ion-datetime>
 
-                <ion-datetime *ngIf="question.subtype == 'time'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
+                <ion-datetime *ngIf="question.subtype === 'time'" style="font-size:small;" [(ngModel)]="question.model" displayFormat="hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
 
             </div>
 
             <!-- boolean toggle -->
-            <div style="width:100%;" item-content *ngIf="question.type == 'yesno'">
+            <div style="width:100%;" item-content *ngIf="question.type === 'yesno'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
                 <ion-segment [(ngModel)]="question.model" (ionChange)="setAnswer(question)">
@@ -136,12 +136,12 @@
             </div>
 
             <!-- external -->
-            <div class="external-container" style="width:100%;" item-content *ngIf="question.type == 'external'">
+            <div class="external-container" style="width:100%;" item-content *ngIf="question.type === 'external'">
                 <iframe frameborder="0" scrolling="no" [src]="question.src"></iframe>
             </div>
 
             <!-- file -->
-            <div style="width:100%;" item-content *ngIf="question.type == 'file'">
+            <div style="width:100%;" item-content *ngIf="question.type === 'file'">
                 <p [class.showError]="!question.hideError" [innerHTML]="question.text"></p>
 
                 <ion-button color="primary" fill="outline" (click)="openExternalFile(question.src)">

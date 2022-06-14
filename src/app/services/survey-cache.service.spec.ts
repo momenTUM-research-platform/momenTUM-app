@@ -88,7 +88,7 @@ describe('FileDownloaderService', () => {
       .downloadFile('https://tuspl22-momentum.srv.mwn.de/api/surveys/demo.json')
       .then((file) => {
         console.log(file);
-        expect(file).toContain("'name': 'demo'");
+        expect(file).toContain('\'name\': \'demo\'');
       })
       .catch((error) => {
         console.log(error);

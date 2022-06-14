@@ -17,8 +17,8 @@ export class SurveyCacheService {
   videoThumbnailsToCache: object = {};
   localMediaURLs: object = {};
   localThumbnailURLs: object = {};
-  mediaCount: number = 0;
-  mediaDownloadedCount: number = 0;
+  mediaCount = 0;
+  mediaDownloadedCount = 0;
 
   constructor(
     private fileTransfer: FileTransfer,
@@ -29,6 +29,7 @@ export class SurveyCacheService {
 
   /**
    * Downloads a remote file and converts it to a local URL
+   *
    * @param url Remote URL to a media file
    */
   async downloadFile(url: string): Promise<string> {
@@ -54,11 +55,12 @@ export class SurveyCacheService {
 
   /**
    * Gets all of the remote URLs from the media elements in this study
+   *
    * @param study The study protocol
    */
   getMediaURLs(study) {
     // get banner url
-    this.mediaToCache['banner'] = study.properties.banner_url;
+    this.mediaToCache.banner = study.properties.banner_url;
 
     // get urls from media elements
     for (const module of study.modules) {
@@ -67,7 +69,7 @@ export class SurveyCacheService {
           (question) => question.type === 'media'
         );
         for (const question of mediaQuestions)
-          this.mediaToCache[question.id] = question.src;
+          {this.mediaToCache[question.id] = question.src;}
       }
     }
     // set mediaCount to be number of media items
@@ -76,6 +78,7 @@ export class SurveyCacheService {
 
   /**
    * Gets all of the media URLs from the study protocol and downloads the files
+   *
    * @param study The study protocol
    */
   cacheAllMedia(study) {
@@ -107,7 +110,7 @@ export class SurveyCacheService {
    */
   checkIfFinished() {
     if (this.mediaDownloadedCount === this.mediaCount)
-      this.updateMediaURLsInStudy();
+      {this.updateMediaURLsInStudy();}
   }
 
   /**
@@ -118,18 +121,18 @@ export class SurveyCacheService {
       try {
         const studyObject = JSON.parse(studyString);
         // update the banner url first
-        studyObject.properties.banner_url = this.localMediaURLs['banner'];
+        studyObject.properties.banner_url = this.localMediaURLs.banner;
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
         for (const module of studyObject.modules)
-          for (const section of module)
-            for (const question of section) {
+          {for (const section of module)
+            {for (const question of section) {
               if (question.id in this.localMediaURLs)
-                question.src = this.localMediaURLs[question.id];
+                {question.src = this.localMediaURLs[question.id];}
               if (question.subtype === 'video')
-                question.thumb = this.localMediaURLs['banner'];
-            }
+                {question.thumb = this.localMediaURLs.banner;}
+            }}}
 
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));

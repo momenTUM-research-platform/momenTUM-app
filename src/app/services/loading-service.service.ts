@@ -5,13 +5,14 @@ import { LoadingController } from '@ionic/angular';
   providedIn: 'root',
 })
 export class LoadingService {
-  isLoading: boolean = false;
-  isCaching: boolean = false;
+  isLoading = false;
+  isCaching = false;
 
   constructor(public loadingController: LoadingController) {}
 
   /**
    * Displays the loading dialog
+   *
    * @param msg The message to display in the loading dialog
    */
   async present(msg: string) {

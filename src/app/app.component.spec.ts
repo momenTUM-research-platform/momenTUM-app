@@ -13,7 +13,7 @@ import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage-angular';
 
 describe('AppComponent', () => {
-  let statusBarSpy, splashScreenSpy, platformReadySpy, platformSpy;
+  let statusBarSpy; let splashScreenSpy; let platformReadySpy; let platformSpy;
 
   beforeEach(waitForAsync(() => {
     statusBarSpy = jasmine.createSpyObj('StatusBar', ['styleDefault']);
