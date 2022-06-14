@@ -6,31 +6,32 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AppComponent } from './app.component';
-import { AppRoutingModule } from "./app-routing.module";
-import {HttpClientTestingModule} from '@angular/common/http/testing';
+import { AppRoutingModule } from './app-routing.module';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { HTTP } from '@ionic-native/http/ngx';
+import { Storage } from '@ionic/storage-angular';
 
 describe('AppComponent', () => {
-
   let statusBarSpy, splashScreenSpy, platformReadySpy, platformSpy;
-
 
   beforeEach(waitForAsync(() => {
     statusBarSpy = jasmine.createSpyObj('StatusBar', ['styleDefault']);
     splashScreenSpy = jasmine.createSpyObj('SplashScreen', ['hide']);
     platformReadySpy = Promise.resolve();
-    platformSpy = jasmine.createSpyObj('Platform', { ready: platformReadySpy }); 
+    platformSpy = jasmine.createSpyObj('Platform', { ready: platformReadySpy });
 
     TestBed.configureTestingModule({
       declarations: [AppComponent],
-      imports: [
-        AppRoutingModule,
-        HttpClientTestingModule,
-      ],
+      imports: [AppRoutingModule, HttpClientTestingModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: StatusBar, useValue: statusBarSpy },
         { provide: SplashScreen, useValue: splashScreenSpy },
         { provide: Platform, useValue: platformSpy },
+        LocalNotifications,
+        HTTP,
+        Storage,
       ],
     }).compileComponents();
   }));
@@ -50,7 +51,4 @@ describe('AppComponent', () => {
   });
 
   // TODO: add more tests!
-
 });
-
-
