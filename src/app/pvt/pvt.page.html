@@ -30,14 +30,12 @@
       </h1>
     </div>
 
-    <div id="game-pane" class="pane"
-       *ngIf="state==='game-state'">
+    <div id="game-pane" class="pane" *ngIf="state==='game-state'" (touchstart)="reacted = true;">
     <ion-icon name="close"
               size="large"
               (click)="loadResults()" *ngIf="enableExit">
     </ion-icon>
-    <div class="timer-container" id="real-timer-container"
-         (mousedown)="reacted = true;">
+    <div class="timer-container" id="real-timer-container">
       <p class="timer" id="real-timer">
         {{timer}}
       </p>
