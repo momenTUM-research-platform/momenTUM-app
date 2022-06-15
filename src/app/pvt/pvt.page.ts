@@ -17,6 +17,7 @@ export class PvtPage implements OnInit {
   // "dur" is the time span, which will be added to min. (in milliseconds)
   showResults: boolean; // decides whether the results of the test will be shown to the user.
   maxReactionTime: number; // The maximum reaction time a user can have, before the test will be cancelled and retaken. (in milliseconds)
+  enableExit: boolean;
 
   // OUTPUT: TODO: create an OUTPUP datastructure
   entries: number[]; // all reaction-times measured.
@@ -40,72 +41,11 @@ export class PvtPage implements OnInit {
     this.reacted = false;
     this.endedGame = false;
     this.trialNumber = 1;
+    this.enableExit = true;
     this.conductTest(true);
   }
 
   ngOnInit() {
-  }
-
-  /**
-   * computes the average of the entries[] array.
-   *
-   * @returns the average value of the entries[] array elements.
-   **/
-  average(): number {
-    // check if entries[] is empty
-    if (this.entries.length === 0) {
-      return null;
-    }
-
-    let average = 0;
-    this.entries.forEach(entry => {
-      average += entry;
-    });
-    average /= this.entries.length;
-    return Math.round(average);
-  }
-
-  /**
-   * computes the minimum entry of the entries[] array.
-   *
-   * @returns the minimum entry of the entries[] array.
-   * */
-  best(): number {
-    // check if entries[] is empty
-    if (this.entries.length === 0) {
-      return null;
-    }
-
-    // calculate best
-    let best = this.entries[0];
-    this.entries.forEach(entry => {
-      if (entry < best) {
-        best = entry;
-      }
-    });
-    return best;
-  }
-
-  /**
-   * computes the maximum entry of the entries[] array
-   *
-   * @returns maximum entry of the entries[] array
-   * */
-  worst(): number {
-
-    // check if entries[] is empty
-    if (this.entries.length === 0) {
-      return null;
-    }
-
-    // calculate worst
-    let worst = this.entries[0];
-    this.entries.forEach(entry => {
-      if (entry > worst) {
-        worst = entry;
-      }
-    });
-    return worst;
   }
 
   /**

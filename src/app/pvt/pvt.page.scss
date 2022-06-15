@@ -1,29 +1,27 @@
 // Elements
 p {
-  font-family: "Courier New", serif;
-  color: #818181;
-  font-size: 17px;
+  font-family: "TUM Neue Helvetica", sans-serif;
+  color: black;
+  font-size: 18px;
   text-align: center;
-  margin: 10px 20px;
+  margin: 30px 20px;
   padding: 0;
 }
 
 h1 {
-  font-family: "Courier New", serif;
+  font-family: "TUM Neue Helvetica", sans-serif;
   color: black;
   font-size: 25px;
   text-align: center;
-  padding: 20px 0 0 0;
-  margin: 0;
+  padding: 20% 0 0 0;
   line-height: 100%;
 }
 
-
 ion-icon {
   padding: 0;
-  margin: 0;
+  margin: 20% 10%;
   color: black;
-  float: right;
+  float: left;
 }
 
 div {
@@ -55,9 +53,10 @@ div {
   font-family: "TUM Neue Helvetica", serif;
   font-size: 30px;
   text-align: center;
-  position: relative;
+  position: absolute;
   left: 50%;
-  transform: translate(-50%,0%);
+  top: 50%;
+  transform: translate(-50%,-50%);
 }
 
 .timer {
@@ -75,42 +74,18 @@ div {
 
 
 // Id's
-#post-pane {
-  color: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "TUM Neue Helvetica", serif;
-  font-size: 12pt;
-  line-height: 30px;
-}
-
-#result-titles {
-  font-weight: bold;
-  width: 40%;
-  text-align: right;
-  right: 55%;
-}
-
-#result-results {
-  text-align: left;
-  width: 60%;
-  padding-right: 10px;
+#results {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
 }
 
 #start-test-button {
-  position: relative;
-  margin-top: 40px;
-}
-
-#real-timer-container {
-  top: 50%;
-}
-
-#tutorial-timer-container {
-  margin: 40px 0;
-}
-
-#game-pane {
-
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
 }
