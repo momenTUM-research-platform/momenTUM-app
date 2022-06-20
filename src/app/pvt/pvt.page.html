@@ -1,4 +1,5 @@
 <ion-content scroll-y="false">
+
   <div id="content-container" class="pane">
 
     <div id="pre-pane" class="pane"
@@ -46,6 +47,9 @@
       <p *ngIf="showResults" id="results">
           {{entries}}
       </p>
+      <ion-label class="button-text" id="submit-button" (mousedown)="submit()">
+        < submit >
+      </ion-label>
     </div>
 
   </div>

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { SurveyDataService } from "../services/survey-data.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-pvt',
@@ -31,8 +33,8 @@ export class PvtPage implements OnInit {
   private endedGame: boolean;
 
   // TODO: The initial values should be defined according to the study.json file.
-  constructor() {
-    this.state = 'pre-state';
+  constructor(private surveyDataService: SurveyDataService, private router: Router) {
+    this.state = 'post-state';
     this.numOfTrials = 10;
     this.entries = Array(this.numOfTrials).fill(-1);
     this.timeInterval = {min: 2000, dur: 1000};
@@ -115,6 +117,14 @@ export class PvtPage implements OnInit {
 
     this.timer = undefined; // make timer invisible
     return;
+  }
+
+  /**
+   * submits the entries array to the server and loads the home page
+   * */
+  submit() {
+    this.surveyDataService.sendSurveyDataToServer({ entries: this.entries })
+      .then(() => this.router.navigate(['/home/']));
   }
 
   /**

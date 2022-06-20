@@ -53,10 +53,9 @@ div {
   font-family: "TUM Neue Helvetica", serif;
   font-size: 30px;
   text-align: center;
-  position: absolute;
+  position: relative;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%,-50%);
+  transform: translateX(-50%);
 }
 
 .timer {
@@ -74,18 +73,25 @@ div {
 
 
 // Id's
-#results {
+#real-timer-container {
   position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+}
+
+#results {
+  position: relative;
   left: 50%;
   top: 50%;
   margin: 0;
   transform: translate(-50%, -50%);
 }
 
-#start-test-button {
+#submit-button {
   position: absolute;
-  top: 60%;
+  bottom: 20%;
   left: 50%;
-  transform: translateX(-50%);
   margin: 0;
+  transform: translate(-50%, -50%);
 }
