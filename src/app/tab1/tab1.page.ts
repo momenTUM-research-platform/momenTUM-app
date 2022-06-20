@@ -236,8 +236,9 @@ export class Tab1Page {
         // checks if the returned text is parseable as JSON, and whether it contains
         // some of the key fields used by schema so it can determine whether it is
         // actually a schema study URL
-        validStudy = JSON.parse(data.data).properties !== undefined
-                  && JSON.parse(data.data).modules !== undefined
+        // @ts-ignore
+        validStudy = JSON.parse(data.data).properties !== undefined // @ts-ignore
+                  && JSON.parse(data.data).modules !== undefined // @ts-ignore
                   && JSON.parse(data.data).properties.study_id !== undefined;
       } catch(e) {
         console.log('JSON Invalid format: exception: '+ e.message);

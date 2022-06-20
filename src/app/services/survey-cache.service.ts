@@ -60,6 +60,7 @@ export class SurveyCacheService {
    */
   getMediaURLs(study) {
     // get banner url
+    // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
     // get urls from media elements
@@ -121,6 +122,7 @@ export class SurveyCacheService {
       try {
         const studyObject = JSON.parse(studyString);
         // update the banner url first
+        // @ts-ignore
         studyObject.properties.banner_url = this.localMediaURLs.banner;
 
         // update the other media items to the corresponding local URL
@@ -131,7 +133,8 @@ export class SurveyCacheService {
               if (question.id in this.localMediaURLs)
                 {question.src = this.localMediaURLs[question.id];}
               if (question.subtype === 'video')
-                {question.thumb = this.localMediaURLs.banner;}
+                { // @ts-ignore
+                  question.thumb = this.localMediaURLs.banner;}
             }}}
 
         // update the study protocol in storage
