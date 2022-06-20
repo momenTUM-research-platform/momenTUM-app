@@ -15,22 +15,22 @@ import { TranslateConfigService } from '../translate-config.service';
 export class Tab2Page {
 
   // array to store the graphs
-  graphs: Array<any> = new Array()
+  graphs: Array<any> = new Array();
 
   // array to store the history
-  history: Array<any> = new Array()
+  history: Array<any> = new Array();
 
   // flag for study enrolment
-  enrolledInStudy: boolean = false
+  enrolledInStudy = false;
 
   // study object JSON
-  studyJSON: any
+  studyJSON: any;
 
   // current study day
-  studyDay: number
+  studyDay: number;
 
   // the current language of the device
-  selectedLanguage: string
+  selectedLanguage: string;
 
   // graph options
   chartOptions: any = {
@@ -50,11 +50,11 @@ export class Tab2Page {
         }
       }]
     }
-  }
+  };
 
   // graph colours
   chartColors: Array<any> = [
-    { 
+    {
       backgroundColor: 'rgba(4,153,139,0.6)',
       borderColor: 'rgba(148,159,177,1)',
       pointBackgroundColor: 'rgba(148,159,177,1)',
@@ -62,7 +62,7 @@ export class Tab2Page {
       pointHoverBackgroundColor: '#fff',
       pointHoverBorderColor: 'rgba(148,159,177,0.8)'
     },
-    { 
+    {
       backgroundColor: 'rgba(77,83,96,0.2)',
       borderColor: 'rgba(77,83,96,1)',
       pointBackgroundColor: 'rgba(77,83,96,1)',
@@ -70,7 +70,7 @@ export class Tab2Page {
       pointHoverBackgroundColor: '#fff',
       pointHoverBorderColor: 'rgba(77,83,96,1)'
     },
-    { 
+    {
       backgroundColor: 'rgba(148,159,177,0.2)',
       borderColor: 'rgba(148,159,177,1)',
       pointBackgroundColor: 'rgba(148,159,177,1)',
@@ -78,33 +78,33 @@ export class Tab2Page {
       pointHoverBackgroundColor: '#fff',
       pointHoverBorderColor: 'rgba(148,159,177,0.8)'
     }
-  ]
+  ];
 
   constructor(private storage: Storage,
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
-    private translateConfigService: TranslateConfigService) { 
+    private translateConfigService: TranslateConfigService) {
       // get the default language of the device
-      this.selectedLanguage = this.translateConfigService.getDefaultLanguage()
+      this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
     }
 
   ionViewWillEnter() {
 
-    this.graphs = []
-    this.history = []
-    this.enrolledInStudy = false
+    this.graphs = [];
+    this.history = [];
+    this.enrolledInStudy = false;
 
-    Promise.all([this.storage.get("current-study"), this.storage.get("enrolment-date")]).then(values => {
-      const studyObject = values[0]
-      const enrolmentDate = values[1]
+    Promise.all([this.storage.get('current-study'), this.storage.get('enrolment-date')]).then(values => {
+      const studyObject = values[0];
+      const enrolmentDate = values[1];
 
       if (studyObject !== null) {
 
-        this.studyJSON = JSON.parse(studyObject)
-        this.enrolledInStudy = true
+        this.studyJSON = JSON.parse(studyObject);
+        this.enrolledInStudy = true;
 
         // calculate the study day
-        this.studyDay = this.diffDays(new Date(enrolmentDate), new Date())
+        this.studyDay = this.diffDays(new Date(enrolmentDate), new Date());
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -113,65 +113,65 @@ export class Tab2Page {
           page: 'my-progress',
           event: 'entry',
           module_index: -1
-        })
+        });
 
         // check if any graphs are available and add history items
         this.studyTasksService.getAllTasks().then(tasks => {
           // get all entries for history
           for (let i = 0; i < tasks.length; i++) {
             if (tasks[i].completed) {
-              let historyItem = {
-                task_name: tasks[i].name.replace(/<\/?[^>]+(>|$)/g, ""),
+              const historyItem = {
+                task_name: tasks[i].name.replace(/<\/?[^>]+(>|$)/g, ''),
                 moment_time: moment(tasks[i].response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
                 response_time: new Date(tasks[i].response_time)
-              }
+              };
               this.history.unshift(historyItem);
             }
           }
           // sort the history array by completion time
           this.history.sort(function(x, y) {
             if (x.response_time > y.response_time) {
-              return -1
+              return -1;
             }
             if (x.response_time < y.response_time) {
-              return 1
+              return 1;
             }
-            return 0
+            return 0;
           });
 
           // get all graphs
           for (let i = 0; i < this.studyJSON.modules.length; i++) {
-            const graph = this.studyJSON.modules[i].graph
-            const study_name = this.studyJSON.modules[i].name
-            const graph_header = this.studyJSON.modules[i].name
+            const graph = this.studyJSON.modules[i].graph;
+            const study_name = this.studyJSON.modules[i].name;
+            const graph_header = this.studyJSON.modules[i].name;
 
             // if the module is to display a graph
             if (graph.display) {
               // get the variable to graph
-              const variableToGraph = graph.variable
+              const variableToGraph = graph.variable;
 
               // store the labels and data for this module
-              const task_labels = []
-              const task_data = []
+              const task_labels = [];
+              const task_data = [];
 
-              const graph_title = graph.title
-              const graph_blurb = graph.blurb
-              const graph_type = graph.type
-              const graph_maxpoints = -(graph.max_points)
+              const graph_title = graph.title;
+              const graph_blurb = graph.blurb;
+              const graph_type = graph.type;
+              const graph_maxpoints = -(graph.max_points);
 
               // loop through each study_task
-              for (let task in tasks) {
+              for (const task in tasks) {
                 // check if the task is this task
                 if (tasks[task].name === study_name) {
                   if (tasks[task].completed) {
                     // get the variable we are to graph
-                    for (let k in tasks[task].responses) {
+                    for (const k in tasks[task].responses) {
                       if (k === variableToGraph) {
                         // format the response time
-                        const response_time = moment(tasks[task].response_time).format("MMM Do, h:mma")
-                        task_labels.push(response_time)
-                        task_data.push(tasks[task].responses[k])
-                        break
+                        const response_time = moment(tasks[task].response_time).format('MMM Do, h:mma');
+                        task_labels.push(response_time);
+                        task_data.push(tasks[task].responses[k]);
+                        break;
                       }
                     }
                   }
@@ -188,28 +188,28 @@ export class Tab2Page {
                 type: graph_type,
                 blurb: graph_blurb,
                 header: graph_header
-              }
+              };
 
               // if the task had any data to graph, push it
               if (task_data.length > 0) {
-                this.graphs.push(graphObj)
+                this.graphs.push(graphObj);
               }
             }
           }
-        })
+        });
       }
-    })
+    });
   }
 
   diffDays(d1, d2)
   {
-    let ndays = 0
-    const tv1 = d1.valueOf()  // msec since 1970
-    const tv2 = d2.valueOf()
+    let ndays = 0;
+    const tv1 = d1.valueOf();  // msec since 1970
+    const tv2 = d2.valueOf();
 
-    ndays = (tv2 - tv1) / 1000 / 86400
-    ndays = Math.round(ndays - 0.5)
-    return ndays
+    ndays = (tv2 - tv1) / 1000 / 86400;
+    ndays = Math.round(ndays - 0.5);
+    return ndays;
   }
 
   async ionViewWillLeave() {
@@ -220,7 +220,7 @@ export class Tab2Page {
         page: 'my-progress',
         event: 'exit',
         module_index: -1
-      })
+      });
     }
   }
 }

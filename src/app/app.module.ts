@@ -26,6 +26,10 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
+// Mocks
+
+// import { FileMock } from '@ionic-native-mocks/file';
+// import { FileTransferMock } from '@ionic-native-mocks/file-transfer';
 export function LanguageLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, 'assets/i18n/', '.json');
 }
@@ -34,31 +38,34 @@ export function LanguageLoader(http: HttpClient) {
   declarations: [AppComponent],
   entryComponents: [],
   imports: [
-    BrowserModule, 
-    NgChartsModule, 
-    IonicModule.forRoot(), 
-    IonicStorageModule.forRoot(), 
+    BrowserModule,
+    NgChartsModule,
+    IonicModule.forRoot(),
+    IonicStorageModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: (LanguageLoader),
-        deps: [HttpClient]
-      }
-    })],
+        useFactory: LanguageLoader,
+        deps: [HttpClient],
+      },
+    }),
+  ],
   providers: [
     StatusBar,
     SplashScreen,
     BarcodeScanner,
     LocalNotifications,
     InAppBrowser,
+    // { provide: File, useClass: FileMock },
+    // { provide: FileTransfer, useClass: FileTransferMock },
     File,
     FileTransfer,
     HTTP,
     FormsModule,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule {}
