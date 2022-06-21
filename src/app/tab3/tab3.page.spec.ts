@@ -1,4 +1,4 @@
-import { CUSTOM_ELEMENTS_SCHEMA, InjectionToken } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Tab3Page } from './tab3.page';
@@ -8,18 +8,12 @@ import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import {
   DEFAULT_LANGUAGE,
-  MissingTranslationHandler,
-  TranslateCompiler,
   TranslateLoader,
   TranslateModule,
-  TranslateParser,
-  TranslateService,
-  TranslateStore,
   USE_DEFAULT_LANG,
   USE_EXTEND,
   USE_STORE,
 } from '@ngx-translate/core';
-import { TranslateConfigService } from '../translate-config.service';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { IonicModule } from '@ionic/angular';
 import { LanguageLoader } from '../app.module';
