@@ -21,10 +21,10 @@ export class AppComponent implements OnInit {
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
-    private localNotifications : LocalNotifications,
+    private localNotifications: LocalNotifications,
     private surveyDataService: SurveyDataService,
-    private router : Router,
-    private ngZone : NgZone,
+    private router: Router,
+    private ngZone: NgZone,
     private alertCtrl: AlertController,
     private storage: Storage
   ) {
@@ -36,22 +36,22 @@ export class AppComponent implements OnInit {
     await this.platform.ready();
 
     await this.storage.create();
-    
+
     this.platform.pause.subscribe(() => {
-      this.isAppInForeground = new Promise(resolve => { this.readyApp = resolve });
+      this.isAppInForeground = new Promise(resolve => { this.readyApp = resolve; });
     });
-   
-      
-    
+
+
+
     this.platform.resume.subscribe(() => {
       this.readyApp();
     });
 
     // handle notification click
-    this.localNotifications.on("click").subscribe(async (notification) => {
+    this.localNotifications.on('click').subscribe(async (notification) => {
       await this.isAppInForeground;
       // log that the user clicked on this notification
-      let logEvent = {
+      const logEvent = {
         timestamp: moment().format(),
         milliseconds: moment().valueOf(),
         page: 'notification-' + moment(notification.data.task_time).format(),
