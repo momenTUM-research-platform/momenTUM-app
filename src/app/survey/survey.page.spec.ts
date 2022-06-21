@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+
 import { RouterTestingModule } from '@angular/router/testing';
 import { IonicModule } from '@ionic/angular';
 
 import { SurveyPage } from './survey.page';
-import { Storage } from '@ionic/storage-angular';
+import { IonicStorageModule, Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
@@ -14,24 +14,35 @@ describe('SurveyPage', () => {
   let component: SurveyPage;
   let fixture: ComponentFixture<SurveyPage>;
 
-  beforeEach(waitForAsync(() => {
+  let angularStorageSpy: jasmine.SpyObj<Storage>;
+
+
+  beforeEach(() => {
+
+    const spyStorage = jasmine.createSpyObj('Storage', ['create', 'get', 'set']);
+
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
       imports: [IonicModule.forRoot(), RouterTestingModule],
       providers: [
-        Storage,
+        {
+          provide: Storage,
+          useValue: spyStorage
+        },
         StatusBar,
         HttpClient,
         HttpHandler,
         HTTP,
-        InAppBrowser,
+        InAppBrowser
       ],
+
     }).compileComponents();
 
     fixture = TestBed.createComponent(SurveyPage);
+    angularStorageSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
     component = fixture.componentInstance;
     fixture.detectChanges();
-  }));
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

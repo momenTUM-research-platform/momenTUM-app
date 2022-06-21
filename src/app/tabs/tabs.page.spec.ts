@@ -40,15 +40,7 @@ describe('TabsPage', () => {
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
-        // TranslateService,
-        // TranslateStore,
-        // TranslateLoader,
-        // TranslateCompiler,
-        // TranslateParser,
-        // MissingTranslationHandler,
-        // TranslateConfigService,
         HttpClient,
-        UrlSerializer,
         ChildrenOutletContexts,
       ],
     }).compileComponents();
@@ -57,7 +49,7 @@ describe('TabsPage', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     service = TestBed.inject(TranslateConfigService);
-    TestBed.inject(UrlSerializer);
+
   }));
 
   it('should create TabsPage', () => {
