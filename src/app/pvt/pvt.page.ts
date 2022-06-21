@@ -13,17 +13,20 @@ import * as moment from "moment";
  * */
 export class PvtPage implements OnInit {
 
-  // INPUT from study:
+  // INPUT from study: TODO: create an INPUT data structure
+  name: string; // the name of the module
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
   // "min" is the minimum time after which the colored panel will emerge.
   // "dur" is the time span, which will be added to min. (in milliseconds)
   showResults: boolean; // decides whether the results of the test will be shown to the user.
   maxReactionTime: number; // The maximum reaction time a user can have, before the test will be cancelled and retaken. (in milliseconds)
-  enableExit: boolean;
+  enableExit: boolean; // if true, the cross for early exit will be visible.
 
-  // OUTPUT: TODO: create an OUTPUP datastructure
-  entries: number[]; // all reaction-times measured.
+  // OUTPUT: TODO: create an OUTPUT data structure
+  output: {
+    reactionTimes: number[]; // all reaction-times measured.
+  }
 
   // HELPER VARIABLES:
   trialNumber: number;
@@ -31,18 +34,16 @@ export class PvtPage implements OnInit {
   state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
   timer: number; // variable used for measuring the reaction-time.
-  private endedGame: boolean;
 
   // TODO: The initial values should be defined according to the study.json file.
   constructor(private surveyDataService: SurveyDataService, private router: Router) {
     this.state = 'pre-state';
     this.numOfTrials = 10;
-    this.entries = Array(this.numOfTrials).fill(-1);
+    this.output.reactionTimes = Array(this.numOfTrials).fill(-1);
     this.timeInterval = {min: 2000, dur: 1000};
     this.showResults = true;
     this.maxReactionTime = 2000;
     this.reacted = false;
-    this.endedGame = false;
     this.trialNumber = 1;
     this.enableExit = true;
     this.conductTest(true);
@@ -106,7 +107,7 @@ export class PvtPage implements OnInit {
     }
     else { // user reacted normal
       console.log('...user reacted in ' + this.timer + ' seconds');
-      this.entries[this.trialNumber-1] = this.timer;
+      this.output.reactionTimes[this.trialNumber-1] = this.timer;
       this.trialNumber++;
     }
 
@@ -126,7 +127,7 @@ export class PvtPage implements OnInit {
   submit() {
     this.surveyDataService.sendSurveyDataToServer({
       name: "pvt",
-      entries: this.entries,
+      entries: this.output.reactionTimes,
       time: moment().format
     })
       .then(() => this.router.navigate(['/home/']));

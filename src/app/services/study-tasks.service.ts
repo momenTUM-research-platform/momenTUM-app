@@ -103,7 +103,7 @@ export class StudyTasksService {
 
               // calc a random number between 0 and (randomInterval * 2)
               // to account for randomInterval either side
-              const randomMinutes = Math.random() * ((module_randomInterval * 2) - 0) + 0;
+              const randomMinutes = Math.random() * ((module_randomInterval * 2));
 
               // add the random number of minutes to the dateTime
               taskTime.setMinutes(taskTime.getMinutes() + randomMinutes);
@@ -117,7 +117,7 @@ export class StudyTasksService {
               task_id: task_ID,
               name: module_name,
               type: module_type,
-              hidden: (module_sticky && sticky_count === 0) ? false : true,
+              hidden: (!(module_sticky && sticky_count === 0)),
               unlock_after: module_unlock_after,
               sticky: module_sticky,
               sticky_label: module_sticky_label,
