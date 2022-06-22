@@ -126,8 +126,15 @@ export class StudyTasksService {
               timeout: module_timeout,
               timeout_after: module_timeout_after,
               time: taskTime.toString(),
+<<<<<<< HEAD
               locale: taskTime.toLocaleString('en-US', options)
             };
+=======
+
+              locale: taskTime.toLocaleString("en-US", options)
+            };
+
+>>>>>>> 1a6d8a61514513fe374b8510b8c5c7b5417ec6c0
 
             study_tasks.push(task_obj);
 
@@ -185,6 +192,10 @@ export class StudyTasksService {
         const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
         const alertTime = new Date(Date.parse(task.time));
         const now = new Date();
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1a6d8a61514513fe374b8510b8c5c7b5417ec6c0
 
         if (now > alertTime && unlocked) {
           if (task.sticky) {

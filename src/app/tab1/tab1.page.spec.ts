@@ -17,20 +17,14 @@ import { Tab1Page } from './tab1.page';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import {
   DEFAULT_LANGUAGE,
-  MissingTranslationHandler,
-  TranslateCompiler,
   TranslateLoader,
   TranslateModule,
-  TranslateParser,
-  TranslateService,
-  TranslateStore,
   USE_DEFAULT_LANG,
   USE_EXTEND,
   USE_STORE,
 } from '@ngx-translate/core';
-import { InjectionToken } from '@angular/core';
-import { TranslateConfigService } from '../translate-config.service';
 import { LanguageLoader } from '../app.module';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('Tab1Page', () => {
   let component: Tab1Page;
@@ -40,6 +34,7 @@ describe('Tab1Page', () => {
     TestBed.configureTestingModule({
       declarations: [Tab1Page],
       imports: [
+        HttpClientTestingModule,
         RouterTestingModule,
         IonicModule.forRoot(),
         HttpClientModule,
@@ -56,10 +51,7 @@ describe('Tab1Page', () => {
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
-
         BarcodeScanner,
-        HttpClient,
-        HttpHandler,
         HTTP,
         Storage,
         LocalNotifications,

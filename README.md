@@ -17,9 +17,11 @@ Sample URLs:
     $ node -v
     $ npm -v
 #### 3. Install Ionic
-    $ npm install -g @ionic/cli
+    $ sudo npm install -g @ionic/cli
 #### 4. Make sure your installations are complete and working by running the following commands 
     $ ionic -v
+#### 5. Install node_modules 
+    $ sudo npm i
 
 ### Useless
 #### 1. To create a new app with tabs
