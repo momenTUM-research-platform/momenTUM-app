@@ -3,10 +3,17 @@ import { TestBed } from '@angular/core/testing';
 import { UuidService } from './uuid.service';
 
 describe('UuidService', () => {
-  beforeEach(() => TestBed.configureTestingModule({}));
+  let service: UuidService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(UuidService);
+  });
 
   it('should be created', () => {
-    const service: UuidService = TestBed.get(UuidService);
     expect(service).toBeTruthy();
+  });
+  it('expect to generate a UUID', () => {
+    expect(service.generateUUID('test')).toContain('test');
   });
 });

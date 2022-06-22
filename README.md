@@ -6,6 +6,10 @@ reader to follow along with building the app.
 
 # Usages
 
+Sample URLs:
+* https://tuspl22-momentum.srv.mwn.de/api/surveys/demo 
+* https://ashatte.io/schema/sleep.json
+
 ## Installations
 #### 1. Install node and npm 
 [Download from here](https://nodejs.org/en/download/) 
@@ -13,9 +17,11 @@ reader to follow along with building the app.
     $ node -v
     $ npm -v
 #### 3. Install Ionic
-    $ npm install -g @ionic/cli
+    $ sudo npm install -g @ionic/cli
 #### 4. Make sure your installations are complete and working by running the following commands 
     $ ionic -v
+#### 5. Install node_modules 
+    $ sudo npm i
 
 ### Useless
 #### 1. To create a new app with tabs
@@ -66,10 +72,14 @@ Generate the native project, if it does not already exist. (You can only install
     $ ionic cordova prepare android
 #### 2. Running with cordova
     $ ionic cordova run android -l
+
 #### Reference
 > https://ionicframework.com/docs/developing/android#installing-android-studio
 
+# Testing
+For testing, run the following command.
 
+    ng test
 ## New features
 #### 1. Generating new features
         $ ionic generate
