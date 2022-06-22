@@ -25,6 +25,7 @@
 
     <div id="survey-list">
 
+        <!--survey content-->
         <ion-item lines="full" *ngFor="let question of survey.sections[this.current_section-1].questions" class="ion-text-wrap survey-item" [hidden]="!question.hideSwitch">
 
             <!-- instruction type -->
@@ -152,7 +153,7 @@
             </div>
 
         </ion-item>
-        <!--</ion-item-group>-->
+        <!--submit button-->
         <ion-item-group>
             <ion-item-divider color="light"></ion-item-divider>
             <ion-item lines="full">
