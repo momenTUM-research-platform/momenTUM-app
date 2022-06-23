@@ -5,6 +5,7 @@ import { StudyTasksService } from '../services/study-tasks.service';
 import { UuidService } from '../services/uuid.service';
 import { HttpClient } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
+import { LogEvent, SurveyData } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -47,7 +48,7 @@ export class SurveyDataService {
    * @param key
    * @param data
    */
-  async saveToLocalStorage(key, data) {
+  async saveToLocalStorage(key: string, data: string) {
     this.storage.set(key, data);
   }
 
@@ -56,7 +57,7 @@ export class SurveyDataService {
    *
    * @param surveyData An object containing all metadata about a survey response
    */
-  sendSurveyDataToServer(surveyData) {
+  sendSurveyDataToServer(surveyData: SurveyData) {
     return Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
@@ -73,11 +74,14 @@ export class SurveyDataService {
       bodyData.append('data_type', 'survey_response');
       bodyData.append('user_id', uuid);
       bodyData.append('study_id', studyJSON?.properties.study_id);
-      bodyData.append('module_index', surveyData.module_index);
+      bodyData.append('module_index', String(surveyData.module_index));
       bodyData.append('module_name', surveyData.module_name);
       bodyData.append('responses', JSON.stringify(surveyData.responses));
       bodyData.append('response_time', surveyData.response_time);
-      bodyData.append('response_time_in_ms', surveyData.response_time_in_ms);
+      bodyData.append(
+        'response_time_in_ms',
+        String(surveyData.response_time_in_ms)
+      );
       bodyData.append('alert_time', surveyData.alert_time);
       bodyData.append('platform', this.platform.platforms()[0]);
 
@@ -86,7 +90,7 @@ export class SurveyDataService {
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
-          const object = {};
+          const object: { [key: string]: FormDataEntryValue } = {};
           bodyData.forEach((value, key) => {
             object[key] = value;
           });
@@ -102,7 +106,7 @@ export class SurveyDataService {
    *
    * @param logEvent An object containing metadata about a log event
    */
-  logPageVisitToServer(logEvent) {
+  logPageVisitToServer(logEvent: LogEvent) {
     return Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
@@ -120,7 +124,7 @@ export class SurveyDataService {
       bodyData.append('page', logEvent.page);
       bodyData.append('event', logEvent.event);
       bodyData.append('timestamp', logEvent.timestamp);
-      bodyData.append('timestamp_in_ms', logEvent.milliseconds);
+      bodyData.append('timestamp_in_ms', String(logEvent.milliseconds));
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
@@ -128,7 +132,7 @@ export class SurveyDataService {
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
-          const object = {};
+          const object: { [key: string]: FormDataEntryValue } = {};
           bodyData.forEach((value, key) => {
             object[key] = value;
           });
@@ -144,16 +148,16 @@ export class SurveyDataService {
    *
    * @param dataType The type of data to attempt to upload, e.g. 'pending-logs' (log events) or 'pending-data' (survey responses)
    */
-  uploadPendingData(dataType) {
+  uploadPendingData(dataType: 'pending-log' | 'pending-data') {
     return Promise.all([this.storage.get('current-study'), this.storage.keys()])
       .then((values) => {
         const studyJSON = JSON.parse(values[0]);
         const keys = values[1];
 
         const pendingLogKeys = [];
-        for (const i of keys) {
-          if (keys[i].startsWith(dataType)) {
-            pendingLogKeys.push(keys[i]);
+        for (const key of keys) {
+          if (key.startsWith(dataType)) {
+            pendingLogKeys.push(key);
           }
         }
         return {
@@ -189,7 +193,7 @@ export class SurveyDataService {
    * @param postURL The URL for a study's data collection server
    * @param bodyData The data to send to that server
    */
-  attemptHttpPost(postURL, bodyData) {
+  attemptHttpPost(postURL: string, bodyData: FormData) {
     return new Promise((resolve) => {
       this.httpClient.post(postURL, bodyData).subscribe({
         next: (v) => {

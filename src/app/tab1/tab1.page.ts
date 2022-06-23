@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
-import { AlertController } from '@ionic/angular';
+import { AlertController, RefresherCustomEvent } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
 import { SurveyDataService } from '../services/survey-data.service';
@@ -15,13 +15,14 @@ import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../translate-config.service';
 import { TranslateService } from '@ngx-translate/core';
+import { Study } from 'types';
 
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss'],
 })
-export class Tab1Page {
+export class Tab1Page implements OnInit {
   // resume event subscription
   resumeEvent: any;
   // flag to display enrol options
@@ -78,16 +79,18 @@ export class Tab1Page {
     private translate: TranslateService
   ) {
     // get the default language of the device
-    this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+    this.selectedLanguage =
+      this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
-  colorTest(systemInitiatedDark) {
-    if (systemInitiatedDark.matches) {
-      this.darkMode = true;
-    } else {
-      this.darkMode = false;
-    }
-  }
+  // Does this get called anywhere?
+  // colorTest(systemInitiatedDark ) {
+  //   if (systemInitiatedDark.matches) {
+  //     this.darkMode = true;
+  //   } else {
+  //     this.darkMode = false;
+  //   }
+  // }
 
   ngOnInit() {
     // set statusBar to be visible on Android
@@ -230,32 +233,35 @@ export class Tab1Page {
    *
    * @param url The URL to attempt to download a study from
    */
-  attemptToDownloadStudy(url, isQRCode) {
+  attemptToDownloadStudy(url: string, isQRCode: boolean) {
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
-    this.surveyDataService.getRemoteData(url).then((data) => {
+    this.surveyDataService.getRemoteData(url).then((result) => {
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
       try {
+        // @ts-expect-error
+        const study: Study = JSON.parse(result.data);
         // checks if the returned text is parseable as JSON, and whether it contains
         // some of the key fields used by schema so it can determine whether it is
         // actually a schema study URL
         // @ts-ignore
+
         validStudy =
-          JSON.parse(data.data).properties !== undefined && // @ts-ignore
-          JSON.parse(data.data).modules !== undefined && // @ts-ignore
-          JSON.parse(data.data).properties.study_id !== undefined;
+          study.properties !== undefined && // @ts-ignore
+          study.modules !== undefined && // @ts-ignore
+          study.properties.study_id !== undefined;
+        if (validStudy) {
+          console.log('Enrolling in a study.... ');
+          this.enrolInStudy(study);
+        }
       } catch (e) {
+        // @ts-expect-error
         console.log('JSON Invalid format: exception: ' + e.message);
         validStudy = false;
-      }
-      if (validStudy) {
-        console.log('Enrolling in a study.... ');
-        this.enrolInStudy(data);
-      } else {
         if (this.loadingService) {
           // Added this condition
           this.loadingService.dismiss();
@@ -264,7 +270,6 @@ export class Tab1Page {
       }
     });
   }
-
   /**
    * Uses the barcode scanner to enrol in a study
    */
@@ -359,12 +364,12 @@ export class Tab1Page {
    *
    * @param data A data object returned from the server to represent a study object
    */
-  enrolInStudy(data) {
+  enrolInStudy(study: Study) {
     this.isEnrolledInStudy = true;
     this.hideEnrolOptions = true;
 
     // convert received data to JSON object
-    this.study = JSON.parse(data.data);
+    this.study = study;
 
     // set the enrolled date
     this.storage.set('enrolment-date', new Date());
@@ -407,8 +412,8 @@ export class Tab1Page {
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
-      for (const i of this.task_list) {
-        this.task_list[i].moment = moment(this.task_list[i].locale).fromNow();
+      for (const task of this.task_list) {
+        task.moment = moment(task.locale).fromNow();
       }
 
       // show the study tasks
@@ -435,7 +440,7 @@ export class Tab1Page {
    *
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
    */
-  async displayEnrolError(isQRCode) {
+  async displayEnrolError(isQRCode: boolean) {
     const msg = isQRCode
       ? "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code."
       : "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL or ID.";
@@ -473,7 +478,8 @@ export class Tab1Page {
   /**
    * Refreshes the list of tasks
    */
-  doRefresh(refresher) {
+  doRefresh(refresher: RefresherCustomEvent) {
+    // What i
     if (!this.loadingService.isLoading) {
       this.ionViewWillEnter();
     }

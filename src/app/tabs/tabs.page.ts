@@ -12,6 +12,7 @@ export class TabsPage {
 
   constructor(private translateConfigService: TranslateConfigService) {
     // get the default language of the device
-    this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+    this.selectedLanguage =
+      this.translateConfigService.getDefaultLanguage() || 'en';
   }
 }

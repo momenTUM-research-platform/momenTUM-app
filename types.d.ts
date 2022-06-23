@@ -146,13 +146,17 @@ interface Task {
   name: string;
   type: string;
   hidden: boolean;
-  unlock_after: Array<string>;
+  unlock_after: string[];
   sticky: boolean;
   sticky_label: string;
   alert_title: string;
+  alert_time?: string;
+  response_time?: string;
+  response_time_ms?: number;
   alert_message: string;
   timeout: boolean;
   timeout_after: number;
+  responses?: Responses;
   time: string;
   locale: string;
   completed: boolean;
@@ -160,4 +164,24 @@ interface Task {
 export interface Option {
   text: string;
   checked: boolean;
+}
+
+export interface SurveyData {
+  module_index: number;
+  module_name: string;
+  responses: Responses;
+  response_time: string;
+  response_time_in_ms: number;
+  alert_time: string;
+}
+
+export interface Responses {
+  [id: string]: Question['response'];
+}
+export interface LogEvent {
+  timestamp: string;
+  milliseconds: number;
+  page: string;
+  event: string;
+  module_index: any;
 }

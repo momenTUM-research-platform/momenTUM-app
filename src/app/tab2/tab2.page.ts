@@ -90,7 +90,8 @@ export class Tab2Page {
     private translateConfigService: TranslateConfigService
   ) {
     // get the default language of the device
-    this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+    this.selectedLanguage =
+      this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
   ionViewWillEnter() {
@@ -124,12 +125,12 @@ export class Tab2Page {
         // check if any graphs are available and add history items
         this.studyTasksService.getAllTasks().then((tasks) => {
           // get all entries for history
-          for (const i of tasks.length) {
-            if (tasks[i].completed) {
+          for (const task of tasks.length) {
+            if (task.completed) {
               const historyItem = {
-                task_name: tasks[i].name.replace(/<\/?[^>]+(>|$)/g, ''),
-                moment_time: moment(tasks[i].response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
-                response_time: new Date(tasks[i].response_time),
+                task_name: task.name.replace(/<\/?[^>]+(>|$)/g, ''),
+                moment_time: moment(tasks[task].response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
+                response_time: new Date(task.response_time),
               };
               this.history.unshift(historyItem);
             }
@@ -138,10 +139,10 @@ export class Tab2Page {
           this.history.sort((x, y) => x.resonse_time - y.response_time);
 
           // get all graphs
-          for (const i of this.studyJSON.modules) {
-            const graph = this.studyJSON.modules[i].graph;
-            const study_name = this.studyJSON.modules[i].name;
-            const graph_header = this.studyJSON.modules[i].name;
+          for (const module of this.studyJSON.modules) {
+            const graph = module.graph;
+            const study_name = module.name;
+            const graph_header = module.name;
 
             // if the module is to display a graph
             if (graph.display) {
@@ -206,7 +207,7 @@ export class Tab2Page {
     });
   }
 
-  diffDays(d1, d2) {
+  diffDays(d1: Date, d2: Date) {
     let ndays = 0;
     const tv1 = d1.valueOf(); // msec since 1970
     const tv2 = d2.valueOf();

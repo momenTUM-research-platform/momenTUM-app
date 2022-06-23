@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
+import { Study, Task } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -13,25 +14,7 @@ export class StudyTasksService {
    *
    * @param studyObject A JSON object that contains all data about a study
    */
-  generateStudyTasks(studyObject) {
-    interface Task {
-      uuid: string;
-      index: number;
-      task_id: number;
-      name: string;
-      type: string;
-      hidden: boolean;
-      unlock_after: Array<string>;
-      sticky: boolean;
-      sticky_label: string;
-      alert_title: string;
-      alert_message: string;
-      timeout: boolean;
-      timeout_after: number;
-      time: string;
-      locale: string;
-    }
-
+  generateStudyTasks(studyObject: Study) {
     // allocate the participant to a study condition
     const min = 1;
     const max: number = studyObject.properties.conditions.length;
@@ -40,9 +23,9 @@ export class StudyTasksService {
     const condition: string =
       studyObject.properties.conditions[condition_index];
 
-    const study_tasks: Array<object> = new Array();
+    const study_tasks: Task[] = new Array();
 
-    // the ID for a task
+    // the ID for a task. Is this a sensible starting point?
     let task_ID = 101;
 
     // loop through all of the modules in this study
@@ -54,7 +37,7 @@ export class StudyTasksService {
       // if the module is assigned to the participant's condition
       // add it to the list, otherwise just skip it
       if (mod.condition === condition || mod.condition === '*') {
-        const module_uuid = mod.uuid === undefined ? -1 : mod.uuid;
+        const module_uuid = mod.uuid;
         const module_duration = mod.alerts.duration;
         const module_offset = mod.alerts.start_offset;
         const module_unlock_after =
@@ -96,7 +79,7 @@ export class StudyTasksService {
 
         for (let numDays = 0; numDays < module_duration; numDays++) {
           // for each alert time, get the hour and minutes and if necessary randomise it
-          for (const t of module_times) {
+          module_times.forEach((module, t) => {
             const hours = module_times[t].hours;
             const mins = module_times[t].minutes;
 
@@ -144,6 +127,7 @@ export class StudyTasksService {
               timeout_after: module_timeout_after,
               time: taskTime.toString(),
               locale: taskTime.toLocaleString('en-US', options),
+              completed: false,
             };
 
             study_tasks.push(task_obj);
@@ -153,7 +137,7 @@ export class StudyTasksService {
 
             // increment the sticky count
             sticky_count++;
-          }
+          });
 
           // as a final step increment the date by 1 to set for next day
           startDay.setDate(startDay.getDate() + 1);
@@ -250,20 +234,20 @@ export class StudyTasksService {
    * @param task
    * @param study_tasks
    */
-  checkTaskIsUnlocked(task, study_tasks) {
+  checkTaskIsUnlocked(task: Task, study_tasks: Task[]) {
     // get a set of completed task uuids
     const completedUUIDs = new Set();
-    for (let i = 0; i < study_tasks?.length; i++) {
-      if (study_tasks[i].completed) {
-        completedUUIDs.add(study_tasks[i].uuid);
+    for (const study_task of study_tasks) {
+      if (study_task.completed) {
+        completedUUIDs.add(study_task.uuid);
       }
     }
 
     // get the list of prereqs from the task
     const prereqs = task.unlock_after;
     let unlock = true;
-    for (const i of prereqs) {
-      if (!completedUUIDs.has(prereqs[i])) {
+    for (const prereq of prereqs) {
+      if (!completedUUIDs.has(prereq)) {
         unlock = false;
         break;
       }
