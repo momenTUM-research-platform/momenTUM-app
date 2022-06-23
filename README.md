@@ -38,7 +38,7 @@ The following guide shows how to use Cordova to build for Browser, Android and i
 #### 2. Prepare
     $ ionic cordova prepare browser
 #### 2. Run the following command
-    $ ionic cordova run browser
+    $ ionic cordova run browser -l
 
     
     

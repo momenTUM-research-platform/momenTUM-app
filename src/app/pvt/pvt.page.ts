@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from "../services/survey-data.service";
-import {Router} from "@angular/router";
-import * as moment from "moment";
+import { SurveyDataService } from '../services/survey-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import * as moment from 'moment';
+import { Storage } from '@ionic/storage-angular';
+import { NavController, ToastController } from '@ionic/angular';
+import { StudyTasksService } from '../services/study-tasks.service';
+import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 @Component({
   selector: 'app-pvt',
@@ -12,7 +16,6 @@ import * as moment from "moment";
  * TODO: Implement the documentation for this class
  * */
 export class PvtPage implements OnInit {
-
   // INPUT from study:
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
@@ -33,12 +36,31 @@ export class PvtPage implements OnInit {
   timer: number; // variable used for measuring the reaction-time.
   private endedGame: boolean;
 
+  // study object
+  study: any;
+
+
+  // task objects
+  tasks: Array<any>;
+  task_id: string;
+  task_index: number;
+  module_index: number;
+  module_name: string;
+
   // TODO: The initial values should be defined according to the study.json file.
-  constructor(private surveyDataService: SurveyDataService, private router: Router) {
+  constructor(
+    private surveyDataService: SurveyDataService,
+    private toastController: ToastController,
+    private studyTasksService: StudyTasksService,
+    private route: ActivatedRoute,
+    private navController: NavController,
+    private storage: Storage,
+    private statusBar: StatusBar
+  ) {
     this.state = 'pre-state';
     this.numOfTrials = 10;
     this.entries = Array(this.numOfTrials).fill(-1);
-    this.timeInterval = {min: 2000, dur: 1000};
+    this.timeInterval = { min: 2000, dur: 1000 };
     this.showResults = true;
     this.maxReactionTime = 2000;
     this.reacted = false;
@@ -48,7 +70,39 @@ export class PvtPage implements OnInit {
     this.conductTest(true);
   }
 
+  /**
+   * Triggered when the survey page is first opened
+   * Initialises the survey and displays it on the screen
+   */
   ngOnInit() {
+    // set statusBar to visible on Android
+    this.statusBar.styleLightContent();
+    this.statusBar.backgroundColorByHexString('#0F2042');
+
+    // necessary to update height of external embedded content
+    window.addEventListener('message', function (e) {
+      if (e.data.hasOwnProperty('frameHeight')) {
+        (<HTMLElement>(
+          document.querySelector('iframe[src^="' + e.data.url + '"]')
+        )).style.height = `${e.data.frameHeight + 10}px`;
+        (<HTMLElement>(
+          document.querySelector('iframe[src^="' + e.data.url + '"]')
+        )).style.width = `99%`;
+      }
+    });
+
+    // the id of the task to be displayed
+    this.task_id = this.route.snapshot.paramMap.get('task_id');
+
+    Promise.all([
+      this.storage.get('current-study'),
+      this.storage.get('uuid'),
+    ]).then((values) => {
+      const studyObject = values[0];
+      const uuid = values[1];
+
+
+    });
   }
 
   /**
@@ -81,8 +135,7 @@ export class PvtPage implements OnInit {
 
     // countdown
     await this.countdownToZero();
-    this.loadGame().
-    then(() => this.loadResults());
+    this.loadGame().then(() => this.loadResults());
     return;
   }
 
@@ -91,45 +144,39 @@ export class PvtPage implements OnInit {
    * */
   async stopTimer(isTutorial: boolean) {
     console.log(' stopTimer() start');
-    if (isTutorial) { // tutorial case
-      console.log('...time data is thrown away. test was just for the tutorial...');
-    }
-    else if (this.timer === undefined) { // user reacted too early
+    if (isTutorial) {
+      // tutorial case
+      console.log(
+        '...time data is thrown away. test was just for the tutorial...'
+      );
+    } else if (this.timer === undefined) {
+      // user reacted too early
       console.log('...user reacted too early, test will be retaken...');
       this.reacted = false;
       return;
-    }
-    else if (this.timer > this.maxReactionTime) { // user reacted too slow
+    } else if (this.timer > this.maxReactionTime) {
+      // user reacted too slow
       console.log('...reaction time reached max...');
       this.reacted = false;
       this.trialNumber++;
-    }
-    else { // user reacted normal
+    } else {
+      // user reacted normal
       console.log('...user reacted in ' + this.timer + ' seconds');
-      this.entries[this.trialNumber-1] = this.timer;
+      this.entries[this.trialNumber - 1] = this.timer;
       this.trialNumber++;
     }
 
     // show the result for a bit.
     const w = Date.now();
-    while (Date.now() - w < 2000 && (this.state === 'pre-state' || this.state === 'game-state')) {
+    while (
+      Date.now() - w < 2000 &&
+      (this.state === 'pre-state' || this.state === 'game-state')
+    ) {
       await this.sleep(0);
     }
 
     this.timer = undefined; // make timer invisible
     return;
-  }
-
-  /**
-   * submits the entries array to the server and loads the home page
-   * */
-  submit() {
-    this.surveyDataService.sendSurveyDataToServer({
-      name: "pvt",
-      entries: this.entries,
-      time: moment().format
-    })
-      .then(() => this.router.navigate(['/home/']));
   }
 
   /**
@@ -139,7 +186,7 @@ export class PvtPage implements OnInit {
    * @returns a promise
    * */
   private sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -209,12 +256,13 @@ export class PvtPage implements OnInit {
       // 0. set all variables
       this.reacted = false;
       // 1. wait for a random amount of time
-      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate waiting time
+      const waitingTime =
+        this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate waiting time
       console.log(`...waiting for ${waitingTime / 1000} seconds...`);
       const x = Date.now();
-      while (Date.now()-x < waitingTime) {
+      while (Date.now() - x < waitingTime) {
         await this.sleep(0); // TODO: why is this line needed for refreshing?
-        if ((this.state !== 'pre-state' && this.state !== 'game-state')) {
+        if (this.state !== 'pre-state' && this.state !== 'game-state') {
           console.log('conductTest() stop: state switch.');
           return;
         }
@@ -227,5 +275,78 @@ export class PvtPage implements OnInit {
     console.log('conductTest() stop.');
     this.loadResults();
     return;
+  }
+
+
+  /**
+   * Past Submit Logic was
+   *
+
+    this.surveyDataService.sendSurveyDataToServer({
+      name: "pvt",
+      entries: this.entries,
+      time: moment().format
+    })
+      .then(() => this.navController.navigateRoot('/'));
+   *
+   *
+   */
+
+  /**
+   * Triggered whenever the submit button is called
+   * Checks if all required questions have been answered and then moves to the next section/saves the response
+   */
+  submit() {
+
+    // get a timestmap of submission time in both readable and ms format
+    const response_time = moment().format();
+    const response_time_ms = moment().valueOf();
+
+
+    // attempt to post surveyResponse to server
+    this.surveyDataService.sendSurveyDataToServer({
+      module_index: this.module_index,
+      module_name: "pvt",
+      entries: this.entries,
+      response_time,
+      response_time_in_ms: response_time_ms
+    });
+
+    // write tasks back to storage
+    this.storage.set('study-tasks', this.tasks).then(() => {
+      // save an exit log
+      this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'survey',
+        event: 'submit',
+        module_index: this.module_index,
+      });
+      this.navController.navigateRoot('/');
+    });
+  }
+
+  /**
+   * Creates a Toast object to display a message to the user
+   *
+   * @param message A message to display in the toast
+   * @param position The position on the screen to display the toast
+   */
+  async showToast(message, position) {
+    const toast = await this.toastController.create({
+      message,
+      position,
+      keyboardClose: true,
+      color: 'danger',
+      buttons: [
+        {
+          text: 'Dismiss',
+          role: 'cancel',
+          handler: () => {},
+        },
+      ],
+    });
+
+    toast.present();
   }
 }
