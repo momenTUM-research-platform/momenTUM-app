@@ -32,9 +32,9 @@ export class PvtPage implements OnInit {
   reactionTimes: number[]; // all reaction-times measured.
 
   // HELPER VARIABLES:
-  trialNumber = 1;
-  reacted = false;
-  state = 'pre-state'; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
+  trialNumber: number; // stores the current trial index
+  reacted: boolean; // contains information, if user reacted
+  state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
   timer: number; // variable used for measuring the reaction-time.
 
@@ -48,7 +48,7 @@ export class PvtPage implements OnInit {
 
   async ngOnInit() {
     await this.getModule();
-    await this.setUpInputVariables();
+    await this.setUpVariables();
     this.conductTest(true);
   }
 
@@ -233,7 +233,7 @@ export class PvtPage implements OnInit {
   /**
    * Is supposed to load all the different parameters, which were defined in the specific pvt module of the study.
    * */
-  private setUpInputVariables() {
+  private setUpVariables() {
     this.numOfTrials = this.module.trials;
     this.reactionTimes = Array(this.numOfTrials).fill(-1);
     this.timeInterval = {
@@ -244,20 +244,29 @@ export class PvtPage implements OnInit {
     this.maxReactionTime = this.module.max_reaction;
     this.enableExit = this.module.exit;
     this.submit_text = this.module.submit_text;
+
+    this.trialNumber = 1;
+    this.state = 'pre-state';
   }
 
   /**
    * Gets the correct module from the list of modules, which contains all the information for the setup of this task.
    * */
-  private getModule() {
+  private async getModule() {
     const id = this.route.snapshot.paramMap.get('task_id');
-    this.studyTasksService.getAllTasks().then((tasks) => {
+    await this.studyTasksService.getAllTasks().then((tasks) => {
       let t = tasks;
       for (let i = 0; i < t.length; i++) {
         if (id == t[i].task_id) {
           const index = t[i].index;
-          const studyObject: any = this.storage.get('current-study');
-          this.module = JSON.parse(studyObject).modules[index];
+          let studyObject: any;
+          return this.storage.get('current-study')
+            .then(ret => studyObject = ret)
+            .then(() => {
+              console.log(studyObject);
+              this.module = JSON.parse(studyObject).modules[index];
+              console.log(this.module);
+            });
         }
       }
     });
