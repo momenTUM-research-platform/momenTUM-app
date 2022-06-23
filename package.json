@@ -55,6 +55,7 @@
         "jetifier": "^2.0.0",
         "karma-coverage": "^2.2.0",
         "moment": "^2.29.3",
+        "nanoid": "^4.0.0",
         "ng2-charts": "^3.0.10",
         "phonegap-plugin-barcodescanner": "8.0.1",
         "rm": "0.1.8",
