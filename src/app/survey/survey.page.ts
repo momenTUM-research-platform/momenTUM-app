@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -71,7 +72,7 @@ export class SurveyPage implements OnInit {
     this.statusBar.backgroundColorByHexString('#0F2042');
 
     // necessary to update height of external embedded content
-    window.addEventListener('message', function(e) {
+    window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
         (<HTMLElement>(
           document.querySelector('iframe[src^="' + e.data.url + '"]')
@@ -96,7 +97,7 @@ export class SurveyPage implements OnInit {
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
         for (let i = 0; i < this.tasks.length; i++) {
-          if (this.task_id == this.tasks[i].task_id) {
+          if (this.task_id === this.tasks[i].task_id) {
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
             this.task_index = i;
@@ -109,8 +110,8 @@ export class SurveyPage implements OnInit {
           .getTaskDisplayList()
           .then((tasks) => {
             let taskAvailable = false;
-            for (let i = 0; i < tasks.length; i++) {
-              if (tasks[i].task_id == this.task_id) {
+            for (const i of tasks) {
+              if (tasks[i].task_id === this.task_id) {
                 taskAvailable = true;
                 break;
               }
@@ -136,7 +137,7 @@ export class SurveyPage implements OnInit {
         }
 
         // shuffle questions if required
-        for (let i = 0; i < this.survey.sections.length; i++) {
+        for (const i of this.survey.sections) {
           if (this.survey.sections[i].shuffle) {
             this.survey.sections[i].questions = this.shuffle(
               this.survey.sections[i].questions
@@ -167,8 +168,8 @@ export class SurveyPage implements OnInit {
         // toggle rand_group questions
         // figure out which ones are grouped together, randomly show one and set its response value to 1
         const randomGroups = {};
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+        for (const i of this.survey.sections) {
+          for (const j of this.survey.sections[i].questions.length) {
             const question = this.survey.sections[i].questions[j];
             if (question.rand_group !== undefined) {
               // set a flag to indicate that this question shouldn't reappear via branching logic
@@ -200,8 +201,8 @@ export class SurveyPage implements OnInit {
 
         // iterate back through and show the ones that have been randomly calculated
         // while removing the branching attributes from those that are hidden
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+        for (const i of this.survey.sections) {
+          for (const j of this.survey.sections[i].questions.length) {
             const question = this.survey.sections[i].questions[j];
             if (showThese.includes(question.id)) {
               question.noToggle = false;
@@ -218,8 +219,8 @@ export class SurveyPage implements OnInit {
         }
 
         // toggle dynamic question setup
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+        for (const i of this.survey.sections.length) {
+          for (const j of this.survey.sections[i].questions) {
             this.toggleDynamicQuestions(this.survey.sections[i].questions[j]);
           }
         }
@@ -269,8 +270,8 @@ export class SurveyPage implements OnInit {
    */
   setupQuestionVariables(uuid) {
     // for all relevant questions add an empty response variable
-    for (let i = 0; i < this.survey.sections.length; i++) {
-      for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+    for (const i of this.survey.sections) {
+      for (const j of this.survey.sections[i].questions) {
         const question = this.survey.sections[i].questions[j];
 
         // for all question types that can be responded to, set default values
@@ -292,10 +293,11 @@ export class SurveyPage implements OnInit {
           question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
             question.src
           );
-          if (question.subtype === 'video')
-            {question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
+          if (question.subtype === 'video') {
+            question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
               question.thumb
-            );}
+            );
+          }
 
           // for external embedded content, sanitize the URLs to make them safe/work in html5 tags
         } else if (question.type === 'external') {
@@ -321,17 +323,20 @@ export class SurveyPage implements OnInit {
         } else if (question.type === 'multi') {
           // set up checked tracking for checkbox questions types
           const tempOptions = [];
-          for (let i = 0; i < question.options.length; i++) {
+          for (const k of question.options) {
             tempOptions.push({ text: question.options[i], checked: false });
           }
           question.options = tempOptions;
 
           // counterbalance the choices if necessary
-          if (question.shuffle)
-            {question.options = this.shuffle(question.options);}
+          if (question.shuffle) {
+            question.options = this.shuffle(question.options);
+          }
 
           // set the empty response to an array for checkbox questions
-          if (question.radio === 'false') {question.response = [];}
+          if (question.radio === 'false') {
+            question.response = [];
+          }
         }
       }
     }
@@ -372,14 +377,16 @@ export class SurveyPage implements OnInit {
     if (responses.indexOf(option.text) > -1) {
       // remove it
       const index = responses.indexOf(option.text);
-      if (index !== -1) {responses.splice(index, 1);}
+      if (index !== -1) {
+        responses.splice(index, 1);
+      }
     } else {
       responses.push(option.text);
     }
 
     // write the array back to a single string
     let response_string = '';
-    for (let i = 0; i < responses.length; i++) {
+    for (const i of responses) {
       response_string += responses[i] + ';';
     }
 
@@ -400,12 +407,14 @@ export class SurveyPage implements OnInit {
   toggleDynamicQuestions(question) {
     // if a question was hidden by rand_group
     // don't do any branching
-    if (question.noToggle !== undefined && question.noToggle) {return;}
+    if (question.noToggle !== undefined && question.noToggle) {
+      return;
+    }
 
     const id = question.id;
     // hide anything with the id as long as the value is equal
-    for (let i = 0; i < this.survey.sections.length; i++) {
-      for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+    for (const i of this.survey.sections) {
+      for (const j of this.survey.sections[i].questions) {
         if (this.survey.sections[i].questions[j].hide_id === id) {
           const hideValue = this.survey.sections[i].questions[j].hide_value;
 
@@ -417,14 +426,21 @@ export class SurveyPage implements OnInit {
             // determine whether to hide/show the element
             const hideIf = this.survey.sections[i].questions[j].hide_if;
             const valueEquals = hideValue === question.response;
-            if (valueEquals === hideIf)
-              {this.survey.sections[i].questions[j].hideSwitch = false;}
-            else {this.survey.sections[i].questions[j].hideSwitch = true;}
+            if (valueEquals === hideIf) {
+              this.survey.sections[i].questions[j].hideSwitch = false;
+            } else {
+              this.survey.sections[i].questions[j].hideSwitch = true;
+            }
           } else if (question.type === 'slider') {
             const direction = hideValue.substring(0, 1);
-            const cutoff = parseInt(hideValue.substring(1, hideValue.length));
+            const cutoff = parseInt(
+              hideValue.substring(1, hideValue.length),
+              10
+            );
             let lesserThan = true;
-            if (direction === '>') {lesserThan = false;}
+            if (direction === '>') {
+              lesserThan = false;
+            }
             if (lesserThan) {
               if (question.response <= cutoff) {
                 this.questions[i].hideSwitch = true;
@@ -450,7 +466,7 @@ export class SurveyPage implements OnInit {
    */
   submit() {
     let errorCount = 0;
-    for (let i = 0; i < this.questions.length; i++) {
+    for (const i of this.questions) {
       const question = this.questions[i];
       if (
         question.required === true &&
@@ -464,7 +480,7 @@ export class SurveyPage implements OnInit {
       }
     }
 
-    if (errorCount == 0) {
+    if (errorCount === 0) {
       // if user on last page and there are no errors, fine to submit
       if (this.current_section === this.num_sections) {
         // add the alert time to the response
@@ -484,8 +500,8 @@ export class SurveyPage implements OnInit {
 
         // add all of the responses to an object in the task to be sent to server
         const responses = {};
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+        for (const i of this.survey.sections) {
+          for (const j of this.survey.sections[i].questions) {
             const question = this.survey.sections[i].questions[j];
             responses[question.id] = question.response;
           }
@@ -522,8 +538,9 @@ export class SurveyPage implements OnInit {
           this.current_section_name =
             this.survey.sections[this.current_section - 1].name;
 
-          if (this.current_section === this.num_sections)
-            {this.submit_text = this.survey.submit_text;}
+          if (this.current_section === this.num_sections) {
+            this.submit_text = this.survey.submit_text;
+          }
 
           this.content.scrollToTop(0);
         });
@@ -567,7 +584,8 @@ export class SurveyPage implements OnInit {
    */
   shuffle(array) {
     let currentIndex = array.length;
-    let temporaryValue; let randomIndex;
+    let temporaryValue;
+    let randomIndex;
 
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {

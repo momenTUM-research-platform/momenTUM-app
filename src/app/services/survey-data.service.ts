@@ -7,16 +7,17 @@ import { HttpClient } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SurveyDataService {
-
-  constructor(private httpClient: HttpClient,
+  constructor(
+    private httpClient: HttpClient,
     private http2: HTTP,
     private storage: Storage,
     private platform: Platform,
     private uuidService: UuidService,
-    private studyTasksService: StudyTasksService) { }
+    private studyTasksService: StudyTasksService
+  ) {}
 
   /**
    * Downloads a survey from a remote URL
@@ -25,19 +26,20 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string) {
     console.log(surveyURL);
-  return new Promise(resolve => {
-    this.http2.setRequestTimeout(7);
-    // Now a get request
-    this.http2.get(surveyURL, {seed: 'f2d91e73'}, {}).then(data => {
-        resolve(data);
-
-      }).catch(error => {
-        console.log('Error message:' + error);
-        resolve(error);
-      });
+    return new Promise((resolve) => {
+      this.http2.setRequestTimeout(7);
+      // Now a get request
+      this.http2
+        .get(surveyURL, { seed: 'f2d91e73' }, {})
+        .then((data) => {
+          resolve(data);
+        })
+        .catch((error) => {
+          console.log('Error message:' + error);
+          resolve(error);
+        });
     });
   }
-
 
   /**
    * Saves data to local storage
@@ -55,7 +57,11 @@ export class SurveyDataService {
    * @param surveyData An object containing all metadata about a survey response
    */
   sendSurveyDataToServer(surveyData) {
-    return Promise.all([this.storage.get('current-study'), this.storage.get('uuid'), this.studyTasksService.getAllTasks()]).then((values) => {
+    return Promise.all([
+      this.storage.get('current-study'),
+      this.storage.get('uuid'),
+      this.studyTasksService.getAllTasks(),
+    ]).then((values) => {
       const studyJSON = JSON.parse(values[0]);
       console.log('Hello', studyJSON);
       const uuid = values[1];
@@ -75,11 +81,14 @@ export class SurveyDataService {
       bodyData.append('alert_time', surveyData.alert_time);
       bodyData.append('platform', this.platform.platforms()[0]);
 
-      return this.attemptHttpPost(studyJSON?.properties.post_url, bodyData).then((postSuccessful) => {
+      return this.attemptHttpPost(
+        studyJSON?.properties.post_url,
+        bodyData
+      ).then((postSuccessful) => {
         if (!postSuccessful) {
           const object = {};
-          bodyData.forEach(function(value, key){
-              object[key] = value;
+          bodyData.forEach((value, key) => {
+            object[key] = value;
           });
           const json = JSON.stringify(object);
           this.storage.set(dataUuid, json);
@@ -94,7 +103,10 @@ export class SurveyDataService {
    * @param logEvent An object containing metadata about a log event
    */
   logPageVisitToServer(logEvent) {
-    return Promise.all([this.storage.get('current-study'), this.storage.get('uuid')]).then(values => {
+    return Promise.all([
+      this.storage.get('current-study'),
+      this.storage.get('uuid'),
+    ]).then((values) => {
       const studyJSON = JSON.parse(values[0]);
       const uuid = values[1];
       const logUuid = this.uuidService.generateUUID('pending-log');
@@ -111,11 +123,14 @@ export class SurveyDataService {
       bodyData.append('timestamp_in_ms', logEvent.milliseconds);
       bodyData.append('platform', this.platform.platforms()[0]);
 
-      return this.attemptHttpPost(studyJSON?.properties.post_url, bodyData).then((postSuccessful) => {
+      return this.attemptHttpPost(
+        studyJSON?.properties.post_url,
+        bodyData
+      ).then((postSuccessful) => {
         if (!postSuccessful) {
           const object = {};
-          bodyData.forEach(function(value, key){
-              object[key] = value;
+          bodyData.forEach((value, key) => {
+            object[key] = value;
           });
           const json = JSON.stringify(object);
           this.storage.set(logUuid, json);
@@ -130,38 +145,42 @@ export class SurveyDataService {
    * @param dataType The type of data to attempt to upload, e.g. 'pending-logs' (log events) or 'pending-data' (survey responses)
    */
   uploadPendingData(dataType) {
-    return Promise.all([this.storage.get('current-study'), this.storage.keys()]).then(values => {
-      const studyJSON = JSON.parse(values[0]);
-      const keys = values[1];
+    return Promise.all([this.storage.get('current-study'), this.storage.keys()])
+      .then((values) => {
+        const studyJSON = JSON.parse(values[0]);
+        const keys = values[1];
 
-      const pendingLogKeys = [];
-      for (let i = 0; i < keys.length; i++) {
-        if (keys[i].startsWith(dataType)) {
-          pendingLogKeys.push(keys[i]);
-        }
-      }
-      return {
-        pendingLogKeys,
-        post_url: studyJSON?.properties.post_url
-      };
-    }).then((data) => {
-      data.pendingLogKeys.map(pendingKey => {
-        this.storage.get(pendingKey).then((log) => {
-          const logJSONObj = JSON.parse(log);
-          const bodyData = new FormData();
-          for (const key in logJSONObj) {
-            if (logJSONObj.hasOwnProperty(key)) {
-              bodyData.append(key, logJSONObj[key]);
-            }
+        const pendingLogKeys = [];
+        for (const i of keys) {
+          if (keys[i].startsWith(dataType)) {
+            pendingLogKeys.push(keys[i]);
           }
-          this.attemptHttpPost(data.post_url, bodyData).then((postSuccessful) => {
-            if (postSuccessful) {
-              this.storage.remove(pendingKey);
+        }
+        return {
+          pendingLogKeys,
+          post_url: studyJSON?.properties.post_url,
+        };
+      })
+      .then((data) => {
+        data.pendingLogKeys.map((pendingKey) => {
+          this.storage.get(pendingKey).then((log) => {
+            const logJSONObj = JSON.parse(log);
+            const bodyData = new FormData();
+            for (const key in logJSONObj) {
+              if (logJSONObj.hasOwnProperty(key)) {
+                bodyData.append(key, logJSONObj[key]);
+              }
             }
+            this.attemptHttpPost(data.post_url, bodyData).then(
+              (postSuccessful) => {
+                if (postSuccessful) {
+                  this.storage.remove(pendingKey);
+                }
+              }
+            );
           });
         });
       });
-    });
   }
 
   /**
@@ -171,16 +190,21 @@ export class SurveyDataService {
    * @param bodyData The data to send to that server
    */
   attemptHttpPost(postURL, bodyData) {
-    return new Promise(resolve => {
-      this.httpClient
-      .post(postURL, bodyData)
-      .subscribe({
-        next: (v) => {resolve(v); console.log('Notice Survey: ' + v) ;},
-        error: (e) => { console.info('Error in attemptHttpPost ' + e || '' ); resolve(false); },
-        complete: () => {console.info('Complete'); resolve(true);}
-        }
-
-      );
+    return new Promise((resolve) => {
+      this.httpClient.post(postURL, bodyData).subscribe({
+        next: (v) => {
+          resolve(v);
+          console.log('Notice Survey: ' + v);
+        },
+        error: (e) => {
+          console.info('Error in attemptHttpPost ' + e || '');
+          resolve(false);
+        },
+        complete: () => {
+          console.info('Complete');
+          resolve(true);
+        },
+      });
     });
   }
 }

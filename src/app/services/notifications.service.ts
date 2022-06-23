@@ -3,30 +3,31 @@ import { Storage } from '@ionic/storage-angular';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationsService {
+  constructor(
+    private localNotifications: LocalNotifications,
+    private storage: Storage
+  ) {}
 
-  constructor(private localNotifications: LocalNotifications,
-    private storage: Storage) { }
-
-    /**
-     * Schedules a notification, taking parameters from a task
-     *
-     * @param task The task that the notification is for
-     */
+  /**
+   * Schedules a notification, taking parameters from a task
+   *
+   * @param task The task that the notification is for
+   */
   scheduleDummyNotification() {
     this.localNotifications.schedule({
       title: 'Hello',
       text: 'World',
       foreground: true,
-      trigger: {at: new Date(new Date().getTime() + 10000)},
+      trigger: { at: new Date(new Date().getTime() + 10000) },
       smallIcon: 'res://notification_icon',
       icon: 'res//notification_icon',
       data: { task_index: 0 },
       launch: true,
       wakeup: true,
-      priority: 2
+      priority: 2,
     });
   }
 
@@ -44,10 +45,14 @@ export class NotificationsService {
       trigger: { at: new Date(Date.parse(task.time)) },
       smallIcon: 'res://notification_icon',
       icon: 'res//notification_icon',
-      data: { task_index: task.index, task_id: task.task_id, task_time: task.time },
+      data: {
+        task_index: task.index,
+        task_id: task.task_id,
+        task_time: task.time,
+      },
       launch: true,
       wakeup: true,
-      priority: 2
+      priority: 2,
     });
   }
 
@@ -64,13 +69,15 @@ export class NotificationsService {
   async setNext30Notifications() {
     await this.localNotifications.cancelAll();
 
-    const notificationsEnabled = await this.storage.get('notifications-enabled');
+    const notificationsEnabled = await this.storage.get(
+      'notifications-enabled'
+    );
 
     if (notificationsEnabled) {
       const tasks = await this.storage.get('study-tasks');
       if (tasks !== null) {
         let alertCount = 0;
-        for (let i = 0; i < tasks.length; i++) {
+        for (const i of tasks) {
           const task = tasks[i];
           const alertTime = new Date(Date.parse(task.time));
 
@@ -82,7 +89,9 @@ export class NotificationsService {
           }
 
           // only set 30 alerts into the future
-          if (alertCount === 30) {break;}
+          if (alertCount === 30) {
+            break;
+          }
         }
       }
     }
@@ -114,13 +123,12 @@ export class NotificationsService {
     });*/
   }
 
-    /**
-     *
-     * @param task
-     * @param study_tasks
-     */
+  /**
+   *
+   * @param task
+   * @param study_tasks
+   */
   checkTaskIsUnlocked(task, study_tasks) {
-
     // get a set of completed task uuids
     const completedUUIDs = new Set();
     for (let i = 0; i < study_tasks?.length; i++) {
@@ -132,7 +140,7 @@ export class NotificationsService {
     // get the list of prereqs from the task
     const prereqs = task.unlock_after;
     let unlock = true;
-    for (let i = 0; i < prereqs.length; i++) {
+    for (const i of prereqs) {
       if (!completedUUIDs.has(prereqs[i])) {
         unlock = false;
         break;
