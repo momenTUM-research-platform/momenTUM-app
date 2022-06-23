@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { SurveyDataService } from "../services/survey-data.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import * as moment from "moment";
+import {StudyTasksService} from "../services/study-tasks.service";
+import {Storage} from "@ionic/storage-angular";
 
 @Component({
   selector: 'app-pvt',
@@ -14,6 +16,8 @@ import * as moment from "moment";
 export class PvtPage implements OnInit {
 
   // INPUT from study: TODO: create an INPUT data structure
+  module: any; // storage for data of this module
+
   name: string; // the name of the module
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
@@ -22,34 +26,30 @@ export class PvtPage implements OnInit {
   showResults: boolean; // decides whether the results of the test will be shown to the user.
   maxReactionTime: number; // The maximum reaction time a user can have, before the test will be cancelled and retaken. (in milliseconds)
   enableExit: boolean; // if true, the cross for early exit will be visible.
+  submit_text: string;
 
   // OUTPUT: TODO: create an OUTPUT data structure
-  output: {
-    reactionTimes: number[]; // all reaction-times measured.
-  }
+  reactionTimes: number[]; // all reaction-times measured.
 
   // HELPER VARIABLES:
-  trialNumber: number;
-  reacted: boolean;
-  state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
+  trialNumber = 1;
+  reacted = false;
+  state = 'pre-state'; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
   timer: number; // variable used for measuring the reaction-time.
 
   // TODO: The initial values should be defined according to the study.json file.
-  constructor(private surveyDataService: SurveyDataService, private router: Router) {
-    this.state = 'pre-state';
-    this.numOfTrials = 10;
-    this.output.reactionTimes = Array(this.numOfTrials).fill(-1);
-    this.timeInterval = {min: 2000, dur: 1000};
-    this.showResults = true;
-    this.maxReactionTime = 2000;
-    this.reacted = false;
-    this.trialNumber = 1;
-    this.enableExit = true;
-    this.conductTest(true);
-  }
+  constructor(private surveyDataService: SurveyDataService,
+              private router: Router,
+              private route: ActivatedRoute,
+              private studyTasksService: StudyTasksService,
+              private storage: Storage)
+  { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.getModule();
+    await this.setUpInputVariables();
+    this.conductTest(true);
   }
 
   /**
@@ -107,7 +107,7 @@ export class PvtPage implements OnInit {
     }
     else { // user reacted normal
       console.log('...user reacted in ' + this.timer + ' seconds');
-      this.output.reactionTimes[this.trialNumber-1] = this.timer;
+      this.reactionTimes[this.trialNumber-1] = this.timer;
       this.trialNumber++;
     }
 
@@ -127,7 +127,7 @@ export class PvtPage implements OnInit {
   submit() {
     this.surveyDataService.sendSurveyDataToServer({
       name: "pvt",
-      entries: this.output.reactionTimes,
+      entries: this.reactionTimes,
       time: moment().format
     })
       .then(() => this.router.navigate(['/home/']));
@@ -228,5 +228,38 @@ export class PvtPage implements OnInit {
     console.log('conductTest() stop.');
     this.loadResults();
     return;
+  }
+
+  /**
+   * Is supposed to load all the different parameters, which were defined in the specific pvt module of the study.
+   * */
+  private setUpInputVariables() {
+    this.numOfTrials = this.module.trials;
+    this.reactionTimes = Array(this.numOfTrials).fill(-1);
+    this.timeInterval = {
+      min: this.module.min_waiting,
+      dur: this.module.min_waiting + this.module.max_waiting
+    };
+    this.showResults = this.module.show;
+    this.maxReactionTime = this.module.max_reaction;
+    this.enableExit = this.module.exit;
+    this.submit_text = this.module.submit_text;
+  }
+
+  /**
+   * Gets the correct module from the list of modules, which contains all the information for the setup of this task.
+   * */
+  private getModule() {
+    const id = this.route.snapshot.paramMap.get('task_id');
+    this.studyTasksService.getAllTasks().then((tasks) => {
+      let t = tasks;
+      for (let i = 0; i < t.length; i++) {
+        if (id == t[i].task_id) {
+          const index = t[i].index;
+          const studyObject: any = this.storage.get('current-study');
+          this.module = JSON.parse(studyObject).modules[index];
+        }
+      }
+    });
   }
 }

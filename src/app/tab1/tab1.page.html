@@ -31,7 +31,7 @@
     <div *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
       <ion-item *ngIf="task.type !== 'header'" detail>
         <ion-icon color="medium" name="{{task.type}}" slot="start"></ion-icon>
-        <ion-label [routerLink]="task.type === 'alarm-outline' ? '/pvt/' : '/survey/' + task.task_id" routerDirection="forward" class="ion-text-wrap">
+        <ion-label [routerLink]="task.type === 'alarm-outline' ? '/pvt/' + task.task_id : '/survey/' + task.task_id" routerDirection="forward" class="ion-text-wrap">
           <span [innerHTML]="task.name"></span>
           <br>
           <span *ngIf="!task.sticky" class="moment">{{task.moment}}</span>
