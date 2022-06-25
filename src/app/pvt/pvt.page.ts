@@ -28,7 +28,6 @@ export class PvtPage implements OnInit {
   reactionTimes: number[]; // all reaction-times measured.
 
   // HELPER VARIABLES:
-  trialNumber: number; // stores the current trial index
   reacted: boolean; // contains information, if user reacted
   state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
@@ -50,7 +49,7 @@ export class PvtPage implements OnInit {
   async ngOnInit() {
     await this.getModule();
     await this.setUpVariables();
-    this.conductTest(true);
+    this.conductPVT(true);
   }
 
   /**
@@ -98,15 +97,16 @@ export class PvtPage implements OnInit {
    * */
   private async loadGame() {
     this.state = 'game-state'; // activate the game-pane div.
-    this.conductTest(false);
+    this.conductPVT(false);
     return;
   }
 
   /**
    * pushes the measured time to the entries array.
    * */
-  private async stopTimer(isTutorial: boolean) {
+  private async stopTimer(isTutorial: boolean, trialCount: number) {
     if (isTutorial) { // tutorial case
+      return;
     }
     else if (this.timer === undefined) { // user reacted too early
       this.reacted = false;
@@ -114,11 +114,10 @@ export class PvtPage implements OnInit {
     }
     else if (this.timer > this.maxReactionTime) { // user reacted too slow
       this.reacted = false;
-      this.trialNumber++;
     }
     else { // user reacted normal
-      this.reactionTimes[this.trialNumber-1] = this.timer;
-      this.trialNumber++;
+      this.reactionTimes[trialCount-1] = this.timer;
+      return;
     }
 
     // show the result for a bit.
@@ -190,6 +189,7 @@ export class PvtPage implements OnInit {
   }
 
   /**
+   * conducts the following PVT test:
    * 0. check if conditions for testing are met.
    * 1. wait for a random amount of time.
    * 2. start the timer.
@@ -197,31 +197,39 @@ export class PvtPage implements OnInit {
    * 4. show the result for a bit.
    * 5. make timer invisible.
    * 6. go to 0.
+   *
+   * @param saveResults tells you if the test is going to save the results in reactionTimes array, and if it should count the trials.
    * */
-  private async conductTest(isTutorial: boolean) {
-    while (isTutorial || this.trialNumber <= this.numOfTrials) {
-      // 0. set all variables
+  private async conductPVT(saveResults: boolean) {
+    let trialCount = 0; // stores the number/index of the current trial.
+    while (saveResults || trialCount <= this.numOfTrials) {
+      // increment trialCount only if it's not the tutorial.
+      if (!saveResults) {
+        trialCount++
+      }
+      // 0. setup all variables
       this.reacted = false;
-      // 1. wait for a random amount of time
-      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate waiting time
+      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate the waiting time
       const x = Date.now();
+      // 1. wait for a random amount of time
       while (Date.now()-x < waitingTime) {
         await this.sleep(0); // anyone knows why this line is needed for refreshing?
+        // checks, if the user exited the tutorial or the game, while the test was waiting.
         if ((this.state !== 'pre-state' && this.state !== 'game-state')) {
           return;
         }
       }
-      // 2. start the timer
-      await this.runTimer(isTutorial);
+      // 2. start running the timer
+      await this.runTimer(saveResults);
       // 3. stop the timer
-      await this.stopTimer(isTutorial);
-    } // test as long as there are trials left.
+      await this.stopTimer(saveResults, trialCount);
+    } // Each loop is one single PVT test-round. The loop condition is, that the test is either for the tutorial, OR it's for the game AND there are trials left.
     this.loadResults();
     return;
   }
 
   /**
-   * Is supposed to load all the different parameters, which were defined in the specific pvt module of the study.
+   * defines all parameters, which were specified in the study section concerning this module.
    * */
   private setUpVariables() {
     this.numOfTrials = this.module.trials;
@@ -235,15 +243,15 @@ export class PvtPage implements OnInit {
     this.enableExit = this.module.exit;
     this.submitText = this.module.submit_text;
 
-    this.trialNumber = 1;
     this.state = 'pre-state';
   }
 
   /**
-   * Gets the correct module from the list of modules, which contains all the information for the setup of this task.
+   * Gets the correct module, which contains all the information for the setup of this task.
+   * The module is saved in the variable "module".
    * */
   private async getModule() {
-    const id = this.route.snapshot.paramMap.get('task_id');
+    const id = this.route.snapshot.paramMap.get('task_id'); // finds the id of this module. The id found here was assigned in the
     await this.studyTasksService.getAllTasks().then((tasks) => {
       let t = tasks;
       for (let i = 0; i < t.length; i++) {
