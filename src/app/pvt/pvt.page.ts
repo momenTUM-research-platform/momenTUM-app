@@ -31,7 +31,7 @@ export class PvtPage implements OnInit {
   reacted: boolean; // contains information, if user reacted
   state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
-  timer: number; // variable used for measuring the reaction-time.
+  timer: any; // variable used for measuring the reaction-time.
 
   constructor(private surveyDataService: SurveyDataService,
               private router: Router,
@@ -49,7 +49,7 @@ export class PvtPage implements OnInit {
   async ngOnInit() {
     await this.getModule();
     await this.setUpVariables();
-    this.conductPVT(true);
+    this.conductPVT(false);
   }
 
   /**
@@ -97,34 +97,29 @@ export class PvtPage implements OnInit {
    * */
   private async loadGame() {
     this.state = 'game-state'; // activate the game-pane div.
-    this.conductPVT(false);
+    this.conductPVT(true);
     return;
   }
 
   /**
    * pushes the measured time to the entries array.
    * */
-  private async stopTimer(isTutorial: boolean, trialCount: number) {
-    if (isTutorial) { // tutorial case
-      return;
+  private async handleResult(saveResults: boolean) {
+    if (this.timer === undefined) {
+      this.timer = 'you reacted too early.';
+      this.reactionTimes.push(-2);
+      this.numOfTrials++;
+    } // user reacted too early. trial will be thrown away.
+    else if (this.timer > this.maxReactionTime) {
+      this.timer = 'waited for too long.'
+      this.reactionTimes.push(-1);
+      this.numOfTrials++;
+    } // user's reaction time surpassed the maximumWaitingTime. trial will be thrown away.
+    else if (saveResults) { // user reacted normal
+      this.reactionTimes.push(this.timer);
     }
-    else if (this.timer === undefined) { // user reacted too early
-      this.reacted = false;
-      return;
-    }
-    else if (this.timer > this.maxReactionTime) { // user reacted too slow
-      this.reacted = false;
-    }
-    else { // user reacted normal
-      this.reactionTimes[trialCount-1] = this.timer;
-      return;
-    }
-
     // show the result for a bit.
-    const w = Date.now();
-    while (Date.now() - w < 2000 && (this.state === 'pre-state' || this.state === 'game-state')) {
-      await this.sleep(0);
-    }
+    await this.sleep(2000);
 
     this.timer = undefined; // make timer invisible
     return;
@@ -202,9 +197,9 @@ export class PvtPage implements OnInit {
    * */
   private async conductPVT(saveResults: boolean) {
     let trialCount = 0; // stores the number/index of the current trial.
-    while (saveResults || trialCount <= this.numOfTrials) {
+    while (trialCount < this.numOfTrials) {
       // increment trialCount only if it's not the tutorial.
-      if (!saveResults) {
+      if (saveResults) {
         trialCount++
       }
       // 0. setup all variables
@@ -220,10 +215,10 @@ export class PvtPage implements OnInit {
         }
       }
       // 2. start running the timer
-      await this.runTimer(saveResults);
+      await this.runTimer(!saveResults);
       // 3. stop the timer
-      await this.stopTimer(saveResults, trialCount);
-    } // Each loop is one single PVT test-round. The loop condition is, that the test is either for the tutorial, OR it's for the game AND there are trials left.
+      await this.handleResult(saveResults);
+    } // Each loop is one single PVT test-round. The loop condition is that there are trials left.
     this.loadResults();
     return;
   }
@@ -233,7 +228,7 @@ export class PvtPage implements OnInit {
    * */
   private setUpVariables() {
     this.numOfTrials = this.module.trials;
-    this.reactionTimes = Array(this.numOfTrials).fill(-1);
+    this.reactionTimes = new Array(this.numOfTrials);
     this.timeInterval = {
       min: this.module.min_waiting,
       dur: this.module.min_waiting + this.module.max_waiting

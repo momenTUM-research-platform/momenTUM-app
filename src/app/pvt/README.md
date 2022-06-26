@@ -30,6 +30,9 @@ The HTML-POST has the following format:
 
 ---
 
-## Edge case handling
-- If the user doesn't react within the maximum reaction time specified in the study, the "missed entry" is repeated, and not thrown away.
-- If the user reacts too early (before the timer is shown), the test will be restarted, meaning the user will have to wait longer than usual.
+## Edge cases
+#### 1. The user doesn't react within the maximum time specified in the study file
+- In this case, the entry will be marked as "-1", and the total number of trials will be incremented by 1. A message will be shown to the user indicating that his reaction took too long.
+
+#### 2. The user reacts too early (before the timer is shown).
+- In this case, the entry will be marked as "-2", and the total number of trials will be incremented by 1. A message will be shown to the user indicating that he reacted too early. The test will be restarted.
