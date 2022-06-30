@@ -13,8 +13,6 @@ import {Storage} from "@ionic/storage-angular";
 export class PvtPage implements OnInit {
 
   // INPUT from study
-  module: any; // storage for study-data of this module
-
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
   // "min" is the minimum time after which the colored panel will emerge.
@@ -38,7 +36,7 @@ export class PvtPage implements OnInit {
               private route: ActivatedRoute,
               private studyTasksService: StudyTasksService,
               private storage: Storage)
-  { }
+  {}
 
   /**
    * Angular standard function, which is called after construction when the component is initialized.
@@ -47,7 +45,6 @@ export class PvtPage implements OnInit {
    * 3. starts the tutorial test
    * */
   async ngOnInit() {
-    await this.getModule();
     await this.setUpVariables();
     this.conductPVT(false);
   }
@@ -227,41 +224,46 @@ export class PvtPage implements OnInit {
    * defines all parameters, which were specified in the study section concerning this module.
    * */
   private setUpVariables() {
-    this.numOfTrials = this.module.trials;
-    this.reactionTimes = new Array(this.numOfTrials);
+    const id = this.route.snapshot.paramMap.get('task_id');
+    const module = this.getModule(id);
+
+    this.numOfTrials = module.trials;
+    this.reactionTimes = [];
     this.timeInterval = {
-      min: this.module.min_waiting,
-      dur: this.module.min_waiting + this.module.max_waiting
+      min: module.min_waiting,
+      dur: module.min_waiting + module.max_waiting
     };
-    this.showResults = this.module.show;
-    this.maxReactionTime = this.module.max_reaction;
-    this.enableExit = this.module.exit;
-    this.submitText = this.module.submit_text;
+    this.showResults = module.show;
+    this.maxReactionTime = module.max_reaction;
+    this.enableExit = module.exit;
+    this.submitText = module.submit_text;
 
     this.state = 'pre-state';
   }
 
   /**
-   * Gets the correct module, which contains all the information for the setup of this task.
-   * The module is saved in the variable "module".
+   * Finds a module in the local storage by its task_id and returns it.
+   *
+   * @param task_id the task_id of the module, which was assigned by the study task service.
+   *
+   * @returns the correct module from the local storage, as an object of type MODULE.
    * */
-  private async getModule() {
-    const id = this.route.snapshot.paramMap.get('task_id'); // finds the id of this module. The id found here was assigned in the
-    await this.studyTasksService.getAllTasks().then((tasks) => {
-      let t = tasks;
-      for (let i = 0; i < t.length; i++) {
-        if (id == t[i].task_id) {
-          const index = t[i].index;
+  private async getModule(task_id: string): Promise<any> {
+    let module: any;
+    this.studyTasksService.getAllTasks()
+      .then((tasks) => {
+      for (const task of tasks) {
+        if (task_id == task.task_id) {
+          const index = task.index;
           let studyObject: any;
           return this.storage.get('current-study')
             .then(ret => studyObject = ret)
             .then(() => {
-              console.log(studyObject);
-              this.module = JSON.parse(studyObject).modules[index];
-              console.log(this.module);
+              module = JSON.parse(studyObject).modules[index];
             });
         }
       }
     });
+    return module;
   }
 }
