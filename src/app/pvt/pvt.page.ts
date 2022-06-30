@@ -1,62 +1,83 @@
 import { Component, OnInit } from '@angular/core';
 import { SurveyDataService } from "../services/survey-data.service";
-import {Router} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import * as moment from "moment";
+import {StudyTasksService} from "../services/study-tasks.service";
+import {Storage} from "@ionic/storage-angular";
 
 @Component({
   selector: 'app-pvt',
   templateUrl: './pvt.page.html',
   styleUrls: ['./pvt.page.scss'],
 })
-/**
- * TODO: Implement the documentation for this class
- * */
 export class PvtPage implements OnInit {
 
-  // INPUT from study:
+  // INPUT from study
+  module: any; // storage for study-data of this module
+
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
   // "min" is the minimum time after which the colored panel will emerge.
   // "dur" is the time span, which will be added to min. (in milliseconds)
   showResults: boolean; // decides whether the results of the test will be shown to the user.
   maxReactionTime: number; // The maximum reaction time a user can have, before the test will be cancelled and retaken. (in milliseconds)
-  enableExit: boolean;
+  enableExit: boolean; // if true, the cross for early exit will be visible.
+  submitText: string; // the text which is shown on the submit button.
 
-  // OUTPUT: TODO: create an OUTPUP datastructure
-  entries: number[]; // all reaction-times measured.
+  // OUTPUT
+  reactionTimes: number[]; // all reaction-times measured.
 
   // HELPER VARIABLES:
-  trialNumber: number;
-  reacted: boolean;
+  reacted: boolean; // contains information, if user reacted
   state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
-  timer: number; // variable used for measuring the reaction-time.
-  private endedGame: boolean;
+  timer: any; // variable used for measuring the reaction-time.
 
-  // TODO: The initial values should be defined according to the study.json file.
-  constructor(private surveyDataService: SurveyDataService, private router: Router) {
-    this.state = 'pre-state';
-    this.numOfTrials = 10;
-    this.entries = Array(this.numOfTrials).fill(-1);
-    this.timeInterval = {min: 2000, dur: 1000};
-    this.showResults = true;
-    this.maxReactionTime = 2000;
-    this.reacted = false;
-    this.endedGame = false;
-    this.trialNumber = 1;
-    this.enableExit = true;
-    this.conductTest(true);
-  }
+  constructor(private surveyDataService: SurveyDataService,
+              private router: Router,
+              private route: ActivatedRoute,
+              private studyTasksService: StudyTasksService,
+              private storage: Storage)
+  { }
 
-  ngOnInit() {
+  /**
+   * Angular standard function, which is called after construction when the component is initialized.
+   * 1. loads the study data into the module variable
+   * 2. sets up the pvt parameters according to the study
+   * 3. starts the tutorial test
+   * */
+  async ngOnInit() {
+    await this.getModule();
+    await this.setUpVariables();
+    this.conductPVT(false);
   }
 
   /**
-   * Loads the game-state. Starts the official testing.
+   * submits the entries array to the server and loads the home page
    * */
-  async loadGame() {
-    this.state = 'game-state'; // activate the game-pane div.
-    await this.conductTest(false);
+  submit() {
+    this.surveyDataService.sendSurveyDataToServer({
+      name: "pvt",
+      entries: this.reactionTimes,
+      time: moment().format
+    })
+      .then(() => this.router.navigate(['/']));
+  }
+
+  /**
+   * starts the pvt test.
+   * 1. loads the countdown.
+   * 2. loads the PVT after the countdown.
+   * 3. loads the results after the PVT.
+   * */
+  async startPvt() {
+    // load all variables before changing state
+    this.countdown = 3;
+    this.state = 'countdown-state';
+
+    // conduct PVT
+    await this.countdownToZero();
+    this.loadGame()
     return;
   }
 
@@ -71,65 +92,37 @@ export class PvtPage implements OnInit {
   }
 
   /**
-   * loads the countdown page.
-   * When it's done with the countdown, it loads the game page.
+   * Loads the game-state.
+   * Starts the official testing.
    * */
-  async loadCountdown() {
-    // load all variables before changing state
-    this.countdown = 3;
-    this.state = 'countdown-state';
-
-    // countdown
-    await this.countdownToZero();
-    this.loadGame().
-    then(() => this.loadResults());
+  private async loadGame() {
+    this.state = 'game-state'; // activate the game-pane div.
+    this.conductPVT(true);
     return;
   }
 
   /**
    * pushes the measured time to the entries array.
    * */
-  async stopTimer(isTutorial: boolean) {
-    console.log(' stopTimer() start');
-    if (isTutorial) { // tutorial case
-      console.log('...time data is thrown away. test was just for the tutorial...');
+  private async handleResult(saveResults: boolean) {
+    if (this.timer === undefined) {
+      this.timer = 'you reacted too early.';
+      this.reactionTimes.push(-2);
+      this.numOfTrials++;
+    } // user reacted too early. trial will be thrown away.
+    else if (this.timer > this.maxReactionTime) {
+      this.timer = 'waited for too long.'
+      this.reactionTimes.push(-1);
+      this.numOfTrials++;
+    } // user's reaction time surpassed the maximumWaitingTime. trial will be thrown away.
+    else if (saveResults) { // user reacted normal
+      this.reactionTimes.push(this.timer);
     }
-    else if (this.timer === undefined) { // user reacted too early
-      console.log('...user reacted too early, test will be retaken...');
-      this.reacted = false;
-      return;
-    }
-    else if (this.timer > this.maxReactionTime) { // user reacted too slow
-      console.log('...reaction time reached max...');
-      this.reacted = false;
-      this.trialNumber++;
-    }
-    else { // user reacted normal
-      console.log('...user reacted in ' + this.timer + ' seconds');
-      this.entries[this.trialNumber-1] = this.timer;
-      this.trialNumber++;
-    }
-
     // show the result for a bit.
-    const w = Date.now();
-    while (Date.now() - w < 2000 && (this.state === 'pre-state' || this.state === 'game-state')) {
-      await this.sleep(0);
-    }
+    await this.sleep(2000);
 
     this.timer = undefined; // make timer invisible
     return;
-  }
-
-  /**
-   * submits the entries array to the server and loads the home page
-   * */
-  submit() {
-    this.surveyDataService.sendSurveyDataToServer({
-      name: "pvt",
-      entries: this.entries,
-      time: moment().format
-    })
-      .then(() => this.router.navigate(['/home/']));
   }
 
   /**
@@ -159,13 +152,11 @@ export class PvtPage implements OnInit {
   /**
    * Recursive function, starts the timer.
    * */
-  private async startTimer(isTutorial: boolean) {
-    console.log(' startTimer() start.');
+  private async runTimer(isTutorial: boolean) {
     if (this.reacted) {
       return null;
     }
     await this.incrementTimer(isTutorial);
-    console.log(' startTimer() stop.');
     return null;
   }
 
@@ -173,7 +164,6 @@ export class PvtPage implements OnInit {
    * updates the timer as fast as possible until the user reacts or the maxReactionTime was reached.
    * */
   private async incrementTimer(isTutorial: boolean) {
-    console.log('  incrementTimer() start.');
     this.timer = 0;
     const startingTime = Date.now();
     if (isTutorial) {
@@ -190,11 +180,11 @@ export class PvtPage implements OnInit {
         await this.sleep(0); // TODO: find out why this line is needed in order for it to work.
       } while (!this.reacted && this.timer < this.maxReactionTime);
     } // increment timer for testing purposes
-    console.log('  incrementTimer() stop.');
     return;
   }
 
   /**
+   * conducts the following PVT test:
    * 0. check if conditions for testing are met.
    * 1. wait for a random amount of time.
    * 2. start the timer.
@@ -202,30 +192,76 @@ export class PvtPage implements OnInit {
    * 4. show the result for a bit.
    * 5. make timer invisible.
    * 6. go to 0.
+   *
+   * @param saveResults tells you if the test is going to save the results in reactionTimes array, and if it should count the trials.
    * */
-  private async conductTest(isTutorial: boolean) {
-    console.log('conductTest() start.');
-    while (isTutorial || this.trialNumber <= this.numOfTrials) {
-      // 0. set all variables
+  private async conductPVT(saveResults: boolean) {
+    let trialCount = 0; // stores the number/index of the current trial.
+    while (trialCount < this.numOfTrials) {
+      // increment trialCount only if it's not the tutorial.
+      if (saveResults) {
+        trialCount++
+      }
+      // 0. setup all variables
       this.reacted = false;
-      // 1. wait for a random amount of time
-      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate waiting time
-      console.log(`...waiting for ${waitingTime / 1000} seconds...`);
+      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate the waiting time
       const x = Date.now();
+      // 1. wait for a random amount of time
       while (Date.now()-x < waitingTime) {
-        await this.sleep(0); // TODO: why is this line needed for refreshing?
+        await this.sleep(0); // anyone knows why this line is needed for refreshing?
+        // checks, if the user exited the tutorial or the game, while the test was waiting.
         if ((this.state !== 'pre-state' && this.state !== 'game-state')) {
-          console.log('conductTest() stop: state switch.');
           return;
         }
       }
-      // 2. start the timer
-      await this.startTimer(isTutorial);
+      // 2. start running the timer
+      await this.runTimer(!saveResults);
       // 3. stop the timer
-      await this.stopTimer(isTutorial);
-    } // test as long as there are trials left.
-    console.log('conductTest() stop.');
+      await this.handleResult(saveResults);
+    } // Each loop is one single PVT test-round. The loop condition is that there are trials left.
     this.loadResults();
     return;
+  }
+
+  /**
+   * defines all parameters, which were specified in the study section concerning this module.
+   * */
+  private setUpVariables() {
+    this.numOfTrials = this.module.trials;
+    this.reactionTimes = new Array(this.numOfTrials);
+    this.timeInterval = {
+      min: this.module.min_waiting,
+      dur: this.module.min_waiting + this.module.max_waiting
+    };
+    this.showResults = this.module.show;
+    this.maxReactionTime = this.module.max_reaction;
+    this.enableExit = this.module.exit;
+    this.submitText = this.module.submit_text;
+
+    this.state = 'pre-state';
+  }
+
+  /**
+   * Gets the correct module, which contains all the information for the setup of this task.
+   * The module is saved in the variable "module".
+   * */
+  private async getModule() {
+    const id = this.route.snapshot.paramMap.get('task_id'); // finds the id of this module. The id found here was assigned in the
+    await this.studyTasksService.getAllTasks().then((tasks) => {
+      let t = tasks;
+      for (let i = 0; i < t.length; i++) {
+        if (id == t[i].task_id) {
+          const index = t[i].index;
+          let studyObject: any;
+          return this.storage.get('current-study')
+            .then(ret => studyObject = ret)
+            .then(() => {
+              console.log(studyObject);
+              this.module = JSON.parse(studyObject).modules[index];
+              console.log(this.module);
+            });
+        }
+      }
+    });
   }
 }
