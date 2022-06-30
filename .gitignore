@@ -18,6 +18,7 @@ Notes
 *.log
 log.txt
 npm-debug.log*
+studylinks.txt
 
 /.angular
 /.idea

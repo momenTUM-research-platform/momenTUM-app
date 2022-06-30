@@ -20,7 +20,7 @@
     </p>
     <p class="button-text"
        id="start-test-button"
-       (click)="loadCountdown()">
+       (click)="startPvt()">
       < start test >
     </p>
   </div>
@@ -31,7 +31,7 @@
       </h1>
     </div>
 
-    <div id="game-pane" class="pane" *ngIf="state==='game-state'" (touchstart)="reacted = true;">
+    <div id="game-pane" class="pane" *ngIf="state==='game-state'" (touchstart)="reacted = true">
     <ion-icon name="close"
               size="large"
               (click)="loadResults()" *ngIf="enableExit">
@@ -45,10 +45,10 @@
 
     <div id="post-pane" class="pane" *ngIf="state==='post-state'">
       <p *ngIf="showResults" id="results">
-          {{entries}}
+          {{reactionTimes}}
       </p>
       <ion-label class="button-text" id="submit-button" (mousedown)="submit()">
-        < submit >
+        < {{submitText}} >
       </ion-label>
     </div>
 
