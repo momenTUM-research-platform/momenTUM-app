@@ -44,13 +44,14 @@ export class PvtPage implements OnInit {
    * 2. sets up the pvt parameters according to the study
    * 3. starts the tutorial test
    * */
-  async ngOnInit() {
-    await this.setUpVariables();
-    this.conductPVT(false);
+  ngOnInit() {
+    this.setUpVariables()
+      .then(() => this.conductPVT(false));
   }
 
   /**
-   * submits the entries array to the server and loads the home page
+   * submits the entries array to the server,
+   * then routes back to the home page.
    * */
   submit() {
     this.surveyDataService.sendSurveyDataToServer({
@@ -221,49 +222,56 @@ export class PvtPage implements OnInit {
   }
 
   /**
-   * defines all parameters, which were specified in the study section concerning this module.
+   * defines all parameters, which were specified in the study section concerning this module,
+   * and defines other variables which need to be initialized.
+   *
+   * @returns a promise.
    * */
-  private setUpVariables() {
-    const id = this.route.snapshot.paramMap.get('task_id');
-    const module = this.getModule(id);
-
-    this.numOfTrials = module.trials;
+  private setUpVariables(): Promise<any> {
+    // set up other variables
     this.reactionTimes = [];
-    this.timeInterval = {
-      min: module.min_waiting,
-      dur: module.min_waiting + module.max_waiting
-    };
-    this.showResults = module.show;
-    this.maxReactionTime = module.max_reaction;
-    this.enableExit = module.exit;
-    this.submitText = module.submit_text;
-
     this.state = 'pre-state';
+
+    // get module parameters
+    return this.getModule()
+      .then((module) => {
+        this.numOfTrials = module.trials;
+        this.timeInterval = {
+          min: module.min_waiting,
+          dur: module.min_waiting + module.max_waiting
+        };
+        this.showResults = module.show;
+        this.maxReactionTime = module.max_reaction;
+        this.enableExit = module.exit;
+        this.submitText = module.submit_text;
+        return;
+    });
+
   }
 
   /**
    * Finds a module in the local storage by its task_id and returns it.
    *
-   * @param task_id the task_id of the module, which was assigned by the study task service.
-   *
    * @returns the correct module from the local storage, as an object of type MODULE.
    * */
-  private async getModule(task_id: string): Promise<any> {
-    let module: any;
-    this.studyTasksService.getAllTasks()
+  private async getModule(): Promise<any> {
+
+    const task_id = this.route.snapshot.paramMap.get('task_id');
+    let index: number;
+
+    return this.studyTasksService
+      .getAllTasks()
       .then((tasks) => {
-      for (const task of tasks) {
-        if (task_id == task.task_id) {
-          const index = task.index;
-          let studyObject: any;
-          return this.storage.get('current-study')
-            .then(ret => studyObject = ret)
-            .then(() => {
-              module = JSON.parse(studyObject).modules[index];
-            });
+        for (const task of tasks) {
+          if (task_id == task.task_id) {
+            index = task.index;
+            break;
+          }
         }
-      }
-    });
-    return module;
+        return this.storage.get('current-study');
+      })
+      .then((studyObject) => {
+        return JSON.parse(studyObject).modules[index];
+      });
   }
 }
