@@ -5,7 +5,7 @@ import { StudyTasksService } from '../services/study-tasks.service';
 import { UuidService } from '../services/uuid.service';
 import { HttpClient } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
-import { LogEvent, SurveyData } from 'types';
+import { LogEvent, Study, SurveyData } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +26,7 @@ export class SurveyDataService {
    * @param surveyURL The web URL where a survey is hosted.
    */
   getRemoteData(surveyURL: string) {
-    console.log(surveyURL);
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       this.http2.setRequestTimeout(7);
       // Now a get request
       this.http2
@@ -37,7 +36,7 @@ export class SurveyDataService {
         })
         .catch((error) => {
           console.log('Error message:' + error);
-          resolve(error);
+          reject(error);
         });
     });
   }

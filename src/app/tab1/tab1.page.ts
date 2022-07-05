@@ -39,7 +39,7 @@ export class Tab1Page implements OnInit {
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
   // is loaded successfully
-  translations: any = {
+  translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
     btn_enrol: 'Enrol',
@@ -94,6 +94,7 @@ export class Tab1Page implements OnInit {
 
   ngOnInit() {
     // set statusBar to be visible on Android
+
     this.statusBar.styleLightContent();
     this.statusBar.backgroundColorByHexString('#0F2042');
 
@@ -121,7 +122,7 @@ export class Tab1Page implements OnInit {
     });
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     // check if dark mode
     if (
       window.matchMedia &&
@@ -160,7 +161,15 @@ export class Tab1Page implements OnInit {
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
+    console.log('Here nowwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
+    try {
+      await this.storage.get('uuid');
+    } catch {
+      console.log('Storage did not exist, creating');
+      await this.storage.create();
+    }
     Promise.all([this.storage.get('current-study')]).then((values) => {
+      console.log(values);
       const studyObject = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
@@ -233,42 +242,40 @@ export class Tab1Page implements OnInit {
    *
    * @param url The URL to attempt to download a study from
    */
-  attemptToDownloadStudy(url: string, isQRCode: boolean) {
+  async attemptToDownloadStudy(url: string, isQRCode: boolean) {
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
-    this.surveyDataService.getRemoteData(url).then((result) => {
+    try {
+      const result = await this.surveyDataService.getRemoteData(url);
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
-      try {
-        // @ts-expect-error
-        const study: Study = JSON.parse(result.data);
-        // checks if the returned text is parseable as JSON, and whether it contains
-        // some of the key fields used by schema so it can determine whether it is
-        // actually a schema study URL
-        // @ts-ignore
+      // @ts-expect-error
+      const study: Study = JSON.parse(result.data);
+      // checks if the returned text is parseable as JSON, and whether it contains
+      // some of the key fields used by schema so it can determine whether it is
+      // actually a schema study URL
+      // @ts-ignore
 
-        validStudy =
-          study.properties !== undefined && // @ts-ignore
-          study.modules !== undefined && // @ts-ignore
-          study.properties.study_id !== undefined;
-        if (validStudy) {
-          console.log('Enrolling in a study.... ');
-          this.enrolInStudy(study);
-        }
-      } catch (e) {
-        // @ts-expect-error
-        console.log('JSON Invalid format: exception: ' + e.message);
-        validStudy = false;
-        if (this.loadingService) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
-        this.displayEnrolError(isQRCode);
+      validStudy =
+        study.properties !== undefined && // @ts-ignore
+        study.modules !== undefined && // @ts-ignore
+        study.properties.study_id !== undefined;
+      if (validStudy) {
+        console.log('Enrolling in a study.... ');
+        this.enrolInStudy(study);
       }
-    });
+    } catch (e) {
+      // @ts-expect-error
+      console.log('JSON Invalid format: exception: ' + e.message, e);
+      if (this.loadingService) {
+        // Added this condition
+        this.loadingService.dismiss();
+      }
+      this.displayEnrolError(isQRCode);
+    }
   }
   /**
    * Uses the barcode scanner to enrol in a study
