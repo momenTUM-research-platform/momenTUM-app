@@ -161,7 +161,6 @@ export class Tab1Page implements OnInit {
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
-    console.log('Here nowwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww');
     try {
       await this.storage.get('uuid');
     } catch {
@@ -169,7 +168,6 @@ export class Tab1Page implements OnInit {
       await this.storage.create();
     }
     Promise.all([this.storage.get('current-study')]).then((values) => {
-      console.log(values);
       const studyObject = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
@@ -289,7 +287,7 @@ export class Tab1Page implements OnInit {
         }
       })
       .catch((err) => {
-        if (this.loadingService) {
+        if (!this.loadingService.isLoading) {
           // Added this condition
           this.loadingService.dismiss();
         }
@@ -356,7 +354,7 @@ export class Tab1Page implements OnInit {
           handler: (response) => {
             // create URL for study
             const url =
-              'https://getschema.app/study.php?study_id=' + response.id;
+              'https://tuspl22-momentum.srv.mwn.de/api/surveys/' + response.id;
             this.attemptToDownloadStudy(url, false);
           },
         },
@@ -371,7 +369,7 @@ export class Tab1Page implements OnInit {
    *
    * @param data A data object returned from the server to represent a study object
    */
-  enrolInStudy(study: Study) {
+  async enrolInStudy(study: Study) {
     this.isEnrolledInStudy = true;
     this.hideEnrolOptions = true;
 
@@ -382,41 +380,47 @@ export class Tab1Page implements OnInit {
     this.storage.set('enrolment-date', new Date());
 
     // set an enrolled flag and save the JSON for the current study
-    this.storage.set('current-study', JSON.stringify(this.study)).then(() => {
-      // log the enrolment event
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'home',
-        event: 'enrol',
-        module_index: -1,
-      });
-
-      // cache all media files if this study has set this property to true
-      if (this.study.properties.cache === true) {
-        this.loadingService.dismiss().then(() => {
-          this.loadingService.isCaching = true;
-          this.loadingService.present(this.translations.msg_caching);
+    this.storage
+      .set('current-study', JSON.stringify(this.study))
+      .then(async () => {
+        // log the enrolment event
+        this.surveyDataService.logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'home',
+          event: 'enrol',
+          module_index: -1,
         });
-        this.surveyCacheService.cacheAllMedia(this.study);
-      }
 
-      // setup the study task objects
-      this.studyTasksService.generateStudyTasks(this.study);
+        // cache all media files if this study has set this property to true
+        if (this.study.properties.cache) {
+          this.loadingService.dismiss().then(() => {
+            this.loadingService.isCaching = true;
+            this.loadingService.present(this.translations.msg_caching);
+          });
+          this.surveyCacheService.cacheAllMedia(this.study);
+        }
 
-      // setup the notifications
-      this.notificationsService.setNext30Notifications();
+        // setup the study task objects
+        const tasks = this.studyTasksService.generateStudyTasks(this.study);
+        console.log(tasks);
+        // setup the notifications
+        this.notificationsService.setNext30Notifications();
 
-      this.loadStudyDetails();
-    });
+        this.loadStudyDetails();
+        const studyTasks = await this.storage.get('study-tasks');
+        console.log('study tasks: ' + JSON.stringify(studyTasks));
+      });
   }
 
   /**
    * Loads the details of the current study, including overdue tasks
    */
   loadStudyDetails() {
+    console.log('loading tasks');
     //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
+      console.log('loaded tasks');
       this.task_list = tasks;
 
       for (const task of this.task_list) {
@@ -464,12 +468,10 @@ export class Tab1Page implements OnInit {
    * Displays a message when camera permission is not allowed
    */
   async displayBarcodeError() {
-    const msg =
-      'Camera permission is required to scan QR codes. You must allow this permission if you wish to use this feature.';
     const alert = await this.alertController.create({
       header: 'Permission Required',
       cssClass: 'alertStyle',
-      message: msg,
+      message: this.translations.msg_camera,
       buttons: ['Dismiss'],
     });
     await alert.present();
