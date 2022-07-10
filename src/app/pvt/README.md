@@ -1,6 +1,6 @@
 # PVT
+This is the wiki page of the pvt test in the momenTUM-app Project.
 
----
 
 ## General overview
 The test works as follows:
@@ -19,12 +19,18 @@ The test works as follows:
 ---
 
 ## Output to the server
+(still not implemented)
 Once a user clicks on the `< submit >` button, a HTML-POST is sent to the server specified in the study file.
 The HTML-POST has the following format:
 
 ```
   output: {
-    reactionTimes: number[]; // all reaction-times measured.
+    module_index: ,
+    module_name: ,
+    entries: [],
+    response_time: ,
+    response_time_in_ms: ,
+    alert_time: ,
   }
 ```
 
@@ -36,3 +42,15 @@ The HTML-POST has the following format:
 
 #### 2. The user reacts too early (before the timer is shown).
 - In this case, the entry will be marked as "-2", and the total number of trials will be incremented by 1. A message will be shown to the user indicating that he reacted too early. The test will be restarted.
+
+## Input for the pvt
+The following parameters are set by the study:
+
+- numOfTrials: Determines, how many reaction times will be measured.
+- timeInterval: Determines the time Interval, in which the timer pops up. The probability distribution is uniform.
+  - min: Determines the minimum number of milliseconds after which the timer could pop up.
+  - max: Determines the maximum number of milliseconds that can pass, before the timer pops up.
+- showResults: Determines, whether after all the tests the user will see the "results page".
+- maxReactionTime: Determines the number of milliseconds, that can pass without reaction, after which the entry will be thrown away, and the test will be restarted.
+- enableExit: Determines, whether the user is able to exit/finish the game early.
+- submitText: Determines the text, which the submit button shows.
