@@ -4,6 +4,8 @@ import {ActivatedRoute, Router} from "@angular/router";
 import * as moment from "moment";
 import {StudyTasksService} from "../services/study-tasks.service";
 import {Storage} from "@ionic/storage-angular";
+import { NavController, ToastController } from '@ionic/angular';
+import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 @Component({
   selector: 'app-pvt',
@@ -22,6 +24,15 @@ export class PvtPage implements OnInit {
   enableExit: boolean; // if true, the cross for early exit will be visible.
   submitText: string; // the text which is shown on the submit button.
 
+
+  // task objects
+  tasks: Array<any>;
+  task_id: string;
+  task_index: number;
+  module_index: number;
+  module_name: string;
+
+
   // OUTPUT
   reactionTimes: number[]; // all reaction-times measured.
 
@@ -33,10 +44,14 @@ export class PvtPage implements OnInit {
 
   constructor(private surveyDataService: SurveyDataService,
               private router: Router,
+              private navController: NavController,
               private route: ActivatedRoute,
               private studyTasksService: StudyTasksService,
-              private storage: Storage)
-  {}
+
+              private storage: Storage,
+              private statusBar: StatusBar,)
+  { }
+
 
   /**
    * Angular standard function, which is called after construction when the component is initialized.
@@ -44,24 +59,46 @@ export class PvtPage implements OnInit {
    * 2. sets up the pvt parameters according to the study
    * 3. starts the tutorial test
    * */
+
   ngOnInit() {
     this.setUpVariables()
       .then(() => this.conductPVT(false));
+
   }
 
   /**
    * submits the entries array to the server,
    * then routes back to the home page.
    * */
-  submit() {
-    this.surveyDataService.sendSurveyDataToServer({
-      name: "pvt",
-      entries: this.reactionTimes,
-      time: moment().format
-    })
-      .then(() => this.router.navigate(['/']));
-  }
+   submit() {
 
+    // get a timestmap of submission time in both readable and ms format
+    const response_time = moment().format();
+    const response_time_ms = moment().valueOf();
+
+
+    // attempt to post surveyResponse to server
+    this.surveyDataService.sendSurveyDataToServer({
+      module_index: this.module_index,
+      module_name: "pvt",
+      entries: this.reactionTimes,
+      response_time,
+      response_time_in_ms: response_time_ms
+    });
+
+    // write tasks back to storage
+    this.storage.set('study-tasks', this.tasks).then(() => {
+      // save an exit log
+      this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'survey',
+        event: 'submit',
+        module_index: this.module_index,
+      });
+      this.navController.navigateRoot('/');
+    });
+  }
   /**
    * starts the pvt test.
    * 1. loads the countdown.

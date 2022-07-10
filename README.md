@@ -71,7 +71,7 @@ Generate the native project, if it does not already exist. (You can only install
 #### For Cordova, run the following:
     $ ionic cordova prepare android
 #### 2. Running with cordova
-    $ ionic cordova run android -l
+    $ ionic cordova run android
 
 #### Reference
 > https://ionicframework.com/docs/developing/android#installing-android-studio
