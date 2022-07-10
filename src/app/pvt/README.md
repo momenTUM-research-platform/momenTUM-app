@@ -19,12 +19,18 @@ The test works as follows:
 ---
 
 ## Output to the server
+(still not implemented)
 Once a user clicks on the `< submit >` button, a HTML-POST is sent to the server specified in the study file.
 The HTML-POST has the following format:
 
 ```
   output: {
-    reactionTimes: number[]; // all reaction-times measured.
+    module_index: ,
+    module_name: ,
+    entries: [],
+    response_time: ,
+    response_time_in_ms: ,
+    alert_time: ,
   }
 ```
 
