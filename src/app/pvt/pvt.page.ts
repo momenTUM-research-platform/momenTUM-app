@@ -252,7 +252,7 @@ export class PvtPage implements OnInit {
   /**
    * Finds a module in the local storage by its task_id and returns it.
    *
-   * @returns the correct module from the local storage, as an object of type MODULE.
+   * @returns A Promise with the correct module from the local storage.
    * */
   private async getModule(): Promise<any> {
 
