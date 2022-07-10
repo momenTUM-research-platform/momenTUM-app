@@ -38,7 +38,7 @@ The following guide shows how to use Cordova to build for Browser, Android and i
 #### 2. Prepare
     $ ionic cordova prepare browser
 #### 2. Run the following command
-    $ ionic cordova run browser -l
+    $ ionic cordova run browser
 
     
     
@@ -71,7 +71,7 @@ Generate the native project, if it does not already exist. (You can only install
 #### For Cordova, run the following:
     $ ionic cordova prepare android
 #### 2. Running with cordova
-    $ ionic cordova run android -l
+    $ ionic cordova run android
 
 #### Reference
 > https://ionicframework.com/docs/developing/android#installing-android-studio
