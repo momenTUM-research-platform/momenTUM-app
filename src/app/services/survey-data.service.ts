@@ -57,7 +57,6 @@ export class SurveyDataService {
   sendSurveyDataToServer(surveyData) {
     return Promise.all([this.storage.get('current-study'), this.storage.get('uuid'), this.studyTasksService.getAllTasks()]).then((values) => {
       const studyJSON = JSON.parse(values[0]);
-      console.log('Hello', studyJSON);
       const uuid = values[1];
       const tasks = values[2];
       const dataUuid = this.uuidService.generateUUID('pending-data');

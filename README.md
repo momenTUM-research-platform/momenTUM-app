@@ -8,6 +8,7 @@ reader to follow along with building the app.
 
 Sample URLs:
 * https://tuspl22-momentum.srv.mwn.de/api/surveys/demo 
+* https://tuspl22-momentum.srv.mwn.de/api/surveys/onlyPVT_myID2000_1655989948278
 * https://ashatte.io/schema/sleep.json
 
 ## Installations

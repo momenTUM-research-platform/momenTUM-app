@@ -23,7 +23,10 @@ export class PvtPage implements OnInit {
   submitText: string; // the text which is shown on the submit button.
 
   // OUTPUT
+  moduleName: string; // the name of this module
+  moduleIndex: number; // The index of this module.
   reactionTimes: number[]; // all reaction-times measured.
+  alertTime: string; // The alert time of this task
 
   // HELPER VARIABLES:
   reacted: boolean; // contains information, if user reacted
@@ -54,12 +57,22 @@ export class PvtPage implements OnInit {
    * then routes back to the home page.
    * */
   submit() {
-    this.surveyDataService.sendSurveyDataToServer({
-      name: "pvt",
-      entries: this.reactionTimes,
-      time: moment().format
-    })
-      .then(() => this.router.navigate(['/']));
+    const surveyData = {
+      module_index: this.moduleIndex,
+      module_name: this.moduleName,
+      entries: [321, 423, 123, -1, -2, 124, 132],
+      response_time: moment().format(),
+      response_time_in_ms: moment().valueOf(),
+      alert_time: this.alertTime,
+    }
+
+    this.surveyDataService.sendSurveyDataToServer(surveyData)
+      .then(() => {
+        return this.router.navigate(['/']);
+      })
+      .then(() => {
+        console.log(surveyData);
+      })
   }
 
   /**
@@ -240,6 +253,7 @@ export class PvtPage implements OnInit {
           min: module.min_waiting,
           dur: module.min_waiting + module.max_waiting
         };
+        this.moduleName = module.name;
         this.showResults = module.show;
         this.maxReactionTime = module.max_reaction;
         this.enableExit = module.exit;
@@ -257,21 +271,21 @@ export class PvtPage implements OnInit {
   private async getModule(): Promise<any> {
 
     const task_id = this.route.snapshot.paramMap.get('task_id');
-    let index: number;
 
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
         for (const task of tasks) {
           if (task_id == task.task_id) {
-            index = task.index;
+            this.moduleIndex = task.index;
+            this.alertTime = moment(task.time).format();
             break;
           }
         }
         return this.storage.get('current-study');
       })
       .then((studyObject) => {
-        return JSON.parse(studyObject).modules[index];
+        return JSON.parse(studyObject).modules[this.moduleIndex];
       });
   }
 }
