@@ -16,6 +16,7 @@ import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import {TranslateService} from '@ngx-translate/core';
 import { Study } from '../../models/models';
+import { ChangeTheme } from '../../shared/change-theme';
 
 @Component({
   selector: 'app-home',
@@ -76,6 +77,7 @@ export class HomePage {
     private translate: TranslateService) {
       // get the default language of the device
       this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+
     }
 
     colorTest(systemInitiatedDark) {
@@ -84,12 +86,30 @@ export class HomePage {
       } else {
         this.darkMode = false;
       }
+
+    }
+
+    toggleTheme(el) {
+      console.log("el %j" , ChangeTheme.getDarkTheme());
+      if(ChangeTheme.getDarkTheme() === 'light'){
+       document.querySelector('ion-icon').setAttribute('name', 'sunny');
+       ChangeTheme.setDarkTheme (true);
+       this.darkMode = true;
+      }else{
+      document.querySelector('ion-icon').setAttribute('name', 'moon');
+        ChangeTheme.setDarkTheme (false);
+        this.darkMode = false;
+      }
     }
 
     ngOnInit() {
       // set statusBar to be visible on Android
       this.statusBar.styleLightContent();
       this.statusBar.backgroundColorByHexString('#0F2042');
+
+
+      // Theme set to the stored prefered type
+      ChangeTheme.initializeTheme();
 
       // need to subscribe to this event in order
       // to ensure that the page will refresh every

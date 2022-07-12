@@ -3,7 +3,7 @@
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
-import { LoadingService } from './loading/loading-service.service';
+import { LoadingService } from '../loading/loading-service.service';
 import { Storage } from '@ionic/storage-angular';
 
 import { SurveyCacheService } from './survey-cache.service';

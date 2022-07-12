@@ -47,3 +47,17 @@ ion-content {
 	margin-bottom: 5%;
 	font-weight: bold;
 }
+ion-button {
+  --border-radius: 15px;
+  width: 80%;
+}
+
+ion-footer{
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+ion-label {
+  margin-bottom: 3px;
+  margin-top: 3px;
+}
