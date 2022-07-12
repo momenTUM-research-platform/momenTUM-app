@@ -15,7 +15,7 @@ import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import {TranslateService} from '@ngx-translate/core';
-import { Study } from '../../models/study';
+import { Study } from '../../models/models';
 
 @Component({
   selector: 'app-home',
@@ -352,9 +352,11 @@ export class HomePage {
 
     // let enrolledStudy = new Study();
     this.study = JSON.parse(data.data);
-    let enrolledStudy = new Study(data.data);
+    let jsonObj: any = JSON.parse(data.data); // string to generic object first
+    let studyObj: Study = <Study>jsonObj;
 
-    console.log("Data:  %j", enrolledStudy);
+
+    console.log("Data:  %j", studyObj);
 
 
 
