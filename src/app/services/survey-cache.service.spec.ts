@@ -86,9 +86,9 @@ describe('FileDownloaderService', () => {
   it('should download the survey', waitForAsync(() => {
     service
       .downloadFile('https://tuspl22-momentum.srv.mwn.de/api/surveys/demo.json')
-      .then((file) => {
-        console.log(file);
-        expect(file).toContain('\'name\': \'demo\'');
+      .then((result) => {
+        console.log(result);
+        expect(result).toContain("'name': 'demo'");
       })
       .catch((error) => {
         console.log(error);

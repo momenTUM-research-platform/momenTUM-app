@@ -14,15 +14,14 @@ import { NotificationsService } from '../services/notifications.service';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../translate-config.service';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
-  styleUrls: ['tab1.page.scss']
+  styleUrls: ['tab1.page.scss'],
 })
 export class Tab1Page {
-
   // resume event subscription
   resumeEvent: any;
   // flag to display enrol options
@@ -45,12 +44,15 @@ export class Tab1Page {
     btn_enrol: 'Enrol',
     'btn_enter-url': 'Enter URL',
     'btn_study-id': 'Study ID',
-    'error_loading-qr-code': 'We couldn\'t load your study. Please check your internet connection and ensure you are scanning the correct code.',
-    'error_loading-study': 'We couldn\'t load your study. Please check your internet connection and ensure you are entering the correct URL.',
+    'error_loading-qr-code':
+      "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.",
+    'error_loading-study':
+      "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL.",
     heading_error: 'Oops...',
     label_loading: 'Loading...',
     msg_caching: 'Downloading media for offline use - please wait!',
-    msg_camera: 'Camera permission is required to scan QR codes. You can allow this permission in Settings.'
+    msg_camera:
+      'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
   };
 
   safeURL: string;
@@ -58,7 +60,8 @@ export class Tab1Page {
   // the current language of the device
   selectedLanguage: string;
 
-  constructor(private barcodeScanner: BarcodeScanner,
+  constructor(
+    private barcodeScanner: BarcodeScanner,
     private surveyDataService: SurveyDataService,
     private notificationsService: NotificationsService,
     private surveyCacheService: SurveyCacheService,
@@ -72,48 +75,55 @@ export class Tab1Page {
     private localNotifications: LocalNotifications,
     private storage: Storage,
     private translateConfigService: TranslateConfigService,
-    private translate: TranslateService) {
-      // get the default language of the device
-      this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+    private translate: TranslateService
+  ) {
+    // get the default language of the device
+    this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+  }
+
+  colorTest(systemInitiatedDark) {
+    if (systemInitiatedDark.matches) {
+      this.darkMode = true;
+    } else {
+      this.darkMode = false;
     }
+  }
 
-    colorTest(systemInitiatedDark) {
-      if (systemInitiatedDark.matches) {
-        this.darkMode = true;
-      } else {
-        this.darkMode = false;
-      }
-    }
+  ngOnInit() {
+    // set statusBar to be visible on Android
+    this.statusBar.styleLightContent();
+    this.statusBar.backgroundColorByHexString('#0F2042');
 
-    ngOnInit() {
-      // set statusBar to be visible on Android
-      this.statusBar.styleLightContent();
-      this.statusBar.backgroundColorByHexString('#0F2042');
-
-      // need to subscribe to this event in order
-      // to ensure that the page will refresh every
-      // time it is navigated to because ionViewWillEnter()
-      // is not called when navigating here from other pages
-      this.router.events.subscribe(event => {
-        if(event instanceof NavigationStart) {
-          if(event.url == '/') {
-            if (!this.loadingService.isLoading) {this.ionViewWillEnter();}
+    // need to subscribe to this event in order
+    // to ensure that the page will refresh every
+    // time it is navigated to because ionViewWillEnter()
+    // is not called when navigating here from other pages
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        if (event.url === '/') {
+          if (!this.loadingService.isLoading) {
+            this.ionViewWillEnter();
           }
         }
-      });
+      }
+    });
 
-      // trigger this to run every time the app is resumed from the background
-      this.resumeEvent = this.platform.resume.subscribe(() => {
-        if (this.router.url === '/tabs/tab1') {
-          if (!this.loadingService.isLoading) {this.ionViewWillEnter();}
+    // trigger this to run every time the app is resumed from the background
+    this.resumeEvent = this.platform.resume.subscribe(() => {
+      if (this.router.url === '/tabs/tab1') {
+        if (!this.loadingService.isLoading) {
+          this.ionViewWillEnter();
         }
-      });
-    }
+      }
+    });
+  }
 
   ionViewWillEnter() {
-
     // check if dark mode
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    ) {
       // dark mode
       this.darkMode = true;
     } else {
@@ -132,9 +142,11 @@ export class Tab1Page {
       'heading_error',
       'label_loading',
       'msg_caching',
-      'msg_camera'
+      'msg_camera',
     ];
-    this.translate.get(labels).subscribe(res => { this.translations = res; });
+    this.translate.get(labels).subscribe((res) => {
+      this.translations = res;
+    });
 
     this.localNotifications.requestPermission();
 
@@ -144,13 +156,10 @@ export class Tab1Page {
     this.hideEnrolOptions = true;
     this.isEnrolledInStudy = false;
 
-
     // check if user is currently enrolled in study
-    Promise.all([this.storage.get('current-study')]).then(values => {
-
+    Promise.all([this.storage.get('current-study')]).then((values) => {
       const studyObject = values[0];
       if (studyObject !== null) {
-
         // convert the study to a JSON object
         this.study = JSON.parse(studyObject);
 
@@ -160,7 +169,7 @@ export class Tab1Page {
           milliseconds: moment().valueOf(),
           page: 'home',
           event: 'entry',
-          module_index: -1
+          module_index: -1,
         });
 
         // attempt to upload any pending logs and survey data
@@ -174,10 +183,10 @@ export class Tab1Page {
         this.loadStudyDetails();
       } else {
         this.hideEnrolOptions = false;
-        if(this.loadingService) { // Added this condition
+        if (this.loadingService) {
+          // Added this condition
           this.loadingService.dismiss();
         }
-
       }
     });
 
@@ -207,7 +216,7 @@ export class Tab1Page {
         milliseconds: moment().valueOf(),
         page: 'home',
         event: 'exit',
-        module_index: -1
+        module_index: -1,
       });
 
       // attempt to upload any pending logs and survey data
@@ -226,29 +235,29 @@ export class Tab1Page {
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
-    this.surveyDataService.getRemoteData(url).then(data => {
-
+    this.surveyDataService.getRemoteData(url).then((data) => {
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
       try {
-
         // checks if the returned text is parseable as JSON, and whether it contains
         // some of the key fields used by schema so it can determine whether it is
         // actually a schema study URL
         // @ts-ignore
-        validStudy = JSON.parse(data.data).properties !== undefined // @ts-ignore
-                  && JSON.parse(data.data).modules !== undefined // @ts-ignore
-                  && JSON.parse(data.data).properties.study_id !== undefined;
-      } catch(e) {
-        console.log('JSON Invalid format: exception: '+ e.message);
+        validStudy =
+          JSON.parse(data.data).properties !== undefined && // @ts-ignore
+          JSON.parse(data.data).modules !== undefined && // @ts-ignore
+          JSON.parse(data.data).properties.study_id !== undefined;
+      } catch (e) {
+        console.log('JSON Invalid format: exception: ' + e.message);
         validStudy = false;
       }
       if (validStudy) {
         console.log('Enrolling in a study.... ');
         this.enrolInStudy(data);
       } else {
-        if(this.loadingService) { // Added this condition
+        if (this.loadingService) {
+          // Added this condition
           this.loadingService.dismiss();
         }
         this.displayEnrolError(isQRCode);
@@ -260,48 +269,53 @@ export class Tab1Page {
    * Uses the barcode scanner to enrol in a study
    */
   async scanBarcode() {
-    this.barcodeScanner.scan().then(barcodeData => {
-      if (!barcodeData.cancelled) {
-        this.attemptToDownloadStudy(barcodeData.text, true);
-      }
-     }).catch(err => {
-      if(this.loadingService) { // Added this condition
-        this.loadingService.dismiss();
-      }
+    this.barcodeScanner
+      .scan()
+      .then((barcodeData) => {
+        if (!barcodeData.cancelled) {
+          this.attemptToDownloadStudy(barcodeData.text, true);
+        }
+      })
+      .catch((err) => {
+        if (this.loadingService) {
+          // Added this condition
+          this.loadingService.dismiss();
+        }
         this.displayBarcodeError();
-     });
+      });
   }
 
   /**
    * Handles the alert dialog to enrol via URL
    */
   async enterURL() {
-      const alert = await this.alertController.create({
-        header: this.translations['btn_enter-url'],
-        cssClass: 'alertStyle',
-        inputs: [
-          {
-            name: 'url',
-            type: 'url',
-            placeholder: 'e.g. https://bit.ly/2Q4O9jI',
-            value: 'https://'
-          }
-        ],
-        buttons: [
-          {
-            text: this.translations.btn_cancel,
-            role: 'cancel',
-            cssClass: 'secondary'
-          }, {
-            text: this.translations.btn_enrol,
-            handler: response => {
-              this.attemptToDownloadStudy(response.url, false);
-            }
-          }
-        ]
-      });
+    const alert = await this.alertController.create({
+      header: this.translations['btn_enter-url'],
+      cssClass: 'alertStyle',
+      inputs: [
+        {
+          name: 'url',
+          type: 'url',
+          placeholder: 'e.g. https://bit.ly/2Q4O9jI',
+          value: 'https://',
+        },
+      ],
+      buttons: [
+        {
+          text: this.translations.btn_cancel,
+          role: 'cancel',
+          cssClass: 'secondary',
+        },
+        {
+          text: this.translations.btn_enrol,
+          handler: (response) => {
+            this.attemptToDownloadStudy(response.url, false);
+          },
+        },
+      ],
+    });
 
-      await alert.present();
+    await alert.present();
   }
 
   /**
@@ -316,23 +330,25 @@ export class Tab1Page {
         {
           name: 'id',
           type: 'text',
-          placeholder: 'e.g. STUDY01'
-        }
+          placeholder: 'e.g. STUDY01',
+        },
       ],
       buttons: [
         {
           text: this.translations.btn_cancel,
           role: 'cancel',
-          cssClass: 'secondary'
-        }, {
+          cssClass: 'secondary',
+        },
+        {
           text: this.translations.btn_enrol,
-          handler: response => {
+          handler: (response) => {
             // create URL for study
-            const url = 'https://getschema.app/study.php?study_id=' + response.id;
+            const url =
+              'https://getschema.app/study.php?study_id=' + response.id;
             this.attemptToDownloadStudy(url, false);
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -361,12 +377,11 @@ export class Tab1Page {
         milliseconds: moment().valueOf(),
         page: 'home',
         event: 'enrol',
-        module_index: -1
+        module_index: -1,
       });
 
       // cache all media files if this study has set this property to true
       if (this.study.properties.cache === true) {
-
         this.loadingService.dismiss().then(() => {
           this.loadingService.isCaching = true;
           this.loadingService.present(this.translations.msg_caching);
@@ -389,10 +404,10 @@ export class Tab1Page {
    */
   loadStudyDetails() {
     //this.jsonText = this.study['properties'].study_name;
-    this.studyTasksService.getTaskDisplayList().then(tasks => {
+    this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
-      for (let i = 0; i < this.task_list.length; i++) {
+      for (const i of this.task_list) {
         this.task_list[i].moment = moment(this.task_list[i].locale).fromNow();
       }
 
@@ -406,7 +421,8 @@ export class Tab1Page {
       // hide loading controller if not caching
       if (!this.loadingService.isCaching) {
         setTimeout(() => {
-          if(this.loadingService) { // Added this condition
+          if (this.loadingService) {
+            // Added this condition
             this.loadingService.dismiss();
           }
         }, 1000);
@@ -420,12 +436,14 @@ export class Tab1Page {
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
    */
   async displayEnrolError(isQRCode) {
-    const msg = isQRCode ? 'We couldn\'t load your study. Please check your internet connection and ensure you are scanning the correct code.' : 'We couldn\'t load your study. Please check your internet connection and ensure you are entering the correct URL or ID.';
+    const msg = isQRCode
+      ? "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code."
+      : "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL or ID.";
     const alert = await this.alertController.create({
       header: 'Oops...',
       message: msg,
       cssClass: 'alertStyle',
-      buttons: ['Dismiss']
+      buttons: ['Dismiss'],
     });
     await alert.present();
   }
@@ -434,12 +452,13 @@ export class Tab1Page {
    * Displays a message when camera permission is not allowed
    */
   async displayBarcodeError() {
-    const msg = 'Camera permission is required to scan QR codes. You must allow this permission if you wish to use this feature.';
+    const msg =
+      'Camera permission is required to scan QR codes. You must allow this permission if you wish to use this feature.';
     const alert = await this.alertController.create({
       header: 'Permission Required',
       cssClass: 'alertStyle',
       message: msg,
-      buttons: ['Dismiss']
+      buttons: ['Dismiss'],
     });
     await alert.present();
   }
@@ -455,7 +474,9 @@ export class Tab1Page {
    * Refreshes the list of tasks
    */
   doRefresh(refresher) {
-    if (!this.loadingService.isLoading) {this.ionViewWillEnter();}
+    if (!this.loadingService.isLoading) {
+      this.ionViewWillEnter();
+    }
     setTimeout(() => {
       refresher.target.complete();
     }, 250);

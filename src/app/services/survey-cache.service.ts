@@ -69,8 +69,9 @@ export class SurveyCacheService {
         const mediaQuestions = section.questions.filter(
           (question) => question.type === 'media'
         );
-        for (const question of mediaQuestions)
-          {this.mediaToCache[question.id] = question.src;}
+        for (const question of mediaQuestions) {
+          this.mediaToCache[question.id] = question.src;
+        }
       }
     }
     // set mediaCount to be number of media items
@@ -96,7 +97,7 @@ export class SurveyCacheService {
   downloadAllMedia() {
     // download all media items
     const keys = Object.keys(this.mediaToCache);
-    for (let i = 0; i < keys.length; i++) {
+    for (const i of keys) {
       this.downloadFile(this.mediaToCache[keys[i]]).then((entryURL) => {
         this.localMediaURLs[keys[i]] =
           this.win.Ionic.WebView.convertFileSrc(entryURL);
@@ -110,8 +111,9 @@ export class SurveyCacheService {
    * Checks if all of the media has been downloaded, if so update the protocol
    */
   checkIfFinished() {
-    if (this.mediaDownloadedCount === this.mediaCount)
-      {this.updateMediaURLsInStudy();}
+    if (this.mediaDownloadedCount === this.mediaCount) {
+      this.updateMediaURLsInStudy();
+    }
   }
 
   /**
@@ -127,15 +129,19 @@ export class SurveyCacheService {
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
-        for (const module of studyObject.modules)
-          {for (const section of module)
-            {for (const question of section) {
-              if (question.id in this.localMediaURLs)
-                {question.src = this.localMediaURLs[question.id];}
-              if (question.subtype === 'video')
-                { // @ts-ignore
-                  question.thumb = this.localMediaURLs.banner;}
-            }}}
+        for (const module of studyObject.modules) {
+          for (const section of module) {
+            for (const question of section) {
+              if (question.id in this.localMediaURLs) {
+                question.src = this.localMediaURLs[question.id];
+              }
+              if (question.subtype === 'video') {
+                // @ts-ignore
+                question.thumb = this.localMediaURLs.banner;
+              }
+            }
+          }
+        }
 
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));
