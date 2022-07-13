@@ -8,16 +8,16 @@ const routes: Routes = [
   },
   {
     path: 'survey/:task_id',
-    loadChildren: () => import('./survey/survey.module').then(m => m.SurveyPageModule)
-  },
-  {
-    path: 'home',
-    loadChildren: () => import('./tab1/tab1.module').then(m => m.Tab1PageModule)
+    loadChildren: () => import('./pages/survey/survey.module').then(m => m.SurveyPageModule)
   },
   {
     path: 'pvt/:task_id',
-    loadChildren: () => import('./pvt/pvt.module').then( m => m.PvtPageModule)
-  }
+    loadChildren: () => import('./pages/pvt/pvt.module').then( m => m.PvtPageModule)
+  },
+  {
+    path: 'home',
+    loadChildren: () => import('./pages/home/home.module').then(m => m.HomePageModule)
+  },
 ];
 @NgModule({
   imports: [

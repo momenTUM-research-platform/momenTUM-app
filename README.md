@@ -7,7 +7,9 @@ reader to follow along with building the app.
 # Usages
 
 Sample URLs:
+* https://gist.githubusercontent.com/BlenDaniel/6f44bdf665123d612295ed47d1a58a77/raw/40e95e86ff86267f0dae21491102c5f32fe283f9/Test.json
 * https://tuspl22-momentum.srv.mwn.de/api/surveys/demo 
+* https://tuspl22-momentum.srv.mwn.de/api/surveys/demo3.json
 * https://ashatte.io/schema/sleep.json
 
 ## Installations
