@@ -1,6 +1,7 @@
 # Specifies intentionally untracked files to ignore when using Git
 # http://git-scm.com/docs/gitignore
 
+pvt-post-format.json
 *~
 *.sw[mnpcod]
 .tmp
@@ -17,6 +18,7 @@ Notes
 *.log
 log.txt
 npm-debug.log*
+studylinks.txt
 
 /.angular
 /.idea
