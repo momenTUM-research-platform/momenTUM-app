@@ -34,7 +34,10 @@ export class PvtPage implements OnInit {
 
 
   // OUTPUT
+  moduleName: string; // the name of this module
+  moduleIndex: number; // The index of this module.
   reactionTimes: number[]; // all reaction-times measured.
+  alertTime: string; // The alert time of this task
 
   // HELPER VARIABLES:
   reacted: boolean; // contains information, if user reacted
@@ -70,21 +73,24 @@ export class PvtPage implements OnInit {
    * submits the entries array to the server,
    * then routes back to the home page.
    * */
-   submit() {
+  submit() {
+    const surveyData = {
+      module_index: this.moduleIndex,
+      module_name: this.moduleName,
+      entries: [321, 423, 123, -1, -2, 124, 132],
+      response_time: moment().format(),
+      response_time_in_ms: moment().valueOf(),
+      alert_time: this.alertTime,
+    }
 
-    // get a timestmap of submission time in both readable and ms format
-    const response_time = moment().format();
-    const response_time_ms = moment().valueOf();
+    this.surveyDataService.sendSurveyDataToServer(surveyData)
+      .then(() => {
+        return this.router.navigate(['/']);
+      })
+      .then(() => {
+        console.log(surveyData);
+      })
 
-
-    // attempt to post surveyResponse to server
-    this.surveyDataService.sendSurveyDataToServer({
-      module_index: this.module_index,
-      module_name: "pvt",
-      entries: this.reactionTimes,
-      response_time,
-      response_time_in_ms: response_time_ms
-    });
 
     // write tasks back to storage
     this.storage.set('study-tasks', this.tasks).then(() => {
@@ -277,6 +283,7 @@ export class PvtPage implements OnInit {
           min: module.min_waiting,
           dur: module.min_waiting + module.max_waiting
         };
+        this.moduleName = module.name;
         this.showResults = module.show;
         this.maxReactionTime = module.max_reaction;
         this.enableExit = module.exit;
@@ -294,21 +301,21 @@ export class PvtPage implements OnInit {
   private async getModule(): Promise<any> {
 
     const task_id = this.route.snapshot.paramMap.get('task_id');
-    let index: number;
 
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
         for (const task of tasks) {
           if (task_id == task.task_id) {
-            index = task.index;
+            this.moduleIndex = task.index;
+            this.alertTime = moment(task.time).format();
             break;
           }
         }
         return this.storage.get('current-study');
       })
       .then((studyObject) => {
-        return JSON.parse(studyObject).modules[index];
+        return JSON.parse(studyObject).modules[this.moduleIndex];
       });
   }
 }
