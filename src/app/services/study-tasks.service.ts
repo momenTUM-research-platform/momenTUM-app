@@ -79,13 +79,10 @@ export class StudyTasksService {
 
         for (let numDays = 0; numDays < module_duration; numDays++) {
           // for each alert time, get the hour and minutes and if necessary randomise it
-          module_times.forEach((module, t) => {
-            const hours = module_times[t].hours;
-            const mins = module_times[t].minutes;
-
+          module_times.forEach((module) => {
             const taskTime = new Date(startDay.getTime());
-            taskTime.setHours(hours);
-            taskTime.setMinutes(mins);
+            taskTime.setHours(module.hours);
+            taskTime.setMinutes(module.minutes);
 
             if (module_random) {
               // remove the randomInterval from the time
@@ -171,9 +168,7 @@ export class StudyTasksService {
    * Gets the tasks that are currently available for the user to complete
    */
   async getTaskDisplayList(): Promise<Task[]> {
-    console.log('here');
     const study_tasks = await this.storage.get('study-tasks');
-    console.log(study_tasks);
     let tasks_to_display = [];
     const sticky_tasks = [];
     const time_tasks = [];
@@ -221,7 +216,6 @@ export class StudyTasksService {
     // merge the time_tasks array with the sticky_tasks array
     tasks_to_display = time_tasks.concat(sticky_tasks);
     // return the tasks list reversed to ensure correct order
-    console.log(tasks_to_display);
     return tasks_to_display.reverse();
   }
 

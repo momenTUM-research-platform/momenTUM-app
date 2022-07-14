@@ -420,7 +420,6 @@ export class Tab1Page implements OnInit {
     console.log('loading tasks');
     //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
-      console.log('loaded tasks');
       this.task_list = tasks;
 
       for (const task of this.task_list) {
