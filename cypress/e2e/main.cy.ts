@@ -79,33 +79,24 @@ describe('Page Testing', () => {
     cy.contains("Let's get started");
   });
 });
-describe('Survey testing', () => {
-  const now = new Date();
-  // before('load the survey', () => {
-  // });
-  it.only('Should display the first section', () => {
+describe.only('Survey testing', () => {
+  beforeEach('load the survey', () => {
+    cy.setStudy();
+  });
+  it('Should display the first section', () => {
     cy.visit('http://localhost:8000');
-    cy.clock(now);
+    cy.clock();
 
-    // cy.contains("Let's get started", { timeout: 10000 }).should('be.visible');
-    // cy.contains('Home').click();
-    // cy.contains('Enter URL', { matchCase: false }).click();
-    // cy.get('input')
-    //   .click()
-    //   .type('tuspl22-momentum.srv.mwn.de/api/surveys/demo', { force: true });
-
-    // cy.contains('Enrol').click();
-    // cy.contains("You're all up to date");
-    // cy.contains("You're all up to date");
-
-    // cy.contains('Settings').click({ force: true });
+    cy.contains('Settings').click({ force: true });
+    cy.contains('User ID');
+    cy.contains('JgC3bwWMOIcXtFCnM66zR');
+    cy.contains('Support');
+    // cy.tick(1000 * 60 * 60 * 24 * 7);
     // cy.contains('Support');
-    cy.tick(1000 * 60 * 60 * 24 * 7);
-    // cy.contains('Support');
-    // cy.contains('Home').click({ force: true });
+    cy.contains('Home').click({ force: true });
     // // cy.contains('up to date').should('be.visible');
     // cy.contains('Welcome', { timeout: 200000 }).click();
-    cy.contains('Start here');
-    cy.contains('Welcome');
+    cy.contains('Loading');
+    cy.contains('Welcome').should('be.visible');
   });
 });
