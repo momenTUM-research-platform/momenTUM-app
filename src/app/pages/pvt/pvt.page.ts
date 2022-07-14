@@ -30,7 +30,7 @@ export class PvtPage implements OnInit {
 
   // HELPER VARIABLES:
   reacted: boolean; // contains information, if user reacted
-  state: string; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
+  state: 'tutorial' | 'countdown' | 'game' | 'results'; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
   countdown: number; // Used for showing the countdown before starting the game.
   timer: any; // variable used for measuring the reaction-time.
 
@@ -84,7 +84,7 @@ export class PvtPage implements OnInit {
   async startPvt() {
     // load all variables before changing state
     this.countdown = 3;
-    this.state = 'countdown-state';
+    this.state = 'countdown';
 
     // conduct PVT
     await this.countdownToZero();
@@ -98,7 +98,7 @@ export class PvtPage implements OnInit {
    * It activates the post-pane div.
    * */
   loadResults(): void {
-    this.state = 'post-state';
+    this.state = 'results';
     return;
   }
 
@@ -107,7 +107,7 @@ export class PvtPage implements OnInit {
    * Starts the official testing.
    * */
   private async loadGame() {
-    this.state = 'game-state'; // activate the game-pane div.
+    this.state = 'game'; // activate the game-pane div.
     this.conductPVT(true);
     return;
   }
@@ -182,7 +182,7 @@ export class PvtPage implements OnInit {
         // 0. measure time
         this.timer = Date.now() - startingTime;
         await this.sleep(0); // TODO: find out why this line is needed in order for it to work.
-      } while (this.timer < 279 && this.state === 'pre-state');
+      } while (this.timer < 279 && this.state === 'tutorial');
     } // increment timer for tutorial purposes
     else {
       do {
@@ -221,7 +221,7 @@ export class PvtPage implements OnInit {
       while (Date.now()-x < waitingTime) {
         await this.sleep(0); // anyone knows why this line is needed for refreshing?
         // checks, if the user exited the tutorial or the game, while the test was waiting.
-        if ((this.state !== 'pre-state' && this.state !== 'game-state')) {
+        if ((this.state !== 'tutorial' && this.state !== 'game')) {
           return;
         }
       }
@@ -243,7 +243,7 @@ export class PvtPage implements OnInit {
   private setUpVariables(): Promise<any> {
     // set up other variables
     this.reactionTimes = [];
-    this.state = 'pre-state';
+    this.state = 'tutorial';
 
     // get module parameters
     return this.getModule()

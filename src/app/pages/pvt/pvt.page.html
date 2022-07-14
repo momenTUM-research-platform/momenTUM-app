@@ -3,7 +3,7 @@
   <div class="pane">
 
     <div class="pane"
-       *ngIf="state==='pre-state'">
+       *ngIf="state==='tutorial'">
     <h1>
       INSTRUCTIONS
     </h1>
@@ -24,13 +24,13 @@
     </p>
   </div>
 
-    <div class="pane" *ngIf="state==='countdown-state'">
+    <div class="pane" *ngIf="state==='countdown'">
       <h1>
         Trial starts in {{countdown}}
       </h1>
     </div>
 
-    <div class="pane" *ngIf="state==='game-state'" (touchstart)="reacted = true">
+    <div class="pane" *ngIf="state==='game'" (touchstart)="reacted = true">
     <ion-icon name="close"
               size="large"
               (click)="loadResults()" *ngIf="enableExit">
@@ -42,7 +42,7 @@
     </div>
   </div>
 
-    <div class="pane" *ngIf="state==='post-state'">
+    <div class="pane" *ngIf="state==='results'">
       <p *ngIf="showResults" id="results">
           {{reactionTimes}}
       </p>
