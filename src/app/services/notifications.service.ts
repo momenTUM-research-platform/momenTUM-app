@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { Task } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -36,7 +37,7 @@ export class NotificationsService {
    *
    * @param task The task that the notification is for
    */
-  scheduleNotification(task) {
+  scheduleNotification(task: Task) {
     this.localNotifications.schedule({
       id: task.task_id,
       title: task.alert_title,
@@ -77,8 +78,7 @@ export class NotificationsService {
       const tasks = await this.storage.get('study-tasks');
       if (tasks !== null) {
         let alertCount = 0;
-        for (const i of tasks) {
-          const task = tasks[i];
+        for (const task of tasks) {
           const alertTime = new Date(Date.parse(task.time));
 
           if (alertTime > new Date()) {
@@ -128,20 +128,20 @@ export class NotificationsService {
    * @param task
    * @param study_tasks
    */
-  checkTaskIsUnlocked(task, study_tasks) {
+  checkTaskIsUnlocked(task: Task, study_tasks: Task[]) {
     // get a set of completed task uuids
     const completedUUIDs = new Set();
-    for (let i = 0; i < study_tasks?.length; i++) {
-      if (study_tasks[i].completed) {
-        completedUUIDs.add(study_tasks[i].uuid);
+    for (const t of study_tasks) {
+      if (t.completed) {
+        completedUUIDs.add(t.uuid);
       }
     }
 
     // get the list of prereqs from the task
     const prereqs = task.unlock_after;
     let unlock = true;
-    for (const i of prereqs) {
-      if (!completedUUIDs.has(prereqs[i])) {
+    for (const prereq of prereqs) {
+      if (!completedUUIDs.has(prereq)) {
         unlock = false;
         break;
       }

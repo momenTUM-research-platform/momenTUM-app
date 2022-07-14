@@ -6,6 +6,7 @@ import {
 import { LoadingService } from '../services/loading-service.service';
 import { File, FileEntry } from '@ionic-native/file/ngx';
 import { Storage } from '@ionic/storage-angular';
+import { Media, Study } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +14,9 @@ import { Storage } from '@ionic/storage-angular';
 export class SurveyCacheService {
   win: any = window;
 
-  mediaToCache: object = {};
+  mediaToCache: { [id: string]: string } = {};
   videoThumbnailsToCache: object = {};
-  localMediaURLs: object = {};
+  localMediaURLs: { [id: string]: string } = {};
   localThumbnailURLs: object = {};
   mediaCount = 0;
   mediaDownloadedCount = 0;
@@ -58,7 +59,7 @@ export class SurveyCacheService {
    *
    * @param study The study protocol
    */
-  getMediaURLs(study) {
+  getMediaURLs(study: Study) {
     // get banner url
     // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
@@ -67,7 +68,7 @@ export class SurveyCacheService {
     for (const module of study.modules) {
       for (const section of module.sections) {
         const mediaQuestions = section.questions.filter(
-          (question) => question.type === 'media'
+          (question): question is Media => question.type === 'media'
         );
         for (const question of mediaQuestions) {
           this.mediaToCache[question.id] = question.src;
@@ -83,7 +84,7 @@ export class SurveyCacheService {
    *
    * @param study The study protocol
    */
-  cacheAllMedia(study) {
+  cacheAllMedia(study: Study) {
     this.mediaCount = 0;
     this.mediaDownloadedCount = 0;
     // map media question ids to their urls
@@ -97,9 +98,9 @@ export class SurveyCacheService {
   downloadAllMedia() {
     // download all media items
     const keys = Object.keys(this.mediaToCache);
-    for (const i of keys) {
-      this.downloadFile(this.mediaToCache[keys[i]]).then((entryURL) => {
-        this.localMediaURLs[keys[i]] =
+    for (const key of keys) {
+      this.downloadFile(this.mediaToCache[key]).then((entryURL) => {
+        this.localMediaURLs[key] =
           this.win.Ionic.WebView.convertFileSrc(entryURL);
         this.mediaDownloadedCount = this.mediaDownloadedCount + 1;
         this.checkIfFinished();

@@ -9,7 +9,8 @@
         "build": "ng build",
         "test": "ng test",
         "lint": "ng lint",
-        "e2e": "ng e2e"
+        "e2e": "ng e2e",
+        "cypress": "cypress open"
     },
     "private": true,
     "dependencies": {
@@ -91,6 +92,7 @@
         "cordova-plugin-file-transfer": "^1.7.1",
         "cordova-plugin-splashscreen": "^6.0.1",
         "cordova-plugin-statusbar": "^3.0.0",
+        "cypress": "^10.3.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-jsdoc": "^39.3.2",
         "eslint-plugin-prettier": "^4.0.0",

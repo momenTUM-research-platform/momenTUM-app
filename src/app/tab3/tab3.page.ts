@@ -48,7 +48,8 @@ export class Tab3Page {
     private surveyDataService: SurveyDataService
   ) {
     // get the default language of the device
-    this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
+    this.selectedLanguage =
+      this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
   ionViewWillEnter() {
@@ -171,7 +172,7 @@ export class Tab3Page {
    *
    * @param support_url The current study's support website URL
    */
-  openSupportURL(support_url) {
+  openSupportURL(support_url: string) {
     //window.location.href = support_url;
     const browser = this.iab.create(support_url, '_system');
   }
@@ -182,7 +183,7 @@ export class Tab3Page {
    * @param support_email The current study's support email address
    * @param study_name The current study's name
    */
-  openSupportEmail(support_email, study_name) {
+  openSupportEmail(support_email: string, study_name: string) {
     window.location.href =
       'mailto:' + support_email + '?subject=Support: ' + study_name;
   }

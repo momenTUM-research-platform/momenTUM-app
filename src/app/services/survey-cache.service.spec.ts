@@ -7,8 +7,6 @@ import { LoadingService } from './loading-service.service';
 import { Storage } from '@ionic/storage-angular';
 
 import { SurveyCacheService } from './survey-cache.service';
-import { FileTransferMock } from '@ionic-native-mocks/file-transfer';
-import { FileMock } from '@ionic-native-mocks/file';
 
 describe('FileDownloaderService', () => {
   let service: SurveyCacheService;
