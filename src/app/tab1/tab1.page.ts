@@ -39,7 +39,7 @@ export class Tab1Page implements OnInit {
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
   // is loaded successfully
-  translations: any = {
+  translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
     btn_enrol: 'Enrol',
@@ -94,6 +94,7 @@ export class Tab1Page implements OnInit {
 
   ngOnInit() {
     // set statusBar to be visible on Android
+
     this.statusBar.styleLightContent();
     this.statusBar.backgroundColorByHexString('#0F2042');
 
@@ -121,7 +122,7 @@ export class Tab1Page implements OnInit {
     });
   }
 
-  ionViewWillEnter() {
+  async ionViewWillEnter() {
     // check if dark mode
     if (
       window.matchMedia &&
@@ -160,6 +161,12 @@ export class Tab1Page implements OnInit {
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
+    try {
+      await this.storage.get('uuid');
+    } catch {
+      console.log('Storage did not exist, creating');
+      await this.storage.create();
+    }
     Promise.all([this.storage.get('current-study')]).then((values) => {
       const studyObject = values[0];
       if (studyObject !== null) {
@@ -233,42 +240,40 @@ export class Tab1Page implements OnInit {
    *
    * @param url The URL to attempt to download a study from
    */
-  attemptToDownloadStudy(url: string, isQRCode: boolean) {
+  async attemptToDownloadStudy(url: string, isQRCode: boolean) {
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
-    this.surveyDataService.getRemoteData(url).then((result) => {
+    try {
+      const result = await this.surveyDataService.getRemoteData(url);
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
-      try {
-        // @ts-expect-error
-        const study: Study = JSON.parse(result.data);
-        // checks if the returned text is parseable as JSON, and whether it contains
-        // some of the key fields used by schema so it can determine whether it is
-        // actually a schema study URL
-        // @ts-ignore
+      // @ts-expect-error
+      const study: Study = JSON.parse(result.data);
+      // checks if the returned text is parseable as JSON, and whether it contains
+      // some of the key fields used by schema so it can determine whether it is
+      // actually a schema study URL
+      // @ts-ignore
 
-        validStudy =
-          study.properties !== undefined && // @ts-ignore
-          study.modules !== undefined && // @ts-ignore
-          study.properties.study_id !== undefined;
-        if (validStudy) {
-          console.log('Enrolling in a study.... ');
-          this.enrolInStudy(study);
-        }
-      } catch (e) {
-        // @ts-expect-error
-        console.log('JSON Invalid format: exception: ' + e.message);
-        validStudy = false;
-        if (this.loadingService) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
-        this.displayEnrolError(isQRCode);
+      validStudy =
+        study.properties !== undefined && // @ts-ignore
+        study.modules !== undefined && // @ts-ignore
+        study.properties.study_id !== undefined;
+      if (validStudy) {
+        console.log('Enrolling in a study.... ');
+        this.enrolInStudy(study);
       }
-    });
+    } catch (e) {
+      // @ts-expect-error
+      console.log('JSON Invalid format: exception: ' + e.message, e);
+      if (this.loadingService) {
+        // Added this condition
+        this.loadingService.dismiss();
+      }
+      this.displayEnrolError(isQRCode);
+    }
   }
   /**
    * Uses the barcode scanner to enrol in a study
@@ -282,7 +287,7 @@ export class Tab1Page implements OnInit {
         }
       })
       .catch((err) => {
-        if (this.loadingService) {
+        if (!this.loadingService.isLoading) {
           // Added this condition
           this.loadingService.dismiss();
         }
@@ -349,7 +354,7 @@ export class Tab1Page implements OnInit {
           handler: (response) => {
             // create URL for study
             const url =
-              'https://getschema.app/study.php?study_id=' + response.id;
+              'https://tuspl22-momentum.srv.mwn.de/api/surveys/' + response.id;
             this.attemptToDownloadStudy(url, false);
           },
         },
@@ -364,7 +369,7 @@ export class Tab1Page implements OnInit {
    *
    * @param data A data object returned from the server to represent a study object
    */
-  enrolInStudy(study: Study) {
+  async enrolInStudy(study: Study) {
     this.isEnrolledInStudy = true;
     this.hideEnrolOptions = true;
 
@@ -375,41 +380,47 @@ export class Tab1Page implements OnInit {
     this.storage.set('enrolment-date', new Date());
 
     // set an enrolled flag and save the JSON for the current study
-    this.storage.set('current-study', JSON.stringify(this.study)).then(() => {
-      // log the enrolment event
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'home',
-        event: 'enrol',
-        module_index: -1,
-      });
-
-      // cache all media files if this study has set this property to true
-      if (this.study.properties.cache === true) {
-        this.loadingService.dismiss().then(() => {
-          this.loadingService.isCaching = true;
-          this.loadingService.present(this.translations.msg_caching);
+    this.storage
+      .set('current-study', JSON.stringify(this.study))
+      .then(async () => {
+        // log the enrolment event
+        this.surveyDataService.logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'home',
+          event: 'enrol',
+          module_index: -1,
         });
-        this.surveyCacheService.cacheAllMedia(this.study);
-      }
 
-      // setup the study task objects
-      this.studyTasksService.generateStudyTasks(this.study);
+        // cache all media files if this study has set this property to true
+        if (this.study.properties.cache) {
+          this.loadingService.dismiss().then(() => {
+            this.loadingService.isCaching = true;
+            this.loadingService.present(this.translations.msg_caching);
+          });
+          this.surveyCacheService.cacheAllMedia(this.study);
+        }
 
-      // setup the notifications
-      this.notificationsService.setNext30Notifications();
+        // setup the study task objects
+        const tasks = this.studyTasksService.generateStudyTasks(this.study);
+        console.log(tasks);
+        // setup the notifications
+        this.notificationsService.setNext30Notifications();
 
-      this.loadStudyDetails();
-    });
+        this.loadStudyDetails();
+        const studyTasks = await this.storage.get('study-tasks');
+        console.log('study tasks: ' + JSON.stringify(studyTasks));
+      });
   }
 
   /**
    * Loads the details of the current study, including overdue tasks
    */
   loadStudyDetails() {
+    console.log('loading tasks');
     //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
+      console.log('loaded tasks');
       this.task_list = tasks;
 
       for (const task of this.task_list) {
@@ -457,12 +468,10 @@ export class Tab1Page implements OnInit {
    * Displays a message when camera permission is not allowed
    */
   async displayBarcodeError() {
-    const msg =
-      'Camera permission is required to scan QR codes. You must allow this permission if you wish to use this feature.';
     const alert = await this.alertController.create({
       header: 'Permission Required',
       cssClass: 'alertStyle',
-      message: msg,
+      message: this.translations.msg_camera,
       buttons: ['Dismiss'],
     });
     await alert.present();

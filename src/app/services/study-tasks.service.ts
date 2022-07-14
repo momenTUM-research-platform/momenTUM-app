@@ -162,71 +162,67 @@ export class StudyTasksService {
   /**
    * Returns all the tasks that have been created for a study
    */
-  getAllTasks() {
-    return this.storage.get('study-tasks').then((tasks) => tasks);
+  async getAllTasks(): Promise<Task[]> {
+    const tasks = await this.storage.get('study-tasks');
+    return tasks;
   }
 
   /**
    * Gets the tasks that are currently available for the user to complete
    */
-  getTaskDisplayList() {
-    return this.storage.get('study-tasks').then((val) => {
-      const study_tasks = val;
+  async getTaskDisplayList(): Promise<Task[]> {
+    console.log('here');
+    const study_tasks = await this.storage.get('study-tasks');
+    console.log(study_tasks);
+    let tasks_to_display = [];
+    const sticky_tasks = [];
+    const time_tasks = [];
+    let last_header = '';
+    for (const task of study_tasks) {
+      console.log(task);
+      // check if task has a pre_req
+      const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
+      const alertTime = new Date(Date.parse(task.time));
+      const now = new Date();
 
-      let tasks_to_display = [];
-      const sticky_tasks = [];
-      const time_tasks = [];
-
-      let last_header = '';
-
-      for (let i = 0; i < study_tasks?.length; i++) {
-        const task = study_tasks[i];
-        // check if task has a pre_req
-        const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
-        const alertTime = new Date(Date.parse(task.time));
-        const now = new Date();
-
-        if (now > alertTime && unlocked) {
-          if (task.sticky) {
-            if (!task.hidden) {
-              if (last_header !== task.sticky_label) {
-                // push a new header into the sticky_tasks array
-                const header = { type: 'header', label: task.sticky_label };
-                sticky_tasks.push(header);
-                last_header = task.sticky_label;
-              }
-              // push the sticky task
-              sticky_tasks.push(task);
+      if (now > alertTime && unlocked) {
+        if (task.sticky) {
+          if (!task.hidden) {
+            if (last_header !== task.sticky_label) {
+              // push a new header into the sticky_tasks array
+              const header = { type: 'header', label: task.sticky_label };
+              sticky_tasks.push(header);
+              last_header = task.sticky_label;
             }
-          } else {
-            // check if task is set to timeout
-            if (task.timeout) {
-              let timeoutTime = new Date(Date.parse(task.time));
-              timeoutTime = new Date(
-                timeoutTime.getTime() + task.timeout_after
-              );
+            // push the sticky task
+            sticky_tasks.push(task);
+          }
+        } else {
+          // check if task is set to timeout
+          if (task.timeout) {
+            let timeoutTime = new Date(Date.parse(task.time));
+            timeoutTime = new Date(timeoutTime.getTime() + task.timeout_after);
 
-              if (now < timeoutTime && !task.completed) {
-                time_tasks.push(task);
-              }
-            } else if (!task.completed) {
+            if (now < timeoutTime && !task.completed) {
               time_tasks.push(task);
             }
+          } else if (!task.completed) {
+            time_tasks.push(task);
           }
         }
       }
-
-      // reverse the time_tasks list so newest is displayed first
-      if (time_tasks.length > 0) {
-        time_tasks.reverse();
-        const header = { type: 'header', label: 'Recent' };
-        time_tasks.unshift(header);
-      }
-      // merge the time_tasks array with the sticky_tasks array
-      tasks_to_display = time_tasks.concat(sticky_tasks);
-      // return the tasks list reversed to ensure correct order
-      return tasks_to_display.reverse();
-    });
+    }
+    // reverse the time_tasks list so newest is displayed first
+    if (time_tasks.length > 0) {
+      time_tasks.reverse();
+      const header_1 = { type: 'header', label: 'Recent' };
+      time_tasks.unshift(header_1);
+    }
+    // merge the time_tasks array with the sticky_tasks array
+    tasks_to_display = time_tasks.concat(sticky_tasks);
+    // return the tasks list reversed to ensure correct order
+    console.log(tasks_to_display);
+    return tasks_to_display.reverse();
   }
 
   /**

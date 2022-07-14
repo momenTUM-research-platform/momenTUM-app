@@ -125,11 +125,11 @@ export class Tab2Page {
         // check if any graphs are available and add history items
         this.studyTasksService.getAllTasks().then((tasks) => {
           // get all entries for history
-          for (const task of tasks.length) {
-            if (task.completed) {
+          for (const task of tasks) {
+            if (task.completed && task.response_time) {
               const historyItem = {
                 task_name: task.name.replace(/<\/?[^>]+(>|$)/g, ''),
-                moment_time: moment(tasks[task].response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
+                moment_time: moment(task.response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
                 response_time: new Date(task.response_time),
               };
               this.history.unshift(historyItem);
@@ -159,19 +159,19 @@ export class Tab2Page {
               const graph_maxpoints = -graph.max_points;
 
               // loop through each study_task
-              for (const task in tasks) {
+              for (const task of tasks) {
                 // check if the task is this task
-                if (tasks[task].name === study_name) {
-                  if (tasks[task].completed) {
+                if (task.name === study_name) {
+                  if (task.completed && task.responses) {
                     // get the variable we are to graph
-                    for (const k in tasks[task].responses) {
+                    for (const k in task.responses) {
                       if (k === variableToGraph) {
                         // format the response time
-                        const response_time = moment(
-                          tasks[task].response_time
-                        ).format('MMM Do, h:mma');
+                        const response_time = moment(task.response_time).format(
+                          'MMM Do, h:mma'
+                        );
                         task_labels.push(response_time);
-                        task_data.push(tasks[task].responses[k]);
+                        task_data.push(task.responses[k]);
                         break;
                       }
                     }

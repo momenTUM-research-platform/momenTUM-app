@@ -97,24 +97,22 @@ export class SurveyPage implements OnInit {
         }
 
         // check if this task is valid
-        const availableTasks = this.studyTasksService
-          .getTaskDisplayList()
-          .then((t) => {
-            let taskAvailable = false;
-            for (const task of t) {
-              if (task.task_id === this.task_id) {
-                taskAvailable = true;
-                break;
-              }
+        this.studyTasksService.getTaskDisplayList().then((t) => {
+          let taskAvailable = false;
+          for (const task of t) {
+            if (String(task.task_id) === this.task_id) {
+              taskAvailable = true;
+              break;
             }
-            if (!taskAvailable) {
-              this.showToast(
-                'This task had a time limit and is no longer available.',
-                'bottom'
-              );
-              this.navController.navigateRoot('/');
-            }
-          });
+          }
+          if (!taskAvailable) {
+            this.showToast(
+              'This task had a time limit and is no longer available.',
+              'bottom'
+            );
+            this.navController.navigateRoot('/');
+          }
+        });
 
         // extract the JSON from the study object
         this.study = JSON.parse(studyObject);
