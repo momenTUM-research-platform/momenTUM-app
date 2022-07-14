@@ -147,17 +147,14 @@ export class PvtPage implements OnInit {
   }
 
   /**
-   * recursive function, which is called for counting down the 'countdown' variable to 0 and wait 1 second each time it gets decremented.
+   * Counts down from 3 to 0. The counting number is stored in the countdown variable.
    * */
-  private countdownToZero(): Promise<any> {
-    return this.sleep(1000).then(() => {
-      if (this.countdown === 0) {
-        return;
-      } else {
-        this.countdown--;
-        return this.countdownToZero();
-      }
-    });
+  private async countdownToZero() {
+    this.countdown = 3;
+    for (let i = 3; i >= 0; i--) {
+      await this.sleep(1000);
+      this.countdown--;
+    }
   }
 
   /**
