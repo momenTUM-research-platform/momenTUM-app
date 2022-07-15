@@ -74,7 +74,8 @@ export class SurveyDataService {
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', String(surveyData.module_index));
       bodyData.append('module_name', surveyData.module_name);
-      bodyData.append('responses', JSON.stringify(surveyData.responses));
+      'responses' in surveyData &&
+        bodyData.append('responses', JSON.stringify(surveyData.responses));
       bodyData.append('response_time', surveyData.response_time);
       bodyData.append(
         'response_time_in_ms',

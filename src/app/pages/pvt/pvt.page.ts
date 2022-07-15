@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from "../../services/survery-data/survey-data.service";
-import {ActivatedRoute, Router} from "@angular/router";
-import * as moment from "moment";
-import {StudyTasksService} from "../../services/study-task/study-tasks.service";
-import {Storage} from "@ionic/storage-angular";
+import { SurveyDataService } from '../../services/survery-data/survey-data.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import * as moment from 'moment';
+import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { Storage } from '@ionic/storage-angular';
+import { SurveyData } from 'types';
 
 @Component({
   selector: 'app-pvt',
@@ -11,7 +12,6 @@ import {Storage} from "@ionic/storage-angular";
   styleUrls: ['./pvt.page.scss'],
 })
 export class PvtPage implements OnInit {
-
   // INPUT from study
   numOfTrials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
@@ -30,16 +30,17 @@ export class PvtPage implements OnInit {
 
   // HELPER VARIABLES:
   reacted: boolean; // contains information, if user reacted
-  state: 'tutorial' | 'countdown' | 'game' | 'results'; // Current state of the Component. Can either equal to 'pre-state', 'countdown-state', 'game-state', or 'post-state'.
+  state: 'tutorial' | 'countdown' | 'game' | 'results';
   countdown: number; // Used for showing the countdown before starting the game.
   timer: any; // variable used for measuring the reaction-time.
 
-  constructor(private surveyDataService: SurveyDataService,
-              private router: Router,
-              private route: ActivatedRoute,
-              private studyTasksService: StudyTasksService,
-              private storage: Storage)
-  {}
+  constructor(
+    private surveyDataService: SurveyDataService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private studyTasksService: StudyTasksService,
+    private storage: Storage
+  ) {}
 
   /**
    * Angular standard function, which is called after construction when the component is initialized.
@@ -48,8 +49,7 @@ export class PvtPage implements OnInit {
    * 3. starts the tutorial test
    * */
   ngOnInit() {
-    this.setUpVariables()
-      .then(() => this.conductPVT(false));
+    this.setUpVariables().then(() => this.conductPVT(false));
   }
 
   /**
@@ -57,22 +57,21 @@ export class PvtPage implements OnInit {
    * then routes back to the home page.
    * */
   submit() {
-    const surveyData = {
+    const surveyData: SurveyData = {
       module_index: this.moduleIndex,
       module_name: this.moduleName,
       entries: [321, 423, 123, -1, -2, 124, 132],
       response_time: moment().format(),
       response_time_in_ms: moment().valueOf(),
       alert_time: this.alertTime,
-    }
+    };
 
-    this.surveyDataService.sendSurveyDataToServer(surveyData)
-      .then(() => {
-        return this.router.navigate(['/']);
-      })
+    this.surveyDataService
+      .sendSurveyDataToServer(surveyData)
+      .then(() => this.router.navigate(['/']))
       .then(() => {
         console.log(surveyData);
-      })
+      });
   }
 
   /**
@@ -88,7 +87,7 @@ export class PvtPage implements OnInit {
 
     // conduct PVT
     await this.countdownToZero();
-    this.loadGame()
+    this.loadGame();
     return;
   }
 
@@ -122,11 +121,12 @@ export class PvtPage implements OnInit {
       this.numOfTrials++;
     } // user reacted too early. trial will be thrown away.
     else if (this.timer > this.maxReactionTime) {
-      this.timer = 'waited for too long.'
+      this.timer = 'waited for too long.';
       this.reactionTimes.push(-1);
       this.numOfTrials++;
     } // user's reaction time surpassed the maximumWaitingTime. trial will be thrown away.
-    else if (saveResults) { // user reacted normal
+    else if (saveResults) {
+      // user reacted normal
       this.reactionTimes.push(this.timer);
     }
     // show the result for a bit.
@@ -142,8 +142,8 @@ export class PvtPage implements OnInit {
    * @param ms number of milliseconds that the function waits
    * @returns a promise
    * */
-  private sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -208,17 +208,18 @@ export class PvtPage implements OnInit {
     while (trialCount < this.numOfTrials) {
       // increment trialCount only if it's not the tutorial.
       if (saveResults) {
-        trialCount++
+        trialCount++;
       }
       // 0. setup all variables
       this.reacted = false;
-      const waitingTime = this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate the waiting time
+      const waitingTime =
+        this.timeInterval.min + Math.random() * this.timeInterval.dur; // calculate the waiting time
       const x = Date.now();
       // 1. wait for a random amount of time
-      while (Date.now()-x < waitingTime) {
+      while (Date.now() - x < waitingTime) {
         await this.sleep(0); // anyone knows why this line is needed for refreshing?
         // checks, if the user exited the tutorial or the game, while the test was waiting.
-        if ((this.state !== 'tutorial' && this.state !== 'game')) {
+        if (this.state !== 'tutorial' && this.state !== 'game') {
           return;
         }
       }
@@ -243,21 +244,19 @@ export class PvtPage implements OnInit {
     this.state = 'tutorial';
 
     // get module parameters
-    return this.getModule()
-      .then((module) => {
-        this.numOfTrials = module.trials;
-        this.timeInterval = {
-          min: module.min_waiting,
-          dur: module.min_waiting + module.max_waiting
-        };
-        this.moduleName = module.name;
-        this.showResults = module.show;
-        this.maxReactionTime = module.max_reaction;
-        this.enableExit = module.exit;
-        this.submitText = module.submit_text;
-        return;
+    return this.getModule().then((module) => {
+      this.numOfTrials = module.trials;
+      this.timeInterval = {
+        min: module.min_waiting,
+        dur: module.min_waiting + module.max_waiting,
+      };
+      this.moduleName = module.name;
+      this.showResults = module.show;
+      this.maxReactionTime = module.max_reaction;
+      this.enableExit = module.exit;
+      this.submitText = module.submit_text;
+      return;
     });
-
   }
 
   /**
@@ -266,14 +265,13 @@ export class PvtPage implements OnInit {
    * @returns A Promise with the correct module from the local storage.
    * */
   private async getModule(): Promise<any> {
-
     const task_id = this.route.snapshot.paramMap.get('task_id');
 
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
         for (const task of tasks) {
-          if (task_id == task.task_id) {
+          if (task_id === String(task.task_id)) {
             this.moduleIndex = task.index;
             this.alertTime = moment(task.time).format();
             break;
@@ -281,8 +279,6 @@ export class PvtPage implements OnInit {
         }
         return this.storage.get('current-study');
       })
-      .then((studyObject) => {
-        return JSON.parse(studyObject).modules[this.moduleIndex];
-      });
+      .then((studyObject) => JSON.parse(studyObject).modules[this.moduleIndex]);
   }
 }

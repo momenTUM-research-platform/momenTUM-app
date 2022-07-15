@@ -1,19 +1,21 @@
 export interface Study {
-  properties: {
-    study_id: string;
-    study_name: string;
-    instructions: string;
-    banner_url: string;
-    support_email: string;
-    support_url: string;
-    ethics: string;
-    pls: string;
-    empty_message: string;
-    post_url: string;
-    conditions: string[];
-    cache: boolean;
-  };
+  properties: Properties;
   modules: Module[];
+}
+
+export interface Properties {
+  study_id: string;
+  study_name: string;
+  instructions: string;
+  banner_url: string;
+  support_email: string;
+  support_url: string;
+  ethics: string;
+  pls: string;
+  empty_message: string;
+  post_url: string;
+  conditions: string[];
+  cache: boolean;
 }
 export interface Module {
   type: string;
@@ -166,14 +168,23 @@ export interface Option {
   checked: boolean;
 }
 
-export interface SurveyData {
-  module_index: number;
-  module_name: string;
-  responses: Responses;
-  response_time: string;
-  response_time_in_ms: number;
-  alert_time: string;
-}
+export type SurveyData =
+  | {
+      module_index: number;
+      module_name: string;
+      responses: Responses;
+      response_time: string;
+      response_time_in_ms: number;
+      alert_time: string;
+    }
+  | {
+      module_index: number;
+      module_name: string;
+      entries: number[];
+      response_time: string;
+      response_time_in_ms: number;
+      alert_time: string;
+    };
 
 export interface Responses {
   [id: string]: Question['response'];

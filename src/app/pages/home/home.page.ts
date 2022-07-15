@@ -15,7 +15,7 @@ import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { TranslateService } from '@ngx-translate/core';
-import { Study } from '../../models/models';
+import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 
 @Component({
@@ -81,22 +81,17 @@ export class HomePage implements OnInit {
     this.selectedLanguage =
       this.translateConfigService.getDefaultLanguage() || 'en';
   }
-  colorTest(systemInitiatedDark) {
-    if (systemInitiatedDark.matches) {
-      this.darkMode = true;
-    } else {
-      this.darkMode = false;
-    }
-  }
 
   toggleTheme() {
     if (ChangeTheme.getDarkTheme() === 'light') {
+      // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
-      ChangeTheme.setDarkTheme(true);
+      ChangeTheme.setTheme(true);
       this.darkMode = true;
     } else {
+      // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'moon');
-      ChangeTheme.setDarkTheme(false);
+      ChangeTheme.setTheme(false);
       this.darkMode = false;
     }
   }
@@ -115,7 +110,7 @@ export class HomePage implements OnInit {
     // is not called when navigating here from other pages
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
-        if (event.url == '/') {
+        if (event.url === '/') {
           if (!this.loadingService.isLoading) {
             this.ionViewWillEnter();
           }
@@ -159,6 +154,7 @@ export class HomePage implements OnInit {
       'msg_caching',
       'msg_camera',
     ];
+    // @ts-ignore
     this.translate.get(labels).subscribe((res) => {
       this.translations = res;
     });
@@ -404,15 +400,15 @@ export class HomePage implements OnInit {
         });
 
         // cache all media files if this study has set this property to true
-        if (this.study.properties.cache) {
+        if (this.study?.properties.cache) {
           this.loadingService.dismiss().then(() => {
             this.loadingService.isCaching = true;
             this.loadingService.present(this.translations.msg_caching);
           });
           this.surveyCacheService.cacheAllMedia(this.study);
         }
-
         // setup the study task objects
+        // @ts-ignore
         const tasks = this.studyTasksService.generateStudyTasks(this.study);
         console.log(tasks);
         // setup the notifications
