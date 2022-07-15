@@ -12,7 +12,7 @@ export class ChangeTheme {
         this.setDarkTheme (this.preferenceColor === 'dark');
     }
 
-    static setDarkTheme (darkColor) {
+    static setTheme (darkColor) {
         const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
         systemDark.addListener(this.colorTest);
 
