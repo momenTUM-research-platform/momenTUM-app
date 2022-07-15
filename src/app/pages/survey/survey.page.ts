@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
@@ -8,6 +9,7 @@ import { SurveyDataService } from '../../services/survery-data/survey-data.servi
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
+import { Module, Option, Question, Responses, Study, Task } from 'types';
 
 @Component({
   selector: 'app-survey',
@@ -15,7 +17,7 @@ import * as moment from 'moment';
   styleUrls: ['./survey.page.scss'],
 })
 export class SurveyPage implements OnInit {
-  @ViewChild(IonContent, {static: false}) content: IonContent;
+  @ViewChild(IonContent, { static: false }) content: IonContent;
 
   // the text to display as submit button label
   submit_text = 'Submit';
@@ -26,23 +28,13 @@ export class SurveyPage implements OnInit {
   current_section_name: string;
 
   // study object
-  study: any;
+  study: Study;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
-  survey: any = {
-    sections: [
-      {
-        questions: [],
-        name: '',
-        shuffle: false,
-      },
-    ],
-    shuffle: false,
-    submit_text: '',
-  };
+  survey: Module;
   questions: any;
 
   // task objects
-  tasks: Array<any>;
+  tasks: Task[];
   task_id: string;
   task_index: number;
   module_index: number;
@@ -59,8 +51,7 @@ export class SurveyPage implements OnInit {
     private toastController: ToastController,
     private ngZone: NgZone,
     private iab: InAppBrowser
-  ) {
-  }
+  ) {}
 
   /**
    * Triggered when the survey page is first opened
@@ -72,7 +63,7 @@ export class SurveyPage implements OnInit {
     this.statusBar.backgroundColorByHexString('#0F2042');
 
     // necessary to update height of external embedded content
-    window.addEventListener('message', function (e) {
+    window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
         (<HTMLElement>(
           document.querySelector('iframe[src^="' + e.data.url + '"]')
@@ -84,7 +75,7 @@ export class SurveyPage implements OnInit {
     });
 
     // the id of the task to be displayed
-    this.task_id = this.route.snapshot.paramMap.get('task_id');
+    this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
 
     Promise.all([
       this.storage.get('current-study'),
@@ -97,7 +88,7 @@ export class SurveyPage implements OnInit {
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
         for (let i = 0; i < this.tasks.length; i++) {
-          if (this.task_id == this.tasks[i].task_id) {
+          if (this.task_id === String(this.tasks[i].task_id)) {
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
             this.task_index = i;
@@ -106,24 +97,22 @@ export class SurveyPage implements OnInit {
         }
 
         // check if this task is valid
-        const availableTasks = this.studyTasksService
-          .getTaskDisplayList()
-          .then((tasks) => {
-            let taskAvailable = false;
-            for (let i = 0; i < tasks.length; i++) {
-              if (tasks[i].task_id == this.task_id) {
-                taskAvailable = true;
-                break;
-              }
+        this.studyTasksService.getTaskDisplayList().then((t) => {
+          let taskAvailable = false;
+          for (const task of t) {
+            if (String(task.task_id) === this.task_id) {
+              taskAvailable = true;
+              break;
             }
-            if (!taskAvailable) {
-              this.showToast(
-                'This task had a time limit and is no longer available.',
-                'bottom'
-              );
-              this.navController.navigateRoot('/');
-            }
-          });
+          }
+          if (!taskAvailable) {
+            this.showToast(
+              'This task had a time limit and is no longer available.',
+              'bottom'
+            );
+            this.navController.navigateRoot('/');
+          }
+        });
 
         // extract the JSON from the study object
         this.study = JSON.parse(studyObject);
@@ -137,11 +126,9 @@ export class SurveyPage implements OnInit {
         }
 
         // shuffle questions if required
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          if (this.survey.sections[i].shuffle) {
-            this.survey.sections[i].questions = this.shuffle(
-              this.survey.sections[i].questions
-            );
+        for (const section of this.survey.sections) {
+          if (section.shuffle) {
+            section.questions = this.shuffle(section.questions);
           }
         }
 
@@ -167,11 +154,10 @@ export class SurveyPage implements OnInit {
 
         // toggle rand_group questions
         // figure out which ones are grouped together, randomly show one and set its response value to 1
-        const randomGroups = {};
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-            const question = this.survey.sections[i].questions[j];
-            if (question.rand_group !== undefined) {
+        const randomGroups: { [rand_group: string]: string[] } = {};
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
+            if (question.rand_group) {
               // set a flag to indicate that this question shouldn't reappear via branching logic
               question.noToggle = true;
 
@@ -194,34 +180,37 @@ export class SurveyPage implements OnInit {
             showThese.push(
               randomGroups[key][
                 Math.floor(Math.random() * randomGroups[key].length)
-                ]
+              ]
             );
           }
         }
 
         // iterate back through and show the ones that have been randomly calculated
         // while removing the branching attributes from those that are hidden
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-            const question = this.survey.sections[i].questions[j];
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
             if (showThese.includes(question.id)) {
               question.noToggle = false;
               question.response = 1;
               // hide any questions from the rand_group that were not made visible
               // and remove any branching logic attributes
+              // ### How to do this in TS?
             } else if (question.noToggle) {
               question.hideSwitch = false;
+              // @ts-ignore
               delete question.hide_id;
+              // @ts-ignore
               delete question.hide_value;
+              // @ts-ignore
               delete question.hide_if;
             }
           }
         }
 
         // toggle dynamic question setup
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-            this.toggleDynamicQuestions(this.survey.sections[i].questions[j]);
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
+            this.toggleDynamicQuestions(question);
           }
         }
 
@@ -268,12 +257,10 @@ export class SurveyPage implements OnInit {
    * Sets up any questions that need initialisation before display
    * e.g. sets date/time objects to current date/time, set default values for sliders, etc.
    */
-  setupQuestionVariables(uuid) {
+  setupQuestionVariables(uuid: string) {
     // for all relevant questions add an empty response variable
-    for (let i = 0; i < this.survey.sections.length; i++) {
-      for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-        const question = this.survey.sections[i].questions[j];
-
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
         // for all question types that can be responded to, set default values
         question.response = '';
         question.model = '';
@@ -285,23 +272,26 @@ export class SurveyPage implements OnInit {
           // placeholder for dates
           question.model = moment().format();
 
-          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags
+          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
         } else if (
           question.type === 'media' &&
           (question.subtype === 'audio' || question.subtype === 'video')
         ) {
+          // @ts-ignore
           question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
             question.src
           );
           if (question.subtype === 'video') {
+            // @ts-ignore
             question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
               question.thumb
             );
           }
 
-          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags
+          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
         } else if (question.type === 'external') {
           question.src = question.src + '?uuid=' + uuid;
+          // @ts-ignore
           question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
             question.src
           );
@@ -322,19 +312,22 @@ export class SurveyPage implements OnInit {
           // for checkbox items, the response is set to an empty array
         } else if (question.type === 'multi') {
           // set up checked tracking for checkbox questions types
-          const tempOptions = [];
-          for (let i = 0; i < question.options.length; i++) {
-            tempOptions.push({text: question.options[i], checked: false});
+          const tempOptions: Option[] = [];
+          for (const option of question.options) {
+            tempOptions.push({
+              text: option,
+              checked: false,
+            });
           }
-          question.options = tempOptions;
+          question.optionsChecked = tempOptions;
 
           // counterbalance the choices if necessary
           if (question.shuffle) {
-            question.options = this.shuffle(question.options);
+            question.optionsChecked = this.shuffle(question.optionsChecked);
           }
 
           // set the empty response to an array for checkbox questions
-          if (question.radio === 'false') {
+          if (!question.radio) {
             question.response = [];
           }
         }
@@ -347,7 +340,7 @@ export class SurveyPage implements OnInit {
    *
    * @param question The question that has been answered
    */
-  setAnswer(question) {
+  setAnswer(question: Question) {
     // save the response and hide error
     question.response = question.model;
     question.hideError = true;
@@ -362,12 +355,12 @@ export class SurveyPage implements OnInit {
    * @param option The option selected in a checkbox group
    * @param question The question that has been answered
    */
-  changeCheckStatus(option, question) {
+  changeCheckStatus(option: Option, question: Question) {
     // get question responses and split
-    let responses = [];
+    let responses: string[] = [];
 
     // split all of the responses up into individual strings
-    if (question.response !== '') {
+    if (question.response && question.response !== '') {
       responses = question.response.toString().split(';');
       responses.pop();
     }
@@ -386,8 +379,8 @@ export class SurveyPage implements OnInit {
 
     // write the array back to a single string
     let response_string = '';
-    for (let i = 0; i < responses.length; i++) {
-      response_string += responses[i] + ';';
+    for (const response of responses) {
+      response_string += response + ';';
     }
 
     // hide any non-response error
@@ -400,11 +393,11 @@ export class SurveyPage implements OnInit {
    *
    * @param url The url of the PDF file to open
    */
-  openExternalFile(url) {
-    const browser = this.iab.create(url, '_system');
+  openExternalFile(url: string) {
+    this.iab.create(url, '_system');
   }
 
-  toggleDynamicQuestions(question) {
+  toggleDynamicQuestions(question: Question) {
     // if a question was hidden by rand_group
     // don't do any branching
     if (question.noToggle !== undefined && question.noToggle) {
@@ -413,42 +406,42 @@ export class SurveyPage implements OnInit {
 
     const id = question.id;
     // hide anything with the id as long as the value is equal
-    for (let i = 0; i < this.survey.sections.length; i++) {
-      for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-        if (this.survey.sections[i].questions[j].hide_id === id) {
-          const hideValue = this.survey.sections[i].questions[j].hide_value;
+    for (const section of this.survey.sections) {
+      for (const q of section.questions) {
+        if ('hide_id' in q && q.hide_id === id) {
+          const hideValue = q.hide_value;
 
-          if (
-            question.type === 'multi' ||
-            question.type === 'yesno' ||
-            question.type === 'text'
-          ) {
+          if (q.type === 'multi' || q.type === 'yesno') {
             // determine whether to hide/show the element
-            const hideIf = this.survey.sections[i].questions[j].hide_if;
-            const valueEquals = hideValue === question.response;
+            const hideIf = q.hide_if;
+            const valueEquals = hideValue === q.response;
             if (valueEquals === hideIf) {
-              this.survey.sections[i].questions[j].hideSwitch = false;
+              q.hideSwitch = false;
             } else {
-              this.survey.sections[i].questions[j].hideSwitch = true;
+              q.hideSwitch = true;
             }
-          } else if (question.type === 'slider') {
+          } else if (
+            q.type === 'slider' &&
+            typeof hideValue === 'string' &&
+            q.response
+          ) {
             const direction = hideValue.substring(0, 1);
-            const cutoff = parseInt(hideValue.substring(1, hideValue.length));
-            let lesserThan = true;
-            if (direction === '>') {
-              lesserThan = false;
-            }
-            if (lesserThan) {
-              if (question.response <= cutoff) {
-                this.questions[i].hideSwitch = true;
+            const cutoff = parseInt(
+              hideValue.substring(1, hideValue.length),
+              10
+            );
+            const lessThan = direction === '<';
+            if (lessThan) {
+              if (q.response <= cutoff) {
+                q.hideSwitch = true;
               } else {
-                this.questions[i].hideSwitch = false;
+                q.hideSwitch = false;
               }
             } else {
-              if (question.response >= cutoff) {
-                this.questions[i].hideSwitch = true;
+              if (q.response >= cutoff) {
+                q.hideSwitch = true;
               } else {
-                this.questions[i].hideSwitch = false;
+                q.hideSwitch = false;
               }
             }
           }
@@ -463,8 +456,7 @@ export class SurveyPage implements OnInit {
    */
   submit() {
     let errorCount = 0;
-    for (let i = 0; i < this.questions.length; i++) {
-      const question = this.questions[i];
+    for (const question of this.questions) {
       if (
         question.required === true &&
         (question.response === '' || question.response === undefined) &&
@@ -477,7 +469,7 @@ export class SurveyPage implements OnInit {
       }
     }
 
-    if (errorCount == 0) {
+    if (errorCount === 0) {
       // if user on last page and there are no errors, fine to submit
       if (this.current_section === this.num_sections) {
         // add the alert time to the response
@@ -496,10 +488,9 @@ export class SurveyPage implements OnInit {
         this.tasks[this.task_index].completed = true;
 
         // add all of the responses to an object in the task to be sent to server
-        const responses = {};
-        for (let i = 0; i < this.survey.sections.length; i++) {
-          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
-            const question = this.survey.sections[i].questions[j];
+        const responses: Responses = {};
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
             responses[question.id] = question.response;
           }
         }
@@ -512,7 +503,7 @@ export class SurveyPage implements OnInit {
           responses,
           response_time,
           response_time_in_ms: response_time_ms,
-          alert_time: this.tasks[this.task_index].alert_time,
+          alert_time: this.tasks[this.task_index].alert_time || '',
         });
 
         // write tasks back to storage
@@ -554,7 +545,7 @@ export class SurveyPage implements OnInit {
    * @param message A message to display in the toast
    * @param position The position on the screen to display the toast
    */
-  async showToast(message, position) {
+  async showToast(message: string, position?: 'top' | 'bottom' | 'middle') {
     const toast = await this.toastController.create({
       message,
       position,
@@ -564,8 +555,7 @@ export class SurveyPage implements OnInit {
         {
           text: 'Dismiss',
           role: 'cancel',
-          handler: () => {
-          },
+          handler: () => {},
         },
       ],
     });
@@ -580,7 +570,7 @@ export class SurveyPage implements OnInit {
    * @param array The array to shuffle
    * @return      The first item in the shuffled array
    */
-  shuffle(array) {
+  shuffle<T>(array: T[]): T[] {
     let currentIndex = array.length;
     let temporaryValue;
     let randomIndex;

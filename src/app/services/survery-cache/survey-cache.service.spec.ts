@@ -7,8 +7,6 @@ import { LoadingService } from '../loading/loading-service.service';
 import { Storage } from '@ionic/storage-angular';
 
 import { SurveyCacheService } from './survey-cache.service';
-import { FileTransferMock } from '@ionic-native-mocks/file-transfer';
-import { FileMock } from '@ionic-native-mocks/file';
 
 describe('FileDownloaderService', () => {
   let service: SurveyCacheService;
@@ -86,9 +84,9 @@ describe('FileDownloaderService', () => {
   it('should download the survey', waitForAsync(() => {
     service
       .downloadFile('https://tuspl22-momentum.srv.mwn.de/api/surveys/demo.json')
-      .then((file) => {
-        console.log(file);
-        expect(file).toContain('\'name\': \'demo\'');
+      .then((result) => {
+        console.log(result);
+        expect(result).toContain("'name': 'demo'");
       })
       .catch((error) => {
         console.log(error);
