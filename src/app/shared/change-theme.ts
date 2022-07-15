@@ -26,7 +26,7 @@ export class ChangeTheme {
         localStorage.preferenceTheme = this.preferenceColor;
     }
 
-    static getDarkTheme(){
+    static getTheme(){
       return this.preferenceColor;
     }
 
