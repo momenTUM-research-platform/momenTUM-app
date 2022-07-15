@@ -4,7 +4,7 @@ import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Router } from '@angular/router';
-import { SurveyDataService } from '../app/services/survery-data/survey-data.service';
+import { SurveyDataService } from './services/survery-data/survey-data.service';
 import * as moment from 'moment';
 import { AlertController } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
