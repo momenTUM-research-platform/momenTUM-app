@@ -14,6 +14,12 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "max-len": "warn",
+        "no-console": "warn",
+        "prefer-arrow/prefer-arrow-functions": "off",
+        "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-unused-expressions": "off",
+        "@typescript-eslint/quotes": "off",
         "@angular-eslint/component-class-suffix": [
           "error",
           {
@@ -40,8 +46,7 @@
     },
     {
       "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
-      "rules": {}
+      "extends": ["plugin:@angular-eslint/template/recommended"]
     }
   ]
 }

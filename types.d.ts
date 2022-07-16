@@ -1,10 +1,9 @@
-
 export interface Study {
   properties: Properties;
   modules: Module[];
 }
 
-export interface Properties{
+export interface Properties {
   study_id: string;
   study_name: string;
   instructions: string;
@@ -169,14 +168,23 @@ export interface Option {
   checked: boolean;
 }
 
-export interface SurveyData {
-  module_index: number;
-  module_name: string;
-  responses: Responses;
-  response_time: string;
-  response_time_in_ms: number;
-  alert_time: string;
-}
+export type SurveyData =
+  | {
+      module_index: number;
+      module_name: string;
+      responses: Responses;
+      response_time: string;
+      response_time_in_ms: number;
+      alert_time: string;
+    }
+  | {
+      module_index: number;
+      module_name: string;
+      entries: number[];
+      response_time: string;
+      response_time_in_ms: number;
+      alert_time: string;
+    };
 
 export interface Responses {
   [id: string]: Question['response'];

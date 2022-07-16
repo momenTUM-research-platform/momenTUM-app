@@ -6,6 +6,7 @@ import {
 import { LoadingService } from '../loading/loading-service.service';
 import { File, FileEntry } from '@ionic-native/file/ngx';
 import { Storage } from '@ionic/storage-angular';
+import { Media, Study } from 'types';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +14,9 @@ import { Storage } from '@ionic/storage-angular';
 export class SurveyCacheService {
   win: any = window;
 
-  mediaToCache: object = {};
+  mediaToCache: { [id: string]: string } = {};
   videoThumbnailsToCache: object = {};
-  localMediaURLs: object = {};
+  localMediaURLs: { [id: string]: string } = {};
   localThumbnailURLs: object = {};
   mediaCount = 0;
   mediaDownloadedCount = 0;
@@ -58,7 +59,7 @@ export class SurveyCacheService {
    *
    * @param study The study protocol
    */
-  getMediaURLs(study) {
+  getMediaURLs(study: Study) {
     // get banner url
     // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
@@ -67,10 +68,11 @@ export class SurveyCacheService {
     for (const module of study.modules) {
       for (const section of module.sections) {
         const mediaQuestions = section.questions.filter(
-          (question) => question.type === 'media'
+          (question): question is Media => question.type === 'media'
         );
-        for (const question of mediaQuestions)
-          {this.mediaToCache[question.id] = question.src;}
+        for (const question of mediaQuestions) {
+          this.mediaToCache[question.id] = question.src;
+        }
       }
     }
     // set mediaCount to be number of media items
@@ -82,7 +84,7 @@ export class SurveyCacheService {
    *
    * @param study The study protocol
    */
-  cacheAllMedia(study) {
+  cacheAllMedia(study: Study) {
     this.mediaCount = 0;
     this.mediaDownloadedCount = 0;
     // map media question ids to their urls
@@ -96,9 +98,9 @@ export class SurveyCacheService {
   downloadAllMedia() {
     // download all media items
     const keys = Object.keys(this.mediaToCache);
-    for (let i = 0; i < keys.length; i++) {
-      this.downloadFile(this.mediaToCache[keys[i]]).then((entryURL) => {
-        this.localMediaURLs[keys[i]] =
+    for (const key of keys) {
+      this.downloadFile(this.mediaToCache[key]).then((entryURL) => {
+        this.localMediaURLs[key] =
           this.win.Ionic.WebView.convertFileSrc(entryURL);
         this.mediaDownloadedCount = this.mediaDownloadedCount + 1;
         this.checkIfFinished();
@@ -110,8 +112,9 @@ export class SurveyCacheService {
    * Checks if all of the media has been downloaded, if so update the protocol
    */
   checkIfFinished() {
-    if (this.mediaDownloadedCount === this.mediaCount)
-      {this.updateMediaURLsInStudy();}
+    if (this.mediaDownloadedCount === this.mediaCount) {
+      this.updateMediaURLsInStudy();
+    }
   }
 
   /**
@@ -127,15 +130,19 @@ export class SurveyCacheService {
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
-        for (const module of studyObject.modules)
-          {for (const section of module)
-            {for (const question of section) {
-              if (question.id in this.localMediaURLs)
-                {question.src = this.localMediaURLs[question.id];}
-              if (question.subtype === 'video')
-                { // @ts-ignore
-                  question.thumb = this.localMediaURLs.banner;}
-            }}}
+        for (const module of studyObject.modules) {
+          for (const section of module) {
+            for (const question of section) {
+              if (question.id in this.localMediaURLs) {
+                question.src = this.localMediaURLs[question.id];
+              }
+              if (question.subtype === 'video') {
+                // @ts-ignore
+                question.thumb = this.localMediaURLs.banner;
+              }
+            }
+          }
+        }
 
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));

@@ -11,7 +11,7 @@ import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-root',
-  templateUrl: 'app.component.html'
+  templateUrl: 'app.component.html',
 })
 export class AppComponent implements OnInit {
   private readyApp!: () => void;
@@ -28,7 +28,6 @@ export class AppComponent implements OnInit {
     private alertCtrl: AlertController,
     private storage: Storage
   ) {
-
     this.initializeApp();
   }
 
@@ -38,10 +37,10 @@ export class AppComponent implements OnInit {
     await this.storage.create();
 
     this.platform.pause.subscribe(() => {
-      this.isAppInForeground = new Promise(resolve => { this.readyApp = resolve; });
+      this.isAppInForeground = new Promise((resolve) => {
+        this.readyApp = resolve;
+      });
     });
-
-
 
     this.platform.resume.subscribe(() => {
       this.readyApp();
@@ -56,7 +55,7 @@ export class AppComponent implements OnInit {
         milliseconds: moment().valueOf(),
         page: 'notification-' + moment(notification.data.task_time).format(),
         event: 'click',
-        module_index: notification.data.task_index
+        module_index: notification.data.task_index,
       };
       this.surveyDataService.logPageVisitToServer(logEvent);
       this.router.navigate(['survey/' + notification.data.task_id]);

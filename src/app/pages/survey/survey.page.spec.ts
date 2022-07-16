@@ -16,10 +16,12 @@ describe('SurveyPage', () => {
 
   let angularStorageSpy: jasmine.SpyObj<Storage>;
 
-
   beforeEach(() => {
-
-    const spyStorage = jasmine.createSpyObj('Storage', ['create', 'get', 'set']);
+    const spyStorage = jasmine.createSpyObj('Storage', [
+      'create',
+      'get',
+      'set',
+    ]);
 
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
@@ -27,15 +29,14 @@ describe('SurveyPage', () => {
       providers: [
         {
           provide: Storage,
-          useValue: spyStorage
+          useValue: spyStorage,
         },
         StatusBar,
         HttpClient,
         HttpHandler,
         HTTP,
-        InAppBrowser
+        InAppBrowser,
       ],
-
     }).compileComponents();
 
     fixture = TestBed.createComponent(SurveyPage);

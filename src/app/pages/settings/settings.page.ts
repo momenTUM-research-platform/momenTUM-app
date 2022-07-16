@@ -13,9 +13,8 @@ import { SurveyDataService } from '../../services/survery-data/survey-data.servi
   styleUrls: ['./settings.page.scss'],
 })
 export class SettingsPage {
-
   // stores the user's UUID
-  uuid: String;
+  uuid: string;
 
   // flag to track whether the user is in a study
   isEnrolled = false;
@@ -35,28 +34,32 @@ export class SettingsPage {
       support_email: '',
       support_url: '',
       ethics: '',
-      pls: ''
-    }
+      pls: '',
+    },
   };
 
-
-  constructor(private storage: Storage,
+  constructor(
+    private storage: Storage,
     private navController: NavController,
     private alertController: AlertController,
     private iab: InAppBrowser,
     private notificsationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
-    private surveyDataService: SurveyDataService) {
-      // get the default language of the device
-      this.selectedLanguage = this.translateConfigService.getDefaultLanguage();
-    }
+    private surveyDataService: SurveyDataService
+  ) {
+    // get the default language of the device
+    this.selectedLanguage =
+      this.translateConfigService.getDefaultLanguage() || 'en';
+  }
 
   ionViewWillEnter() {
-
     this.isEnrolled = false;
 
-    Promise.all([this.storage.get('current-study'), this.storage.get('uuid'), this.storage.get('notifications-enabled')]).then(values => {
-
+    Promise.all([
+      this.storage.get('current-study'),
+      this.storage.get('uuid'),
+      this.storage.get('notifications-enabled'),
+    ]).then((values) => {
       // check if user is currently enrolled in study
       // to show/hide additional options
       const studyObject = values[0];
@@ -64,7 +67,6 @@ export class SettingsPage {
         console.log('I found a study!');
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
-
       } else {
         this.isEnrolled = false;
       }
@@ -74,8 +76,11 @@ export class SettingsPage {
 
       // get the status of the notifications
       const notificationsEnabled = values[2];
-      if (notificationsEnabled === null) {this.notificationsEnabled = false;}
-      else {this.notificationsEnabled = notificationsEnabled;}
+      if (notificationsEnabled === null) {
+        this.notificationsEnabled = false;
+      } else {
+        this.notificationsEnabled = notificationsEnabled;
+      }
 
       // log the user visiting this tab
       this.surveyDataService.logPageVisitToServer({
@@ -83,7 +88,7 @@ export class SettingsPage {
         milliseconds: moment().valueOf(),
         page: 'settings',
         event: 'entry',
-        module_index: -1
+        module_index: -1,
       });
     });
   }
@@ -95,7 +100,7 @@ export class SettingsPage {
         milliseconds: moment().valueOf(),
         page: 'settings',
         event: 'exit',
-        module_index: -1
+        module_index: -1,
       });
     }
   }
@@ -111,8 +116,9 @@ export class SettingsPage {
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
-        }, {
+          role: 'cancel',
+        },
+        {
           text: 'Withdraw',
           handler: () => {
             // log a withdraw event to the server
@@ -121,24 +127,31 @@ export class SettingsPage {
               milliseconds: moment().valueOf(),
               page: 'settings',
               event: 'withdraw',
-              module_index: -1
+              module_index: -1,
             });
             // upload any pending logs and data
-            this.surveyDataService.uploadPendingData('pending-log').then(() => this.surveyDataService.uploadPendingData('pending-data')).then(() =>
-               this.storage.remove('current-study')
-              // then remove all the pending study tasks from storage
-            ).then(() =>
-               this.storage.remove('study-tasks')
-            // then cancel all remaining notifications and navigate to home
-            ).then(() => {
-              // cancel all notifications
-              this.notificsationsService.cancelAllNotifications();
-              // navigate to the home tab
-              this.navController.navigateRoot('/');
-            });
-          }
-        }
-      ]
+            this.surveyDataService
+              .uploadPendingData('pending-log')
+              .then(() =>
+                this.surveyDataService.uploadPendingData('pending-data')
+              )
+              .then(
+                () => this.storage.remove('current-study')
+                // then remove all the pending study tasks from storage
+              )
+              .then(
+                () => this.storage.remove('study-tasks')
+                // then cancel all remaining notifications and navigate to home
+              )
+              .then(() => {
+                // cancel all notifications
+                this.notificsationsService.cancelAllNotifications();
+                // navigate to the home tab
+                this.navController.navigateRoot('/');
+              });
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -159,7 +172,7 @@ export class SettingsPage {
    *
    * @param support_url The current study's support website URL
    */
-  openSupportURL(support_url) {
+  openSupportURL(support_url: string) {
     //window.location.href = support_url;
     const browser = this.iab.create(support_url, '_system');
   }
@@ -170,8 +183,8 @@ export class SettingsPage {
    * @param support_email The current study's support email address
    * @param study_name The current study's name
    */
-  openSupportEmail(support_email, study_name) {
-    window.location.href = 'mailto:'+support_email+'?subject=Support: '+study_name;
+  openSupportEmail(support_email: string, study_name: string) {
+    window.location.href =
+      'mailto:' + support_email + '?subject=Support: ' + study_name;
   }
-
 }
