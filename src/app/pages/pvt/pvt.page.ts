@@ -56,8 +56,8 @@ export class PvtPage implements OnInit {
    * submits the entries array to the server,
    * then routes back to the home page.
    * */
-  submit() {
-    const surveyData: SurveyData = {
+  async submit() {
+    const surveyData = {
       module_index: this.moduleIndex,
       module_name: this.moduleName,
       entries: [321, 423, 123, -1, -2, 124, 132],
@@ -66,12 +66,8 @@ export class PvtPage implements OnInit {
       alert_time: this.alertTime,
     };
 
-    this.surveyDataService
-      .sendSurveyDataToServer(surveyData)
-      .then(() => this.router.navigate(['/']))
-      .then(() => {
-        console.log(surveyData);
-      });
+    await this.surveyDataService.sendSurveyDataToServer(surveyData);
+    this.router.navigate(['/']);
   }
 
   /**

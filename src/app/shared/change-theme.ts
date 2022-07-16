@@ -6,17 +6,12 @@ export class ChangeTheme {
   }
 
   static setTheme(darkColor: boolean) {
-    if (darkColor) {
-      this.preferenceColor = 'dark';
-    } else {
-      this.preferenceColor = 'light';
-    }
+    this.preferenceColor = darkColor ? 'dark' : 'light';
 
     document.body.setAttribute('color-theme', this.preferenceColor);
     localStorage.preferenceTheme = this.preferenceColor;
   }
-
-  static getDarkTheme() {
+  static getTheme() {
     return this.preferenceColor;
   }
 }
