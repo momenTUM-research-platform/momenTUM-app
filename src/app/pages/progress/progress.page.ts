@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { Chart } from 'chart.js';
-import { NgChartsModule } from 'ng2-charts';
 import * as moment from 'moment';
-import { SurveyDataService } from '../../services/survery-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
 

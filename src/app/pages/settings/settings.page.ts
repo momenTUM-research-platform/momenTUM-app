@@ -5,7 +5,7 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { SurveyDataService } from '../../services/survery-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 
 @Component({
   selector: 'app-settings',

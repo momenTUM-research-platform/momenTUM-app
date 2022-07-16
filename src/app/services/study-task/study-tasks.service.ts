@@ -31,9 +31,7 @@ export class StudyTasksService {
     // loop through all of the modules in this study
     // and create the associated study tasks based
     // on the alert schedule
-    for (let i = 0; i < studyObject.modules.length; i++) {
-      const mod = studyObject.modules[i];
-
+    for (const [i, mod] of studyObject.modules.entries()) {
       // if the module is assigned to the participant's condition
       // add it to the list, otherwise just skip it
       if (mod.condition === condition || mod.condition === '*') {
@@ -51,22 +49,17 @@ export class StudyTasksService {
         const module_times = mod.alerts.times;
         const alert_title = mod.alerts.title;
         const alert_message = mod.alerts.message;
-        let module_type = 'default';
-        if (mod.type === 'survey') {
-          module_type = 'checkmark-circle-outline';
-        }
-        if (mod.type === 'video') {
-          module_type = 'film-outline';
-        }
-        if (mod.type === 'audio') {
-          module_type = 'headset-outline';
-        }
-        if (mod.type === 'info') {
-          module_type = 'bulb-outline';
-        }
-        if (mod.type === 'pvt') module_type = 'alarm-outline';
 
-        const module_name = studyObject.modules[i].name;
+        const typeToIcon: { [type: string]: string } = {
+          survey: 'checkmark-circle-outline',
+          video: 'film-outline',
+          audio: 'headset-outline',
+          info: 'bulb-outline',
+          pvt: 'alarm-outline',
+        };
+        const module_type = typeToIcon[mod.type] || 'default';
+
+        const module_name = mod.name;
         const module_index = i;
 
         const startDay = new Date(); // set a date object for today

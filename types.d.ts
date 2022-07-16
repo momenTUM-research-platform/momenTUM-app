@@ -17,7 +17,7 @@ export interface Properties {
   conditions: string[];
   cache: boolean;
 }
-export interface Module {
+interface Module {
   type: string;
   name: string;
   submit_text: string;
@@ -163,12 +163,12 @@ interface Task {
   locale: string;
   completed: boolean;
 }
-export interface Option {
+interface Option {
   text: string;
   checked: boolean;
 }
 
-export type SurveyData =
+type SurveyData =
   | {
       module_index: number;
       module_name: string;
@@ -186,10 +186,10 @@ export type SurveyData =
       alert_time: string;
     };
 
-export interface Responses {
+interface Responses {
   [id: string]: Question['response'];
 }
-export interface LogEvent {
+interface LogEvent {
   timestamp: string;
   milliseconds: number;
   page: string;

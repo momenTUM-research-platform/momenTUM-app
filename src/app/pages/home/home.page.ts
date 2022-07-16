@@ -5,16 +5,15 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { AlertController, RefresherCustomEvent } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
-import { SurveyDataService } from '../../services/survery-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { SurveyCacheService } from '../../services/survery-cache/survey-cache.service';
+import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
 import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { TranslateService } from '@ngx-translate/core';
 import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 
