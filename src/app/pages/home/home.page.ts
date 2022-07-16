@@ -83,7 +83,7 @@ export class HomePage implements OnInit {
   }
 
   toggleTheme() {
-    if (ChangeTheme.getDarkTheme() === 'light') {
+    if (ChangeTheme.getTheme() === 'light') {
       // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
       ChangeTheme.setTheme(true);
