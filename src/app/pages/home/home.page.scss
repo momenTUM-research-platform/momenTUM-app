@@ -15,7 +15,7 @@ ion-content {
 }
 
 .secondary {
-	color: #04998b;
+	color: #005293;
 }
 
 .welcome-msg {
@@ -33,7 +33,7 @@ ion-content {
 }
 
 .enrolment-img-light {
-	height: 35%;
+	height: 40%;
 	margin-top: 10%;
 	margin-left: auto;
 	margin-right: auto;
@@ -60,4 +60,31 @@ ion-footer{
 ion-label {
   margin-bottom: 3px;
   margin-top: 3px;
+}
+
+.banner-img {
+  border-radius: 30px !important;
+  overflow: hidden;
+  width:101%;
+  height:101%;
+  margin-left:-5px;
+  padding:20px;
+}
+
+ion-img::part(image) {
+  border-radius: 20px;
+}
+
+.title-label{
+  margin: 3px;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+
+ion-item {
+  --ion-item-background: transparent;
+}
+ion-list {
+  --ion-item-background: transparent;
 }

@@ -73,7 +73,7 @@ export class StudyTasksService {
         if (mod.type === 'video') {module_type = 'film-outline';}
         if (mod.type === 'audio') {module_type = 'headset-outline';}
         if (mod.type === 'info') {module_type = 'bulb-outline';}
-        if (mod.type === "pvt") module_type = "alarm-outline"
+        if (mod.type === 'pvt') {module_type = 'alarm-outline';}
 
         const module_name = studyObject.modules[i].name;
         const module_index = i;

@@ -50,3 +50,125 @@ p {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
+
+
+.light-blue-card{
+  --ion-item-background:#E2F5FF;
+  --padding-start: 0px;
+  --inner-padding-start: 0px;
+  --margin-start: 50px;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: #0C47A0;
+}
+
+.light-blue-card-page{
+  --ion-item-background:#E2F5FF;
+  --margin: 5px;
+  margin: 5px;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: #0C47A0;
+}
+
+.light-blue-card-bg{
+  --ion-item-background:#E2F5FF;
+  width:100%;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: #0C47A0;
+}
+
+.light-blue-card-div-instruction{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width:100%;
+  --inner-padding-start: 5px;
+}
+
+.light-blue-card-div{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width:100%;
+}
+
+.light-blue-card-grid{
+  width:100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mult-select{
+  width:100%;
+  text-align:left !important;
+}
+
+.ion-radio-select-style{
+  width:100%;
+  max-width:100%;
+  background: #fff;
+}
+
+
+
+.ion-row-items{
+  text-align: start !important;
+  width:100%;
+}
+
+.radio-button-style{
+  --ion-item-background:#fff;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  border-radius: 50px !important;
+}
+.item-radio-checked{
+  --ion-item-background:#5CB2FD;
+  color: #fff;
+}
+
+ion-input{
+  --background: #fff;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  border-radius: 10px !important;
+}
+
+submit-next-button {
+  --border-radius: 15px;
+  width: 80%;
+}
+
+bottom-button{
+  align-items: center;
+  width: 80%;
+}
+ion-button {
+  --border-radius: 15px;
+}
+
+ion-segment-button{
+  --indicator-box-shadow: transparent !important;
+  border-radius: 15px !important;
+  padding: 0px;
+  margin-right: 10px;
+  margin-left: 10px;
+  --background:white;
+  --color:#2d2e87;
+  --background-checked: linear-gradient(to right, #5CB2FD, #5CB2FD)!important;
+  --color-checked: white;
+  --indicator-color : transparent!important; /* this solution */
+
+}
