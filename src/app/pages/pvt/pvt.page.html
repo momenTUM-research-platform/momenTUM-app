@@ -1,56 +1,54 @@
 <ion-content scroll-y="false">
-
-  <div class="pane">
-
-    <div class="pane"
-       *ngIf="state==='tutorial'">
+  <!--Tutorial Page-->
+  <div *ngIf="state==='tutorial'" class="pane">
     <h1>
-      INSTRUCTIONS
+      TUTORIAL
     </h1>
     <p>
       Welcome! PVT stands for Psychomotor Vigilance Testing. PVT testing is easy to understand: it's just a reflex game. Some numbers will flash onto the screen suddenly, and your job will be to respond as soon as possible by touching the screen. When someone plays it, the screen looks something like this:
     </p>
-    <div class="timer-container">
-      <p class="timer">
+    <div class="timer-box">
+      <h2 class="timer-font">
         {{timer}}
-      </p>
+      </h2>
     </div>
     <p>
       The game will last for {{numOfTrials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
     </p>
-    <p class="button-text"
-       (click)="startPvt()">
+    <button (click)="startPvt()">
       < start test >
-    </p>
+    </button>
   </div>
 
-    <div class="pane" *ngIf="state==='countdown'">
-      <h1>
-        Trial starts in {{countdown}}
-      </h1>
-    </div>
+  <!--Countdown Page-->
+  <div *ngIf="state==='countdown'" class="pane">
+    <h1>
+      Trial starts in {{countdown}}
+    </h1>
+  </div>
 
-    <div class="pane" *ngIf="state==='game'" (touchstart)="reacted = true">
-    <ion-icon name="close"
-              size="large"
-              (click)="loadResults()" *ngIf="enableExit">
-    </ion-icon>
-    <div class="timer-container" id="real-timer-container">
-      <p class="timer">
+  <!--PVT Page-->
+  <div *ngIf="state==='game'" (touchstart)="reacted = true" class="pane">
+    <ion-icon name="close" size="large" (click)="loadResults()" *ngIf="enableExit"></ion-icon>
+    <div class="timer-box center-abs">
+      <h2 class="timer-font">
         {{timer}}
-      </p>
+      </h2>
     </div>
   </div>
 
-    <div class="pane" *ngIf="state==='results'">
-      <p *ngIf="showResults" id="results">
-          {{reactionTimes}}
-      </p>
-      <ion-label class="button-text" id="submit-button" (mousedown)="submit()">
-        < {{submitText}} >
-      </ion-label>
-    </div>
-
+  <!--Results Page-->
+  <div *ngIf="state==='results'" class="pane">
+    <h1>
+      RESULTS
+    </h1>
+    <p *ngIf="showResults" class="center-abs">
+        {{reactionTimes}}
+    </p>
+    <button (mousedown)="submit()">
+      < {{submitText}} >
+    </button>
   </div>
+
 </ion-content>
 
