@@ -16,6 +16,7 @@ import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-home',
@@ -75,7 +76,8 @@ export class HomePage implements OnInit {
     private alertController: AlertController,
     private localNotifications: LocalNotifications,
     private storage: Storage,
-    private translateConfigService: TranslateConfigService
+    private translateConfigService: TranslateConfigService,
+    private translate: TranslateService
   ) {
     this.selectedLanguage =
       this.translateConfigService.getDefaultLanguage() || 'en';
