@@ -53,7 +53,7 @@ p {
 
 
 .light-blue-card{
-  --ion-item-background:#E2F5FF;
+  --ion-item-background: var(--ion-color-tertiary);
   --padding-start: 0px;
   --inner-padding-start: 0px;
   --margin-start: 50px;
@@ -63,11 +63,11 @@ p {
   font-size: 18px;
   line-height: 24px;
   text-align: center;
-  color: #0C47A0;
+  color: var(--ion-color-tertiary-contrast);
 }
 
 .light-blue-card-page{
-  --ion-item-background:#E2F5FF;
+  --ion-item-background:var(--ion-color-tertiary);
   --margin: 5px;
   margin: 5px;
   border-radius: 10px !important;
@@ -76,11 +76,11 @@ p {
   font-size: 18px;
   line-height: 24px;
   text-align: center;
-  color: #0C47A0;
+  color: var(--ion-color-tertiary-contrast);
 }
 
 .light-blue-card-bg{
-  --ion-item-background:#E2F5FF;
+  --ion-item-background:var(--ion-color-tertiary);
   width:100%;
   border-radius: 10px !important;
   overflow: hidden;
@@ -88,7 +88,7 @@ p {
   font-size: 18px;
   line-height: 24px;
   text-align: center;
-  color: #0C47A0;
+  color: var(--ion-color-tertiary-contrast);
 }
 
 .light-blue-card-div-instruction{
@@ -118,7 +118,7 @@ p {
 .ion-radio-select-style{
   width:100%;
   max-width:100%;
-  background: #fff;
+  background: var(--ion-color-tertiary-contrast);
 }
 
 
@@ -129,18 +129,18 @@ p {
 }
 
 .radio-button-style{
-  --ion-item-background:#fff;
+  --ion-item-background: var(--ion-input-color);
   margin-top: 10px !important;
   margin-bottom: 10px !important;
   border-radius: 50px !important;
 }
 .item-radio-checked{
-  --ion-item-background:#5CB2FD;
-  color: #fff;
+  --ion-item-background:var(--ion-color-tertiary-shade);
+  color: var(--ion-input-color);
 }
 
 ion-input{
-  --background: #fff;
+  --background: var(--ion-input-color);
   padding-left: 10px !important;
   padding-right: 10px !important;
   border-radius: 10px !important;
@@ -165,10 +165,10 @@ ion-segment-button{
   padding: 0px;
   margin-right: 10px;
   margin-left: 10px;
-  --background:white;
-  --color:#2d2e87;
-  --background-checked: linear-gradient(to right, #5CB2FD, #5CB2FD)!important;
-  --color-checked: white;
+  --background:var(--ion-segment-button);
+  --color:var(--ion-color-tertiary-contrast);
+  --background-checked: linear-gradient(to right, var(--ion-color-tertiary-shade), var(--ion-color-tertiary-shade))!important;
+  --color-checked: var(--ion-segment-button);
   --indicator-color : transparent!important; /* this solution */
 
 }
