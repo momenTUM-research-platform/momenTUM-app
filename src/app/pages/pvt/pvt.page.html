@@ -13,7 +13,7 @@
       </h2>
     </div>
     <p>
-      The game will last for {{numOfTrials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
+      The game will last for {{trials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
     </p>
     <button (click)="startPvt()">
       < start test >
@@ -23,7 +23,7 @@
   <!--Countdown Page-->
   <div *ngIf="state==='countdown'" class="pane">
     <h1>
-      Trial starts in {{countdown}}
+      Trial starts in {{counter}}
     </h1>
   </div>
 
@@ -45,7 +45,7 @@
     <p *ngIf="showResults" class="center-abs">
         {{reactionTimes}}
     </p>
-    <button (mousedown)="submit()">
+    <button (mousedown)="navHome()">
       < {{submitText}} >
     </button>
   </div>
