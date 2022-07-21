@@ -1,17 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { Storage } from '@ionic/storage-angular';
-import {Module} from "../../../../types";
 
 @Component({
   selector: 'app-pvt',
   templateUrl: './pvt.page.html',
   styleUrls: ['./pvt.page.scss'],
 })
-export class PvtPage implements OnInit {
+export class PvtPage implements AfterViewInit {
   // INPUT from study
   trials: number; // the number of times that the test will be conducted.
   timeInterval: { min: number; dur: number }; // the time interval, in which the colored panel will emerge.
@@ -44,12 +43,6 @@ export class PvtPage implements OnInit {
 
   /**
    * angular lifecycle hook method. check out https://angular.io/guide/lifecycle-hooks for more documentation.
-   * */
-  ngOnInit(): void {
-  }
-
-  /**
-   * angular lifecycle hook method. check out https://angular.io/guide/lifecycle-hooks for more documentation.
    *
    * it sets up the variables and starts the pvt test.
    * */
@@ -66,7 +59,7 @@ export class PvtPage implements OnInit {
     const surveyData = {
       module_index: this.moduleIndex,
       module_name: this.moduleName,
-      entries: [321, 423, 123, -1, -2, 124, 132],
+      entries: this.reactionTimes,
       response_time: moment().format(),
       response_time_in_ms: moment().valueOf(),
       alert_time: this.alertTime,
@@ -124,7 +117,7 @@ export class PvtPage implements OnInit {
    * @param save decides, whether the measured results will be saved to the reactionTimes Array.
    * */
   private async handleResult(save: boolean) {
-    if (save && this.timer === undefined) {
+    if (save && !this.timer) {
       this.timer = 'you reacted too early.';
       this.reactionTimes.push(-2);
       this.trials++;
