@@ -48,6 +48,12 @@ button:hover {
   color: grey;
 }
 
+.top-right-position {
+  position: absolute;
+  right: 5%;
+  top: 10%;
+}
+
 .timer-box {
   height: $timerBoxHeight;
   width: $timerBoxWidth;

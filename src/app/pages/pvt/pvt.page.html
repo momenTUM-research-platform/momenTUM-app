@@ -1,6 +1,6 @@
 <ion-content scroll-y="false">
   <!--Tutorial Page-->
-  <div *ngIf="state==='tutorial'" class="pane">
+  <div *ngIf="state==='instructions'" class="pane">
     <h1>
       TUTORIAL
     </h1>
@@ -9,14 +9,14 @@
     </p>
     <div class="timer-box">
       <h2 class="timer-font">
-        {{timer}}
+        {{instructionTimer}}
       </h2>
     </div>
     <p>
       The game will last for {{trials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
     </p>
-    <button (click)="startPvt()">
-      < start test >
+    <button (click)="start()">
+      < start >
     </button>
   </div>
 
@@ -28,8 +28,8 @@
   </div>
 
   <!--PVT Page-->
-  <div *ngIf="state==='game'" (touchstart)="reacted = true" class="pane">
-    <ion-icon name="close" size="large" (click)="loadResults()" *ngIf="enableExit"></ion-icon>
+  <div *ngIf="state==='RTT'" (touchstart)="reacted = true" class="pane">
+    <ion-icon class="top-right-position" size="large" (click)="exit()" name="close" *ngIf="enableExit"></ion-icon>
     <div class="timer-box center-abs">
       <h2 class="timer-font">
         {{timer}}
