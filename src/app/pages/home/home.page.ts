@@ -16,7 +16,7 @@ import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
-import {TranslateService} from "@ngx-translate/core";
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-home',
@@ -131,15 +131,7 @@ export class HomePage implements OnInit {
 
   async ionViewWillEnter() {
     // check if dark mode
-    if (
-      window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-    ) {
-      // dark mode
-      this.darkMode = true;
-    } else {
-      this.darkMode = false;
-    }
+    this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     // load the correct translations for dynamic labels/messages
     const labels = [
@@ -409,8 +401,9 @@ export class HomePage implements OnInit {
           this.surveyCacheService.cacheAllMedia(this.study);
         }
         // setup the study task objects
-        // @ts-ignore
-        const tasks = this.studyTasksService.generateStudyTasks(this.study);
+        const tasks = this.study
+          ? this.studyTasksService.generateStudyTasks(this.study)
+          : [];
         console.log(tasks);
         // setup the notifications
         this.notificationsService.setNext30Notifications();

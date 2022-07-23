@@ -113,18 +113,9 @@ Generate the native project, if it does not already exist. (You can only install
 
 #### 2. Running with cordova
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-$ ionic cordova run android
-=======
-
-=======
-
-> > > > > > > main
+    $ ionic cordova run android
 
     $ ionic cordova run android -l
-
-> > > > > > > main
 
 #### Reference
 
