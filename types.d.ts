@@ -1,19 +1,22 @@
 export interface Study {
-  properties: {
-    study_id: string;
-    study_name: string;
-    instructions: string;
-    banner_url: string;
-    support_email: string;
-    support_url: string;
-    ethics: string;
-    pls: string;
-    empty_message: string;
-    post_url: string;
-    conditions: string[];
-    cache: boolean;
-  };
+  properties: Properties;
   modules: Module[];
+}
+
+export interface Properties {
+  study_id: string;
+  study_name: string;
+  instructions: string;
+  banner_url: string;
+  support_email: string;
+  support_url: string;
+  ethics: string;
+  pls: string;
+  created_by: string;
+  empty_msg: string;
+  post_url: string;
+  conditions: string[];
+  cache: boolean;
 }
 export interface Module {
   type: string;
