@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
@@ -6,7 +6,7 @@ import { StudyTasksService } from '../../services/study-task/study-tasks.service
 import { Storage } from '@ionic/storage-angular';
 
 @Component({
-  selector: 'app-RTT',
+  selector: 'app-pvt',
   templateUrl: './pvt.page.html',
   styleUrls: ['./pvt.page.scss'],
 })
