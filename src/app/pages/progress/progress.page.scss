@@ -10,9 +10,19 @@
 
 .blurb-style {
 	font-size: 13px;
-	color: #000000;
+	color: var(--ion-color-tertiary-contrast) !important;
 }
 
-p {
-	white-space: pre-wrap;
+
+
+ion-item {
+  --ion-item-background: transparent;
+}
+
+
+
+.title-label{
+  margin: 3px;
+  font-size: 15px;
+  color:  var(--ion-color-tertiary) !important;
 }

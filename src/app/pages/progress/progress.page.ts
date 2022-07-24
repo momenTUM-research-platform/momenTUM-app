@@ -193,6 +193,7 @@ export class ProgressPage {
 
               // if the task had any data to graph, push it
               if (task_data.length > 0) {
+                console.log("Graph object: %j", graphObj);
                 this.graphs.push(graphObj);
               }
             }
