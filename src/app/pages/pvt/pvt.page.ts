@@ -82,6 +82,8 @@ export class PvtPage implements OnInit {
 
   /**
    * Handles the exit buttons behavior.
+   * Submits the results.
+   * Either loads the results page or navigates to the homepage.
    * */
   async exit() {
     this.exited = true;
