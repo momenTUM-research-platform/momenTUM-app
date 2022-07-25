@@ -70,14 +70,7 @@ export class PvtPage implements OnInit {
     if (this.exited) {
       return;
     }
-    else if (this.showResults) {
-      this.state = 'results';
-      this.submit();
-    }
-    else {
-      this.submit();
-      this.navHome();
-    }
+    this.exit();
   }
 
   /**
@@ -128,7 +121,7 @@ export class PvtPage implements OnInit {
       this.reacted = false;
 
       // calculate random time to wait
-      let wait = this.min + Math.random() * (this.max - this.min);
+      let wait = this.getUniformRand(this.min, this.max);
 
       // wait for random amount of time while checking if the user exited or the user reacted
       let start = Date.now();
@@ -278,5 +271,15 @@ export class PvtPage implements OnInit {
    * */
   private sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Uses Math.random() to calculate a uniformly distributed random number between min and max.
+   * @param min minimum number that can be generated.
+   * @param max maximum number that can be generated.
+   * @returns a uniformly distributed random number between the parameters.
+   * */
+  private getUniformRand(min: number, max: number): number {
+    return  min + Math.random() * (max - min);
   }
 }
