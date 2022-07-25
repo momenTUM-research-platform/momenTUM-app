@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.0.0">
+  <zoom_level>8</zoom_level>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>376</x>
+      <y>112</y>
+      <w>16</w>
+      <h>16</h>
+    </coordinates>
+    <panel_attributes>type=initial</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLObject</id>
+    <coordinates>
+      <x>280</x>
+      <y>56</y>
+      <w>608</w>
+      <h>744</h>
+    </coordinates>
+    <panel_attributes>Angular Lifecycle
+valign=top</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>152</y>
+      <w>152</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>component instantiated
+( constructor called )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>120</y>
+      <w>24</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+layer=0</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>640</x>
+      <y>248</y>
+      <w>80</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngOnInit
+bg=yellow
+type=sender
+group=group-0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>192</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>232</y>
+      <w>264</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>first display of the data-bound properties 
+and setting the directive or component's 
+input properties.
+group=group-0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>256</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-0</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>288</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>328</y>
+      <w>336</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>projects external content into the component's view, 
+or into the view that a directive is in. 
+group=group-1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>712</x>
+      <y>336</y>
+      <w>152</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngAfterContentInit
+bg=yellow
+type=sender
+group=group-1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>368</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>408</y>
+      <w>264</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>check the content projected 
+into the directive or component. 
+group=group-2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>600</x>
+      <y>416</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-2</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>640</x>
+      <y>408</y>
+      <w>176</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngAfterContentChecked
+bg=yellow
+type=sender
+group=group-2</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>472</y>
+      <w>296</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>initialize the component's views and child views,
+or the view that contains the directive. 
+group=group-3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>432</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>672</x>
+      <y>344</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-1</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>632</x>
+      <y>488</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-3</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>672</x>
+      <y>480</y>
+      <w>136</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngAfterViewinit
+bg=yellow
+type=sender
+group=group-3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>560</y>
+      <w>288</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>check the component's views and child views, 
+or the view that contains the directive.
+group=group-4</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>624</x>
+      <y>576</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-4</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>664</x>
+      <y>568</y>
+      <w>152</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngAfterViewChecked
+bg=yellow
+type=sender
+group=group-4</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>344</x>
+      <y>648</y>
+      <w>288</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>destroy the directive or component. 
+group=group-5</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>624</x>
+      <y>672</y>
+      <w>56</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+group=group-5</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>664</x>
+      <y>664</y>
+      <w>128</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>call ngOnDestroy
+bg=yellow
+type=sender
+group=group-5</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>520</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>608</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>376</x>
+      <y>696</y>
+      <w>24</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>376</x>
+      <y>736</y>
+      <w>16</w>
+      <h>16</h>
+    </coordinates>
+    <panel_attributes>type=final
+layer=1</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

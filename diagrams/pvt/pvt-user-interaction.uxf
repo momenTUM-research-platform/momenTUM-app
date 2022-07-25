@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.0.0">
+  <zoom_level>7</zoom_level>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>784</x>
+      <y>105</y>
+      <w>112</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>exit button
+clicked
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>77</x>
+      <y>35</y>
+      <w>112</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>submit button
+clicked
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>357</x>
+      <y>217</y>
+      <w>112</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>start button 
+clicked
+bg=yellow
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>182</x>
+      <y>56</y>
+      <w>84</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>252</x>
+      <y>49</y>
+      <w>77</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>navHome( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>889</x>
+      <y>126</y>
+      <w>84</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>959</x>
+      <y>119</y>
+      <w>70</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>exit( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>462</x>
+      <y>238</y>
+      <w>84</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>693</x>
+      <y>196</y>
+      <w>287</w>
+      <h>259</h>
+    </coordinates>
+    <panel_attributes>start( )
+--
+valign=top</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>238</x>
+      <y>315</y>
+      <w>98</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>setUpVariables( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>196</x>
+      <y>322</y>
+      <w>56</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>378</x>
+      <y>315</y>
+      <w>98</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>reactionTimeTest( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>329</x>
+      <y>322</y>
+      <w>63</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>644</x>
+      <y>308</y>
+      <w>14</w>
+      <h>14</h>
+    </coordinates>
+    <panel_attributes>type=flow_final</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>469</x>
+      <y>322</y>
+      <w>147</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>190.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>91</x>
+      <y>301</y>
+      <w>112</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>ngAfterViewInit( )
+was called
+bg=green
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLSyncBarVertical</id>
+    <coordinates>
+      <x>525</x>
+      <y>224</y>
+      <w>14</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>template=txt
+title=titletext
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>525</x>
+      <y>224</y>
+      <w>182</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>240.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>525</x>
+      <y>259</y>
+      <w>91</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>110.0;60.0;60.0;60.0;60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSyncBarVertical</id>
+    <coordinates>
+      <x>595</x>
+      <y>294</y>
+      <w>14</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>template=txt
+title=titletext
+bg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>595</x>
+      <y>308</y>
+      <w>63</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>721</x>
+      <y>259</y>
+      <w>14</w>
+      <h>14</h>
+    </coordinates>
+    <panel_attributes>type=initial</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>728</x>
+      <y>259</y>
+      <w>42</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>756</x>
+      <y>252</y>
+      <w>84</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>countdown( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>861</x>
+      <y>252</y>
+      <w>105</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>reactionTimeTest( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>833</x>
+      <y>259</y>
+      <w>42</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>889</x>
+      <y>315</y>
+      <w>42</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>type=decision
+exited</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>903</x>
+      <y>273</y>
+      <w>21</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLSpecialState</id>
+    <coordinates>
+      <x>903</x>
+      <y>399</y>
+      <w>14</w>
+      <h>14</h>
+    </coordinates>
+    <panel_attributes>type=flow_final</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>903</x>
+      <y>350</y>
+      <w>42</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+true</panel_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>735</x>
+      <y>322</y>
+      <w>168</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+false</panel_attributes>
+    <additional_attributes>10.0;40.0;10.0;20.0;220.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>273</x>
+      <y>560</y>
+      <w>105</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>loadResults( )</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>721</x>
+      <y>350</y>
+      <w>105</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>call
+loadResults( )
+bg=green
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>91</x>
+      <y>441</y>
+      <w>112</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>loadResults( )
+was called
+bg=green
+type=receiver</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>735</x>
+      <y>385</y>
+      <w>182</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>240.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+</diagram>
