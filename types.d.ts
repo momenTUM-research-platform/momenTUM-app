@@ -12,12 +12,14 @@ export interface Properties {
   support_url: string;
   ethics: string;
   pls: string;
-  empty_message: string;
+  created_by: string;
+  empty_msg: string;
   post_url: string;
   conditions: string[];
   cache: boolean;
 }
-interface Module {
+
+export interface Module {
   type: string;
   name: string;
   submit_text: string;
