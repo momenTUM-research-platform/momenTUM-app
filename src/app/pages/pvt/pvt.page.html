@@ -13,7 +13,10 @@
       </h2>
     </div>
     <p>
-      The game will last for {{trials}} trials. You can also end the game at any time by clicking the x in the upper right corner.
+      The game will last for {{trials}} trials.
+    </p>
+    <p *ngIf="enableExit">
+      You can also end the game at any time by clicking the x in the upper right corner.
     </p>
     <button (click)="start()">
       < start >
