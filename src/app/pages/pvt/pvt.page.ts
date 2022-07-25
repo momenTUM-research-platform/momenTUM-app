@@ -35,8 +35,8 @@ export class PvtPage implements OnInit {
   timer: number; // for RTT page
   instructionTimer: any; // for instructions page
   exited: boolean;
-  tooLateMessage: string = 'too late';
-  tooEarlyMessage: string = 'too early';
+  tooLateMessage = 'too late';
+  tooEarlyMessage = 'too early';
 
   constructor(
     private surveyDataService: SurveyDataService,
