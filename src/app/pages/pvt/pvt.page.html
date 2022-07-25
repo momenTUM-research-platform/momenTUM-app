@@ -5,7 +5,7 @@
       TUTORIAL
     </h1>
     <p>
-      Welcome! PVT stands for Psychomotor Vigilance Testing. PVT testing is easy to understand: it's just a reflex game. Some numbers will flash onto the screen suddenly, and your job will be to respond as soon as possible by touching the screen. When someone plays it, the screen looks something like this:
+      Welcome! Reaction-time-testing is easy: it's just a reflex game. Some numbers will flash onto the screen suddenly, and your job will be to respond as soon as possible by touching the screen. When someone plays it, the screen looks something like this:
     </p>
     <div class="timer-box">
       <h2 class="timer-font">
@@ -30,12 +30,18 @@
     </h1>
   </div>
 
-  <!--PVT Page-->
+  <!--RTT Page-->
   <div *ngIf="state==='RTT'" (touchstart)="reacted = true" class="pane">
     <ion-icon class="top-right-position" size="large" (click)="exit()" name="close" *ngIf="enableExit"></ion-icon>
     <div class="timer-box center-abs">
-      <h2 class="timer-font">
+      <h2 *ngIf="timer >= 0">
         {{timer}}
+      </h2>
+      <h2 *ngIf="reactedTooLate">
+        {{tooLateMessage}}
+      </h2>
+      <h2 *ngIf="reactedTooEarly">
+        {{tooEarlyMessage}}
       </h2>
     </div>
   </div>

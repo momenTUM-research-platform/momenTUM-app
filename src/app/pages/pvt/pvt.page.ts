@@ -12,7 +12,7 @@ import { Storage } from '@ionic/storage-angular';
 })
 export class PvtPage implements OnInit {
   // INPUT from study
-  trials: number; // the number of times that the test will be conducted.
+  trials: number;
   min: number;
   max: number;
   showResults: boolean;
@@ -28,13 +28,15 @@ export class PvtPage implements OnInit {
 
   // HELPER VARIABLES:
   reacted: boolean;
+  reactedTooEarly: boolean;
+  reactedTooLate: boolean;
   state: 'instructions' | 'countdown' | 'RTT' | 'results';
   counter: number; // countdown
-  timer: any; // for RTT page
+  timer: number; // for RTT page
   instructionTimer: any; // for instructions page
   exited: boolean;
-  tooLateMessage = 'waited for too long';
-  tooEarlyMessage = 'user reacted too early';
+  tooLateMessage: string = 'too late';
+  tooEarlyMessage: string = 'too early';
 
   constructor(
     private surveyDataService: SurveyDataService,
@@ -46,6 +48,8 @@ export class PvtPage implements OnInit {
     this.reactionTimes = [];
     this.state = 'instructions';
     this.exited = false;
+    this.reactedTooLate = false;
+    this.reactedTooEarly = false;
   }
 
   /**
@@ -117,15 +121,17 @@ export class PvtPage implements OnInit {
     let trialCount = 1;
     while (trialCount <= this.trials && !this.exited) {
       // reset variables
-      this.timer = undefined;
+      this.timer = -1;
       this.reacted = false;
+      this.reactedTooEarly = false;
+      this.reactedTooLate = false;
 
       // calculate random time to wait
-      let wait = this.getUniformRand(this.min, this.max);
+      let wait = PvtPage.getUniformRand(this.min, this.max);
 
       // wait for random amount of time while checking if the user exited or the user reacted
       let start = Date.now();
-      while (Date.now() - start < wait && !this.exited && !this.reacted) {
+      while (!(Date.now() - start > wait || this.exited || this.reacted)) {
         await this.sleep(0);
       }
 
@@ -154,7 +160,7 @@ export class PvtPage implements OnInit {
     do {
       this.timer = Date.now() - start; // update timer
       await this.sleep(0);
-    } while (!this.reacted && !this.exited && !this.exited && this.timer < this.timeToTimeout);
+    } while (!this.reacted && !this.exited && this.timer < this.timeToTimeout);
   }
 
   /**
@@ -168,13 +174,15 @@ export class PvtPage implements OnInit {
     if (this.exited) {
       return;
     }
-    else if (!this.timer) {
-      this.timer = this.tooEarlyMessage;
+    else if (this.timer === -1) {
+      this.reactedTooEarly = true;
+      this.timer = -1;
       this.reactionTimes.push(-2);
       this.trials++;
     }
     else if (this.timer > this.timeToTimeout) {
-      this.timer = this.tooLateMessage;
+      this.reactedTooLate = true;
+      this.timer = -1;
       this.reactionTimes.push(-1);
       this.trials++;
     }
@@ -279,7 +287,7 @@ export class PvtPage implements OnInit {
    * @param max maximum number that can be generated.
    * @returns a uniformly distributed random number between the parameters.
    * */
-  private getUniformRand(min: number, max: number): number {
+  private static getUniformRand(min: number, max: number): number {
     return  min + Math.random() * (max - min);
   }
 }
