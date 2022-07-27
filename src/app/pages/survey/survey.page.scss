@@ -17,6 +17,7 @@
 
 .scroll-content {
     padding-bottom: 0 !important;
+    margin-right: 5px !important;
 }
 
 p {
@@ -158,7 +159,9 @@ bottom-button{
 ion-button {
   --border-radius: 15px;
 }
-
+ion-segment {
+  --background: transparent !important;
+}
 ion-segment-button{
   --indicator-box-shadow: transparent !important;
   border-radius: 15px !important;
@@ -169,6 +172,11 @@ ion-segment-button{
   --color:var(--ion-color-tertiary-contrast);
   --background-checked: linear-gradient(to right, var(--ion-color-tertiary-shade), var(--ion-color-tertiary-shade))!important;
   --color-checked: var(--ion-segment-button);
-  --indicator-color : transparent!important; /* this solution */
+  --indicator-color : transparent !important; /* this solution */
 
+}
+
+ion-datetime {
+  --color:var(--ion-color-tertiary-contrast);
+  --placeholder-color: transparent !important;
 }

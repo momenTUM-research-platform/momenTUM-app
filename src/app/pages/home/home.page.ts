@@ -55,6 +55,14 @@ export class HomePage {
     msg_camera: 'Camera permission is required to scan QR codes. You can allow this permission in Settings.'
   };
 
+  logData: any = {
+    timestamp: moment().format(),
+    milliseconds: moment().valueOf(),
+    page: 'home',
+    event: 'enrol',
+    module_index: -1
+  };
+
   safeURL: string;
 
   // the current language of the device
@@ -349,7 +357,7 @@ export class HomePage {
           text: this.translations.btn_enrol,
           handler: response => {
             // create URL for study
-            const url = 'https://getschema.app/study.php?study_id=' + response.id;
+            const url = 'https://tuspl22-momentum.srv.mwn.de/api/surveys/demo=' + response.id;
             this.attemptToDownloadStudy(url, false);
           }
         }
@@ -377,9 +385,6 @@ export class HomePage {
 
 
     console.log("Data:  %j", studyObj);
-
-
-
 
     // set the enrolled date
     this.storage.set('enrolment-date', new Date());

@@ -98,6 +98,17 @@
     outline: none !important;
   }
 
+
+  ion-datetime {
+    --background: #ffffff;
+    --background-rgb: 255,241,242;
+
+    border-radius: 16px;
+    box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+  }
+
+
+
 }
 
 // @media (prefers-color-scheme: dark) {
@@ -196,6 +207,17 @@
     :focus{
       outline: none !important;
     }
+
+    ion-datetime {
+      --background: #0d344d;
+      --background-rgb: 255,241,242;
+
+      border-radius: 16px;
+      box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+    }
+
+
+
   }
 
   /*
@@ -275,6 +297,10 @@
     --ion-toolbar-background: #1f1f1f;
 
     --ion-tab-bar-background: #1f1f1f;
+
+
+
+
   }
 
 // }
