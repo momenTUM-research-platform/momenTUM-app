@@ -16,7 +16,7 @@ describe('AppComponent', () => {
   let statusBarSpy; let splashScreenSpy; let platformReadySpy; let platformSpy;
 
   beforeEach(waitForAsync(() => {
-    statusBarSpy = jasmine.createSpyObj('StatusBar', ['styleDefault']);
+    statusBarSpy = jasmine.createSpyObj('StatusBar', ['styleDefault', 'overlaysWebView']);
     splashScreenSpy = jasmine.createSpyObj('SplashScreen', ['hide']);
     platformReadySpy = Promise.resolve();
     platformSpy = jasmine.createSpyObj('Platform', { ready: platformReadySpy });
@@ -46,7 +46,7 @@ describe('AppComponent', () => {
     TestBed.createComponent(AppComponent);
     expect(platformSpy.ready).toHaveBeenCalled();
     await platformReadySpy;
-    expect(statusBarSpy.styleDefault).toHaveBeenCalled();
+    expect(statusBarSpy.overlaysWebView).toHaveBeenCalled();
     expect(splashScreenSpy.hide).toHaveBeenCalled();
   });
 

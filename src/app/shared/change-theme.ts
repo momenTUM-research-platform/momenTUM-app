@@ -5,7 +5,8 @@ export class ChangeTheme {
 
     public static preferenceColor: string;
 
-    constructor() { }
+    constructor() {
+     }
 
     static initializeTheme() {
         this.preferenceColor = localStorage.preferenceTheme;

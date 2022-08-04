@@ -148,9 +148,10 @@ export class StudyTasksService {
     study_tasks.sort(function(a: Task, b: Task) {
       const dateA = new Date(a.time);
       const dateB = new Date(b.time);
-
       return dateA.getTime() - dateB.getTime();
     });
+
+
 
     // save tasks and condition to storage
     this.storage.set('condition', condition);
@@ -163,7 +164,7 @@ export class StudyTasksService {
   /**
    * Returns all the tasks that have been created for a study
    */
-  getAllTasks() {
+   async getAllTasks()  {
     return this.storage.get('study-tasks').then((tasks) => tasks);
   }
 
@@ -225,6 +226,7 @@ export class StudyTasksService {
       // merge the time_tasks array with the sticky_tasks array
       tasks_to_display = time_tasks.concat(sticky_tasks);
       // return the tasks list reversed to ensure correct order
+
       return tasks_to_display.reverse();
     });
   }
@@ -235,6 +237,9 @@ export class StudyTasksService {
    * @param study_tasks
    */
   checkTaskIsUnlocked(task, study_tasks) {
+
+    console.log("TASK: " + task);
+    console.log("STUDY TASK: " + study_tasks);
 
     // get a set of completed task uuids
     const completedUUIDs = new Set();

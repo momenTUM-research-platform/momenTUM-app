@@ -68,7 +68,8 @@ export class SurveyPage implements OnInit {
    */
   ngOnInit() {
     // set statusBar to visible on Android
-    this.statusBar.styleLightContent();
+    //this.statusBar.styleLightContent();
+    this.statusBar.overlaysWebView(false);
     this.statusBar.backgroundColorByHexString('#0F2042');
 
     // necessary to update height of external embedded content

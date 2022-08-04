@@ -99,6 +99,7 @@ export class HomePage {
 
     toggleTheme(el) {
       console.log("el %j" , ChangeTheme.getDarkTheme());
+
       if(ChangeTheme.getDarkTheme() === 'light'){
        document.querySelector('ion-icon').setAttribute('name', 'sunny');
        ChangeTheme.setDarkTheme (true);
@@ -112,12 +113,15 @@ export class HomePage {
 
     ngOnInit() {
       // set statusBar to be visible on Android
-      this.statusBar.styleLightContent();
+      this.statusBar.overlaysWebView(false);
+      //this.statusBar.styleLightContent();
       this.statusBar.backgroundColorByHexString('#0F2042');
 
 
       // Theme set to the stored prefered type
+      ChangeTheme.setDarkTheme (false);
       ChangeTheme.initializeTheme();
+      this.darkMode = false;
 
       // need to subscribe to this event in order
       // to ensure that the page will refresh every
@@ -142,12 +146,12 @@ export class HomePage {
   ionViewWillEnter() {
 
     // check if dark mode
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      // dark mode
-      this.darkMode = true;
-    } else {
-      this.darkMode = false;
-    }
+    // if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    //   // dark mode
+    //   this.darkMode = true;
+    // } else {
+    //   this.darkMode = false;
+    // }
 
     // load the correct translations for dynamic labels/messages
     const labels = [
