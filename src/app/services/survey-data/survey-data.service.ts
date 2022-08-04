@@ -35,7 +35,6 @@ export class SurveyDataService {
           resolve(data);
         })
         .catch((error) => {
-          console.log('Error message:' + error);
           reject(error);
         });
     });

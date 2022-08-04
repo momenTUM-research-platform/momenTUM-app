@@ -29,6 +29,7 @@
         "@capacitor/cli": "^4.0.1",
         "@capacitor/core": "^4.0.1",
         "@capacitor/haptics": "^4.0.1",
+        "@capacitor/ios": "4.0.1",
         "@capacitor/keyboard": "^4.0.1",
         "@capacitor/status-bar": "^4.0.1",
         "@ionic-native/barcode-scanner": "^5.36.0",

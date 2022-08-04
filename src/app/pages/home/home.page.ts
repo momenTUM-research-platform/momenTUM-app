@@ -249,7 +249,7 @@ export class HomePage implements OnInit {
       const result = await this.surveyDataService.getRemoteData(url);
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
-      let validStudy = false;
+      let validStudy: boolean;
       // @ts-expect-error
       const study: Study = JSON.parse(result.data);
       // checks if the returned text is parseable as JSON, and whether it contains
