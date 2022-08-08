@@ -15,7 +15,7 @@ export class StudyTasksService {
    * @param studyObject A JSON object that contains all data about a study
    */
   generateStudyTasks(studyObject) {
-
+    console.log("STUDY OBJECT IS: %j", studyObject);
     interface Task {
       uuid: string;
       index: number;
@@ -157,6 +157,7 @@ export class StudyTasksService {
     this.storage.set('condition', condition);
     this.storage.set('study-tasks', study_tasks);
 
+    console.log("TASK IS: "+ JSON.stringify( study_tasks));
     return study_tasks;
 
   }

@@ -361,7 +361,7 @@ export class HomePage {
           text: this.translations.btn_enrol,
           handler: response => {
             // create URL for study
-            const url = 'https://tuspl22-momentum.srv.mwn.de/api/surveys/demo=' + response.id;
+            const url = 'https://tuspl22-momentum.srv.mwn.de/api/v1/study/' + response.id;
             this.attemptToDownloadStudy(url, false);
           }
         }
