@@ -1,5 +1,5 @@
 {
-    "name": "MomenTUM",
+    "name": "momenTUM",
     "version": "0.0.1",
     "author": "Ionic Framework",
     "homepage": "https://ionicframework.com/",
@@ -133,8 +133,8 @@
         },
         "platforms": [
             "ios",
-            "android",
-            "browser"
+            "browser",
+            "android"
         ]
     }
 }

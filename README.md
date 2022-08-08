@@ -7,11 +7,11 @@ reader to follow along with building the app.
 # Usages
 
 Sample URLs:
-
-- https://gist.githubusercontent.com/BlenDaniel/6f44bdf665123d612295ed47d1a58a77/raw/40e95e86ff86267f0dae21491102c5f32fe283f9/Test.json
-- https://tuspl22-momentum.srv.mwn.de/api/surveys/demo
-- https://tuspl22-momentum.srv.mwn.de/api/surveys/onlyPVT_myID2000_1655989948278
-- https://ashatte.io/schema/sleep.json
+* https://gist.githubusercontent.com/BlenDaniel/6f44bdf665123d612295ed47d1a58a77/raw/40e95e86ff86267f0dae21491102c5f32fe283f9/Test.json
+* https://gist.githubusercontent.com/BlenDaniel/e632a053ffc22e40cebe07efd18c6200/raw/049790c18f5dab943dafe998879a3c38ef732618/AnotherTest.json
+* https://tuspl22-momentum.srv.mwn.de/api/surveys/demo 
+* https://tuspl22-momentum.srv.mwn.de/api/surveys/onlyPVT_myID2000_1655989948278
+* https://ashatte.io/schema/sleep.json
 
 ## Installations
 
