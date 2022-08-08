@@ -9,7 +9,8 @@
         "build": "ng build",
         "test": "ng test",
         "lint": "ng lint",
-        "e2e": "ng e2e"
+        "e2e": "ng e2e",
+        "cypress": "cypress open"
     },
     "private": true,
     "dependencies": {
@@ -56,6 +57,7 @@
         "jetifier": "^2.0.0",
         "karma-coverage": "^2.2.0",
         "moment": "^2.29.3",
+        "nanoid": "^4.0.0",
         "ng2-charts": "^3.0.10",
         "phonegap-plugin-barcodescanner": "8.0.1",
         "rm": "0.1.8",
@@ -90,6 +92,7 @@
         "cordova-plugin-file-transfer": "github:apache/cordova-plugin-file-transfer",
         "cordova-plugin-splashscreen": "^6.0.1",
         "cordova-plugin-statusbar": "^3.0.0",
+        "cypress": "^10.3.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-jsdoc": "^39.3.2",
         "eslint-plugin-prettier": "^4.0.0",
