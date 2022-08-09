@@ -3,12 +3,12 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
-import { Module, Option, Question, Responses, Study, Task } from 'types';
+import { Question, Option, Responses } from 'types';
 
 @Component({
   selector: 'app-survey',
@@ -16,7 +16,7 @@ import { Module, Option, Question, Responses, Study, Task } from 'types';
   styleUrls: ['./survey.page.scss'],
 })
 export class SurveyPage implements OnInit {
-  @ViewChild(IonContent, { static: false }) content: IonContent;
+  @ViewChild(IonContent, {static: false}) content: IonContent;
 
   // the text to display as submit button label
   submit_text = 'Submit';
@@ -27,13 +27,23 @@ export class SurveyPage implements OnInit {
   current_section_name: string;
 
   // study object
-  study: Study;
+  study: any;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
-  survey: Module;
+  survey: any = {
+    sections: [
+      {
+        questions: [],
+        name: '',
+        shuffle: false,
+      },
+    ],
+    shuffle: false,
+    submit_text: '',
+  };
   questions: any;
 
   // task objects
-  tasks: Task[];
+  tasks: Array<any>;
   task_id: string;
   task_index: number;
   module_index: number;
@@ -50,7 +60,8 @@ export class SurveyPage implements OnInit {
     private toastController: ToastController,
     private ngZone: NgZone,
     private iab: InAppBrowser
-  ) {}
+  ) {
+  }
 
   /**
    * Triggered when the survey page is first opened
@@ -63,7 +74,7 @@ export class SurveyPage implements OnInit {
     this.statusBar.backgroundColorByHexString('#0F2042');
 
     // necessary to update height of external embedded content
-    window.addEventListener('message', (e) => {
+    window.addEventListener('message', function (e) {
       if (e.data.hasOwnProperty('frameHeight')) {
         (<HTMLElement>(
           document.querySelector('iframe[src^="' + e.data.url + '"]')
@@ -88,7 +99,7 @@ export class SurveyPage implements OnInit {
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
         for (let i = 0; i < this.tasks.length; i++) {
-          if (this.task_id === String(this.tasks[i].task_id)) {
+          if (this.task_id == this.tasks[i].task_id) {
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
             this.task_index = i;
@@ -97,22 +108,24 @@ export class SurveyPage implements OnInit {
         }
 
         // check if this task is valid
-        this.studyTasksService.getTaskDisplayList().then((t) => {
-          let taskAvailable = false;
-          for (const task of t) {
-            if (String(task.task_id) === this.task_id) {
-              taskAvailable = true;
-              break;
+        const availableTasks = this.studyTasksService
+          .getTaskDisplayList()
+          .then((tasks) => {
+            let taskAvailable = false;
+            for (let i = 0; i < tasks.length; i++) {
+              if ((tasks[i].task_id).toString() === this.task_id) {
+                taskAvailable = true;
+                break;
+              }
             }
-          }
-          if (!taskAvailable) {
-            this.showToast(
-              'This task had a time limit and is no longer available.',
-              'bottom'
-            );
-            this.navController.navigateRoot('/');
-          }
-        });
+            if (!taskAvailable) {
+              this.showToast(
+                'This task had a time limit and is no longer available.',
+                'bottom'
+              );
+              this.navController.navigateRoot('/');
+            }
+          });
 
         // extract the JSON from the study object
         this.study = JSON.parse(studyObject);
@@ -126,9 +139,11 @@ export class SurveyPage implements OnInit {
         }
 
         // shuffle questions if required
-        for (const section of this.survey.sections) {
-          if (section.shuffle) {
-            section.questions = this.shuffle(section.questions);
+        for (let i = 0; i < this.survey.sections.length; i++) {
+          if (this.survey.sections[i].shuffle) {
+            this.survey.sections[i].questions = this.shuffle(
+              this.survey.sections[i].questions
+            );
           }
         }
 
@@ -154,10 +169,11 @@ export class SurveyPage implements OnInit {
 
         // toggle rand_group questions
         // figure out which ones are grouped together, randomly show one and set its response value to 1
-        const randomGroups: { [rand_group: string]: string[] } = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (question.rand_group) {
+        const randomGroups:{ [rand_group: string]: string[] } = {};
+        for (let i = 0; i < this.survey.sections.length; i++) {
+          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+            const question = this.survey.sections[i].questions[j];
+            if (question.rand_group !== undefined) {
               // set a flag to indicate that this question shouldn't reappear via branching logic
               question.noToggle = true;
 
@@ -180,37 +196,34 @@ export class SurveyPage implements OnInit {
             showThese.push(
               randomGroups[key][
                 Math.floor(Math.random() * randomGroups[key].length)
-              ]
+                ]
             );
           }
         }
 
         // iterate back through and show the ones that have been randomly calculated
         // while removing the branching attributes from those that are hidden
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
+        for (let i = 0; i < this.survey.sections.length; i++) {
+          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+            const question = this.survey.sections[i].questions[j];
             if (showThese.includes(question.id)) {
               question.noToggle = false;
               question.response = 1;
               // hide any questions from the rand_group that were not made visible
               // and remove any branching logic attributes
-              // ### How to do this in TS?
             } else if (question.noToggle) {
               question.hideSwitch = false;
-              // @ts-ignore
               delete question.hide_id;
-              // @ts-ignore
               delete question.hide_value;
-              // @ts-ignore
               delete question.hide_if;
             }
           }
         }
 
         // toggle dynamic question setup
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            this.toggleDynamicQuestions(question);
+        for (let i = 0; i < this.survey.sections.length; i++) {
+          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+            this.toggleDynamicQuestions(this.survey.sections[i].questions[j]);
           }
         }
 
@@ -259,8 +272,10 @@ export class SurveyPage implements OnInit {
    */
   setupQuestionVariables(uuid: string) {
     // for all relevant questions add an empty response variable
-    for (const section of this.survey.sections) {
-      for (const question of section.questions) {
+    for (let i = 0; i < this.survey.sections.length; i++) {
+      for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+        const question = this.survey.sections[i].questions[j];
+
         // for all question types that can be responded to, set default values
         question.response = '';
         question.model = '';
@@ -272,26 +287,23 @@ export class SurveyPage implements OnInit {
           // placeholder for dates
           question.model = moment().format();
 
-          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
+          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags
         } else if (
           question.type === 'media' &&
           (question.subtype === 'audio' || question.subtype === 'video')
         ) {
-          // @ts-ignore
           question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
             question.src
           );
           if (question.subtype === 'video') {
-            // @ts-ignore
             question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
               question.thumb
             );
           }
 
-          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
+          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags
         } else if (question.type === 'external') {
           question.src = question.src + '?uuid=' + uuid;
-          // @ts-ignore
           question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
             question.src
           );
@@ -312,22 +324,19 @@ export class SurveyPage implements OnInit {
           // for checkbox items, the response is set to an empty array
         } else if (question.type === 'multi') {
           // set up checked tracking for checkbox questions types
-          const tempOptions: Option[] = [];
-          for (const option of question.options) {
-            tempOptions.push({
-              text: option,
-              checked: false,
-            });
+          const tempOptions = [];
+          for (let i = 0; i < question.options.length; i++) {
+            tempOptions.push({text: question.options[i], checked: false});
           }
-          question.optionsChecked = tempOptions;
+          question.options = tempOptions;
 
           // counterbalance the choices if necessary
           if (question.shuffle) {
-            question.optionsChecked = this.shuffle(question.optionsChecked);
+            question.options = this.shuffle(question.options);
           }
 
           // set the empty response to an array for checkbox questions
-          if (!question.radio) {
+          if (question.radio === 'false') {
             question.response = [];
           }
         }
@@ -379,8 +388,8 @@ export class SurveyPage implements OnInit {
 
     // write the array back to a single string
     let response_string = '';
-    for (const response of responses) {
-      response_string += response + ';';
+    for (let i = 0; i < responses.length; i++) {
+      response_string += responses[i] + ';';
     }
 
     // hide any non-response error
@@ -394,9 +403,8 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    this.iab.create(url, '_system');
+    const browser = this.iab.create(url, '_system');
   }
-
   toggleDynamicQuestions(question: Question) {
     // if a question was hidden by rand_group
     // don't do any branching
@@ -449,14 +457,14 @@ export class SurveyPage implements OnInit {
       }
     }
   }
-
   /**
    * Triggered whenever the submit button is called
    * Checks if all required questions have been answered and then moves to the next section/saves the response
    */
   submit() {
     let errorCount = 0;
-    for (const question of this.questions) {
+    for (let i = 0; i < this.questions.length; i++) {
+      const question = this.questions[i];
       if (
         question.required === true &&
         (question.response === '' || question.response === undefined) &&
@@ -469,7 +477,7 @@ export class SurveyPage implements OnInit {
       }
     }
 
-    if (errorCount === 0) {
+    if (errorCount == 0) {
       // if user on last page and there are no errors, fine to submit
       if (this.current_section === this.num_sections) {
         // add the alert time to the response
@@ -489,8 +497,9 @@ export class SurveyPage implements OnInit {
 
         // add all of the responses to an object in the task to be sent to server
         const responses: Responses = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
+        for (let i = 0; i < this.survey.sections.length; i++) {
+          for (let j = 0; j < this.survey.sections[i].questions.length; j++) {
+            const question = this.survey.sections[i].questions[j];
             responses[question.id] = question.response;
           }
         }
@@ -503,7 +512,7 @@ export class SurveyPage implements OnInit {
           responses,
           response_time,
           response_time_in_ms: response_time_ms,
-          alert_time: this.tasks[this.task_index].alert_time || '',
+          alert_time: this.tasks[this.task_index].alert_time,
         });
 
         // write tasks back to storage
@@ -555,7 +564,8 @@ export class SurveyPage implements OnInit {
         {
           text: 'Dismiss',
           role: 'cancel',
-          handler: () => {},
+          handler: () => {
+          },
         },
       ],
     });
@@ -570,7 +580,7 @@ export class SurveyPage implements OnInit {
    * @param array The array to shuffle
    * @return      The first item in the shuffled array
    */
-  shuffle<T>(array: T[]): T[] {
+  shuffle<T>(array: T[]): T[]{
     let currentIndex = array.length;
     let temporaryValue;
     let randomIndex;

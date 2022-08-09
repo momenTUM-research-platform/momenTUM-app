@@ -25,7 +25,12 @@
         "message": "Please enter your participant ID",
         "start_offset": 0,
         "duration": 1,
-        "times": [{ "hours": 6, "minutes": 0 }],
+        "times": [
+          {
+            "hours": 6,
+            "minutes": 0
+          }
+        ],
         "random": false,
         "random_interval": 0,
         "sticky": true,
@@ -71,7 +76,12 @@
         "message": "Please complete the sleep diary within 1 hour of waking up.",
         "start_offset": 1,
         "duration": 7,
-        "times": [{ "hours": 7, "minutes": 0 }],
+        "times": [
+          {
+            "hours": 6,
+            "minutes": 30
+          }
+        ],
         "random": false,
         "random_interval": 0,
         "sticky": false,

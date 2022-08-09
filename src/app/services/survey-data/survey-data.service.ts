@@ -3,7 +3,7 @@ import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 import { LogEvent, Study, SurveyData } from 'types';
 
@@ -27,17 +27,22 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string) {
     return new Promise((resolve, reject) => {
-      this.http2.setRequestTimeout(7);
-      // Now a get request
-      this.http2
-        .get(surveyURL, { seed: 'f2d91e73' }, {})
-        .then((data) => {
+      let headers = { headers: new HttpHeaders({ timeout: `${7000}` })};
+      this.httpClient.get(surveyURL, headers)
+      .subscribe({
+        next: (data) => {
           resolve(data);
-        })
-        .catch((error) => {
-          console.log('Error message:' + error);
+        },
+        error: (error) => {
+          console.info('Error in get Remote Data: ' + error || '');
           reject(error);
-        });
+          resolve(false);
+        },
+        complete: () => {
+          console.info('Complete');
+          resolve(true);
+        },
+      });
     });
   }
 

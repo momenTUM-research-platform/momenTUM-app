@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { StudyTasksService } from './study-tasks.service';
 import { Storage } from '@ionic/storage-angular';
+import { Task, Study } from 'types';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;
@@ -80,6 +81,18 @@ describe('StudyTasksService', () => {
     ],
   };
 
+  const study_task_list = [{
+    uuid: study_object.modules[0].uuid,
+    name: study_object.modules[0].name,
+    unlock_after: study_object.modules[0].unlock_after,
+    sticky: study_object.modules[0].alerts.sticky,
+    sticky_label: study_object.modules[0].alerts.sticky_label,
+    alert_title: study_object.modules[0].alerts.title,
+    alert_message: study_object.modules[0].alerts.message,
+    timeout: study_object.modules[0].alerts.timeout,
+    timeout_after: study_object.modules[0].alerts.timeout_after
+  }];
+
   beforeEach(() => {
     const spyStorage = jasmine.createSpyObj('Storage', [
       'create',
@@ -103,23 +116,12 @@ describe('StudyTasksService', () => {
   });
 
   it('should generate study tasks', async () => {
-    const stubValue = study_object;
+    const study: Study = JSON.parse(JSON.stringify(study_object));
+    const stubValue = study;
     // returns a study task and also stores it in the storage
-    const response: object[] = await service.generateStudyTasks(study_object);
+    const response: object[] = await service.generateStudyTasks(study);
 
     angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
-
-    const study_task_list = [{
-      uuid: study_object.modules[0].uuid,
-      name: study_object.modules[0].name,
-      unlock_after: study_object.modules[0].unlock_after,
-      sticky: study_object.modules[0].alerts.sticky,
-      sticky_label: study_object.modules[0].alerts.sticky_label,
-      alert_title: study_object.modules[0].alerts.title,
-      alert_message: study_object.modules[0].alerts.message,
-      timeout: study_object.modules[0].alerts.timeout,
-      timeout_after: study_object.modules[0].alerts.timeout_after
-    }];
 
     expect(response[0])
       .withContext('response was same as stubValue')
@@ -127,22 +129,23 @@ describe('StudyTasksService', () => {
   });
 
   it('should get all tasks from storage', async () => {
-    const stubValue = 'study-tasks';
+    const stubValue: Task[] = JSON.parse(JSON.stringify( study_task_list)) ;
 
     angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
-    const response: string = await service.getAllTasks();
+    const response: Task[] = await service.getAllTasks();
 
     expect(angularStorageSpy.get.calls.count())
       .withContext('spy method was called once')
       .toBe(1);
 
     expect(response)
-      .withContext('response was same as stubValue')
+      .withContext('response was same as stub Value')
       .toBe(stubValue);
   });
 
   it('should get tasks display list from storage', async () => {
-    await angularStorageSpy.get.and.returnValue(Promise.resolve(study_object));
+
+    await angularStorageSpy.get.and.returnValue(Promise.resolve(study_task_list));
 
     const response: any = await service.getTaskDisplayList();
 

@@ -154,6 +154,7 @@ export class StudyTasksService {
    */
   async getAllTasks(): Promise<Task[]> {
     const tasks = await this.storage.get('study-tasks');
+
     return tasks;
   }
 
@@ -167,7 +168,6 @@ export class StudyTasksService {
     const time_tasks = [];
     let last_header = '';
     for (const task of study_tasks) {
-      console.log(task);
       // check if task has a pre_req
       const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
       const alertTime = new Date(Date.parse(task.time));
