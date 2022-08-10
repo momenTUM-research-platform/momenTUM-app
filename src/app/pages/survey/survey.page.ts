@@ -8,7 +8,20 @@ import { SurveyDataService } from '../../services/survey-data/survey-data.servic
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
-import { Module, Option, Question, Responses, Study, Task } from 'types';
+import {
+  DateTime, External,
+  Instruction, Media,
+  Module,
+  Multi,
+  Option,
+  Question,
+  Responses,
+  Slider,
+  Study,
+  Task,
+  Text,
+  YesNo
+} from 'types';
 
 @Component({
   selector: 'app-survey',
@@ -29,7 +42,45 @@ export class SurveyPage implements OnInit {
   // study object
   study: Study;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
-  survey: Module;
+  survey: Module = {
+    type: '',
+    name: '',
+    submit_text: '',
+
+    condition: '',
+    alerts: {
+      title: '',
+      message: '',
+      start_offset: 0,
+      duration: 0,
+      times: [],
+      random: false,
+      random_interval: 0,
+      sticky: false,
+      sticky_label: '',
+      timeout: false,
+      timeout_after: 0,
+    },
+    graph: {
+      display: false,
+      variable: '',
+      title: '',
+      blurb: '',
+      type: 'bar',
+      max_points: 0,
+    },
+    sections: [
+      {
+        name: '',
+        shuffle: false,
+        questions: [],
+      }
+    ],
+    uuid: '',
+    unlock_after: [],
+    shuffle: false,
+  }
+
   questions: any;
 
   // task objects
@@ -50,7 +101,7 @@ export class SurveyPage implements OnInit {
     private toastController: ToastController,
     private ngZone: NgZone,
     private iab: InAppBrowser
-  ) {}
+  ) { }
 
   /**
    * Triggered when the survey page is first opened
