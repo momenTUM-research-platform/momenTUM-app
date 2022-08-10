@@ -14,7 +14,7 @@ export class StudyTasksService {
    *
    * @param studyObject A JSON object that contains all data about a study
    */
-  generateStudyTasks(studyObject: Study) {
+  async generateStudyTasks(studyObject: Study) {
     // allocate the participant to a study condition
     const min = 1;
     const max: number = studyObject.properties.conditions.length;
@@ -23,7 +23,7 @@ export class StudyTasksService {
     const condition: string =
       studyObject.properties.conditions[condition_index];
 
-    const study_tasks: Task[] = new Array();
+    const study_tasks: Task[] = [];
 
     // the ID for a task. Is this a sensible starting point?
     let task_ID = 101;
@@ -119,7 +119,6 @@ export class StudyTasksService {
               locale: taskTime.toLocaleString('en-US', options),
               completed: false,
             };
-
             study_tasks.push(task_obj);
 
             // increment task id
@@ -134,7 +133,6 @@ export class StudyTasksService {
         }
       }
     }
-
     study_tasks.sort((a: Task, b: Task) => {
       const dateA = new Date(a.time);
       const dateB = new Date(b.time);
@@ -143,9 +141,8 @@ export class StudyTasksService {
     });
 
     // save tasks and condition to storage
-    this.storage.set('condition', condition);
-    this.storage.set('study-tasks', study_tasks);
-
+    await this.storage.set('condition', condition);
+    await this.storage.set('study-tasks', study_tasks);
     return study_tasks;
   }
 
@@ -167,7 +164,6 @@ export class StudyTasksService {
     const time_tasks = [];
     let last_header = '';
     for (const task of study_tasks) {
-      console.log(task);
       // check if task has a pre_req
       const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
       const alertTime = new Date(Date.parse(task.time));

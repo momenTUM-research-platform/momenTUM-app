@@ -31,9 +31,9 @@ export class HomePage implements OnInit {
   // track whether the user is currently enrolled in a study
   isEnrolledInStudy = false;
   // stores the details of the study
-  study: Study | null = null;
+  study: Study | null = null; // this is defined as null because it is actually needed to render the html
   // stores the list of tasks to be completed by the user
-  task_list: Array<any> = new Array();
+  task_list: any[] = [];
   // dark mode
   darkMode = false;
 
@@ -102,7 +102,7 @@ export class HomePage implements OnInit {
     this.statusBar.styleLightContent();
     this.statusBar.backgroundColorByHexString('#0F2042');
 
-    // Theme set to the stored prefered type
+    // Theme set to the stored preferred type
     ChangeTheme.initializeTheme();
 
     // need to subscribe to this event in order
@@ -110,12 +110,8 @@ export class HomePage implements OnInit {
     // time it is navigated to because ionViewWillEnter()
     // is not called when navigating here from other pages
     this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        if (event.url === '/') {
-          if (!this.loadingService.isLoading) {
-            this.ionViewWillEnter();
-          }
-        }
+      if (event instanceof NavigationStart && event.url === '/' && !this.loadingService.isLoading) {
+        this.ionViewWillEnter();
       }
     });
 
@@ -239,6 +235,7 @@ export class HomePage implements OnInit {
    * Attempt to download a study from the URL scanned/entered by a user
    *
    * @param url The URL to attempt to download a study from
+   * @param isQRCode
    */
   async attemptToDownloadStudy(url: string, isQRCode: boolean) {
     // show loading bar
@@ -262,7 +259,6 @@ export class HomePage implements OnInit {
         study.modules !== undefined && // @ts-ignore
         study.properties.study_id !== undefined;
       if (validStudy) {
-        console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
       }
     } catch (e) {
@@ -367,7 +363,7 @@ export class HomePage implements OnInit {
   /**
    * Enrols the user in the study, sets up notifications and tasks
    *
-   * @param data A data object returned from the server to represent a study object
+   * @param study
    */
   async enrolInStudy(study: Study) {
     this.isEnrolledInStudy = true;
@@ -401,16 +397,12 @@ export class HomePage implements OnInit {
           this.surveyCacheService.cacheAllMedia(this.study);
         }
         // setup the study task objects
-        const tasks = this.study
-          ? this.studyTasksService.generateStudyTasks(this.study)
-          : [];
-        console.log(tasks);
+        await this.studyTasksService.generateStudyTasks(study);
         // setup the notifications
         this.notificationsService.setNext30Notifications();
 
         this.loadStudyDetails();
         const studyTasks = await this.storage.get('study-tasks');
-        console.log('study tasks: ' + JSON.stringify(studyTasks));
       });
   }
 
@@ -418,8 +410,6 @@ export class HomePage implements OnInit {
    * Loads the details of the current study, including overdue tasks
    */
   loadStudyDetails() {
-    console.log('loading tasks');
-    //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
