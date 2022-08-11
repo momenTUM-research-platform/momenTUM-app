@@ -1,0 +1,47 @@
+ion-item {
+  --min-height: 0px;
+}
+
+.title-label{
+  margin: 3px;
+  font-size: 12px;
+}
+ion-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-col {
+  display: flex;
+  align-items: center;
+}
+
+ion-item-group{
+  padding-top: 20px;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.icon-image{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+ion-img::part(image) {
+
+  height: 100px; /* or whatever value */
+  /* you can set the height value too */
+}
+
+ion-item {
+  --ion-item-background: transparent;
+}
+ion-list {
+  --ion-item-background: transparent;
+}
+
+.icon {
+  filter: invert(19%) sepia(60%) saturate(2417%) hue-rotate(188deg) brightness(106%) contrast(101%);
+}

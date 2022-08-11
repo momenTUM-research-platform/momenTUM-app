@@ -54,6 +54,7 @@ This is an ionic-angular mobile application.
 This readme gives a step by step installation guide for the respective
 reader to follow along with building the app.
 
+
 ## Installations
 
 #### 1. Install node and npm
@@ -156,6 +157,8 @@ Generate the native project, if it does not already exist. (You can only install
     $ ionic cordova prepare android
 
 #### 2. Running with cordova
+
+    $ ionic cordova run android
 
     $ ionic cordova run android -l
 

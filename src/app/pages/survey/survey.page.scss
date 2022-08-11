@@ -1,0 +1,182 @@
+#section-title {
+    font-weight: 50;
+}
+
+.videoPlayer {
+    width: 100%;
+}
+
+.showError:before {
+    content: " *";
+}
+
+.showError {
+    font-weight: bold;
+    color: #F44336 !important;
+}
+
+.scroll-content {
+    padding-bottom: 0 !important;
+    margin-right: 5px !important;
+}
+
+p {
+    white-space: pre-wrap;
+}
+
+.slider-label-left {
+    width: 50%;
+    text-align: left;
+    float: left;
+    font-size: small;
+    margin-top: -5px;
+    color: gray;
+}
+
+.slider-label-right {
+    width: 50%;
+    text-align: right;
+    float: left;
+    font-size: small;
+    margin-top: -5px;
+    color: gray;
+}
+
+.external-container {
+    min-height: 100px;
+    background: url("../../../assets/imgs/spinner.gif");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 50px 50px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+.light-blue-card{
+  --ion-item-background: var(--ion-color-tertiary);
+  --padding-start: 0px;
+  --inner-padding-start: 0px;
+  --margin-start: 50px;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: var(--ion-color-tertiary-contrast);
+}
+
+.light-blue-card-page{
+  --ion-item-background:var(--ion-color-tertiary);
+  --margin: 5px;
+  margin: 5px;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: var(--ion-color-tertiary-contrast);
+}
+
+.light-blue-card-bg{
+  --ion-item-background:var(--ion-color-tertiary);
+  width:100%;
+  border-radius: 10px !important;
+  overflow: hidden;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  text-align: center;
+  color: var(--ion-color-tertiary-contrast);
+}
+
+.light-blue-card-div-instruction{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width:100%;
+  --inner-padding-start: 5px;
+}
+
+.light-blue-card-div{
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width:100%;
+}
+
+.light-blue-card-grid{
+  width:100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.mult-select{
+  width:100%;
+  text-align:left !important;
+}
+
+.ion-radio-select-style{
+  width:100%;
+  max-width:100%;
+  background: var(--ion-color-tertiary-contrast);
+}
+
+
+
+.ion-row-items{
+  text-align: start !important;
+  width:100%;
+}
+
+.radio-button-style{
+  --ion-item-background: var(--ion-input-color);
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  border-radius: 50px !important;
+}
+.item-radio-checked{
+  --ion-item-background:var(--ion-color-tertiary-shade);
+  color: var(--ion-input-color);
+}
+
+ion-input{
+  --background: var(--ion-input-color);
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  border-radius: 10px !important;
+}
+
+submit-next-button {
+  --border-radius: 15px;
+  width: 80%;
+}
+
+bottom-button{
+  align-items: center;
+  width: 80%;
+}
+ion-button {
+  --border-radius: 15px;
+}
+ion-segment {
+  --background: transparent !important;
+}
+ion-segment-button{
+  --indicator-box-shadow: transparent !important;
+  border-radius: 15px !important;
+  padding: 0px;
+  margin-right: 10px;
+  margin-left: 10px;
+  --background:var(--ion-segment-button);
+  --color:var(--ion-color-tertiary-contrast);
+  --background-checked: linear-gradient(to right, var(--ion-color-tertiary-shade), var(--ion-color-tertiary-shade))!important;
+  --color-checked: var(--ion-segment-button);
+  --indicator-color : transparent !important; /* this solution */
+
+}
+
+ion-datetime {
+  --color:var(--ion-color-tertiary-contrast);
+  --placeholder-color: transparent !important;
+}

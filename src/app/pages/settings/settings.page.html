@@ -1,0 +1,101 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+
+      <span class="header-title-thin">momenTUM</span>
+    </ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-item-group>
+    <ion-grid>
+      <ion-row>
+        <ion-col stacked class="icon-image"  size="4">
+          <img  src="assets/icon/Person.svg" class="icon"/>
+        </ion-col>
+        <ion-col size="8">
+          <!-- <ion-item>User ID</ion-item>
+      <ion-item >
+          {{this.uuid}}
+      </ion-item> -->
+      <ion-list>
+        <ion-item lines="none">
+          <ion-label color="secondary" stacked class="title-label">
+            User ID
+          </ion-label>
+        </ion-item>
+
+        <ion-item lines="none">
+          <ion-label>
+            {{this.uuid}}
+          </ion-label>
+        </ion-item>
+        </ion-list>
+    </ion-col>
+      </ion-row>
+    </ion-grid>
+
+  </ion-item-group>
+  <ion-item-group [hidden]="!isEnrolled">
+    <ion-label color="secondary" stacked class="title-label">
+      Notifications
+          </ion-label>
+
+      <ion-item lines="none">
+          <ion-label>Enable Notifications</ion-label>
+          <ion-toggle color="secondary" (ionChange)="toggleNotifications()" [(ngModel)]="notificationsEnabled"></ion-toggle>
+      </ion-item>
+      <div *ngIf="this.study?.properties.instructions?.length > 0">
+          <ion-label color="secondary" stacked class="title-label">
+            About this study
+                </ion-label>
+          <ion-item lines="none">
+              <ion-label style="white-space: pre-wrap !important;" [innerHTML]="this.study?.properties.instructions" class="ion-text-wrap">
+              </ion-label>
+          </ion-item>
+      </div>
+      <div *ngIf="this.study?.properties.support_email?.length > 0 || this.study?.properties.support_url?.length > 0">
+
+          <ion-label color="secondary" stacked class="title-label">
+            Support
+                </ion-label>
+          <ion-item lines="none" *ngIf="this.study?.properties.support_email?.length > 0" (click)="openSupportEmail(this.study?.properties.support_email, this.study?.properties.study_name)" detail>
+              <ion-label>
+                  Contact us by email
+              </ion-label>
+          </ion-item>
+          <ion-item lines="none" *ngIf="this.study?.properties.support_url?.length > 0" (click)="openSupportURL(this.study?.properties.support_url)" detail>
+              <ion-label>
+                  Support website
+              </ion-label>
+          </ion-item>
+      </div>
+      <div *ngIf="this.study?.properties.ethics?.length > 0 || this.study?.properties.pls?.length > 0">
+
+          <ion-label color="secondary" stacked class="title-label">
+            Ethics Information
+                </ion-label>
+          <ion-item lines="none" *ngIf="this.study?.properties.ethics?.length > 0">
+              <ion-label style="white-space: pre-wrap !important;" [innerHTML]="this.study?.properties.ethics" class="ion-text-wrap">
+              </ion-label>
+          </ion-item>
+          <ion-item lines="none" *ngIf="this.study?.properties.pls?.length > 0" (click)="openSupportURL(this.study?.properties.pls)" detail>
+              <ion-label>
+                  Plain Language Statement
+              </ion-label>
+          </ion-item>
+      </div>
+      <ion-label color="secondary" stacked class="title-label">
+        Withdraw
+            </ion-label>
+      <ion-item lines="none" (click)="withdrawFromStudy()" detail>
+          <ion-label>
+              Withdraw from study
+          </ion-label>
+      </ion-item>
+  </ion-item-group>
+  <br/>
+
+</ion-content>
