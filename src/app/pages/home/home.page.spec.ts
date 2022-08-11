@@ -60,7 +60,7 @@ describe('HomePage', () => {
   let TranslateServiceSpy: jasmine.SpyObj<TranslateService>;
 
   beforeEach(waitForAsync(() => {
-    const surveySpy = jasmine.createSpyObj('SurveyDataServiceSpy', ['logPageVisitToServer', 'uploadPendingData'])
+    const surveySpy = jasmine.createSpyObj('SurveyDataServiceSpy', ['logPageVisitToServer', 'uploadPendingData']);
     TestBed.configureTestingModule({
       declarations: [HomePage],
       imports: [

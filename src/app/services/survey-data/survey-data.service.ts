@@ -27,7 +27,7 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string) {
     return new Promise((resolve, reject) => {
-      let headers = { headers: new HttpHeaders({ timeout: `${7000}` })};
+      const headers = { headers: new HttpHeaders({ timeout: `${7000}` })};
       this.httpClient.get(surveyURL, headers)
       .subscribe({
         next: (data) => {
