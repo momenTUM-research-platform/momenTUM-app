@@ -527,7 +527,7 @@ export class SurveyPage implements OnInit {
           this.tasks[this.task_index].time
         ).format();
 
-        // get a timestmap of submission time in both readable and ms format
+        // get a timestamp of submission time in both readable and ms format
         const response_time = moment().format();
         this.tasks[this.task_index].response_time = response_time;
 
@@ -537,7 +537,7 @@ export class SurveyPage implements OnInit {
         // indicate that the current task is completed
         this.tasks[this.task_index].completed = true;
 
-        // add all of the responses to an object in the task to be sent to server
+        // add all the responses to an object in the task to be sent to server
         const responses: Responses = {};
         for (const section of this.survey.sections) {
           for (const question of section.questions) {
