@@ -16,4 +16,8 @@ describe('LoadingService', () => {
   it('expect to generate a message', () => {
     expect(service.present('test message')).toBeTruthy();
   });
+
+  it('expect to dismiss a message', () => {
+    expect(service.dismiss()).toBeTruthy();
+  });
 });

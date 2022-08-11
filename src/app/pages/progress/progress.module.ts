@@ -5,12 +5,14 @@ import { IonicModule } from '@ionic/angular';
 import { ProgressPageRoutingModule } from './progress-routing.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProgressPage } from './progress.page';
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
+    NgChartsModule,
     TranslateModule.forChild(),
     ProgressPageRoutingModule
   ],

@@ -2,7 +2,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'momentum.app',
-  appName: 'MomenTUM',
+  appName: 'momenTUM',
+
   webDir: 'www',
   bundledWebRuntime: false,
   cordova: {
