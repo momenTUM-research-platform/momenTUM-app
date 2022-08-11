@@ -23,7 +23,6 @@ export interface Module {
   type: string;
   name: string;
   submit_text: string;
-
   condition: string;
   alerts: {
     title: string;
@@ -95,14 +94,17 @@ interface Question {
 interface Instruction extends Question {
   type: 'instruction';
 }
+
 interface Text extends Question {
   type: 'text';
   subtype: 'short' | 'long' | 'numeric';
 }
+
 interface DateTime extends Question {
   type: 'datetime';
   subtype: 'date' | 'time' | 'datetime';
 }
+
 interface YesNo extends Question {
   type: 'yesno';
   yes_text: string;
@@ -111,6 +113,7 @@ interface YesNo extends Question {
   hide_value?: boolean;
   hide_if?: boolean;
 }
+
 interface Slider extends Question {
   type: 'slider';
   min: number;
@@ -121,6 +124,7 @@ interface Slider extends Question {
   hide_value?: string; //  prefix with < or > => <50
   hide_if?: boolean;
 }
+
 interface Multi extends Question {
   type: 'multi';
   radio: boolean;
@@ -132,12 +136,14 @@ interface Multi extends Question {
   hide_value?: string;
   hide_if?: boolean;
 }
+
 interface Media extends Question {
   type: 'media';
   subtype: 'image' | 'video' | 'audio';
   src: string;
   thumb: string;
 }
+
 interface External extends Question {
   type: 'external';
   src: string;
@@ -165,32 +171,25 @@ interface Task {
   locale: string;
   completed: boolean;
 }
+
 interface Option {
   text: string;
   checked: boolean;
 }
 
-type SurveyData =
-  | {
-      module_index: number;
-      module_name: string;
-      responses: Responses;
-      response_time: string;
-      response_time_in_ms: number;
-      alert_time: string;
-    }
-  | {
-      module_index: number;
-      module_name: string;
-      entries: number[];
-      response_time: string;
-      response_time_in_ms: number;
-      alert_time: string;
-    };
+interface SurveyData {
+  module_index: number;
+  module_name: string;
+  responses: Responses | number[];
+  response_time: string;
+  response_time_in_ms: number;
+  alert_time: string;
+}
 
 interface Responses {
   [id: string]: Question['response'];
 }
+
 interface LogEvent {
   timestamp: string;
   milliseconds: number;

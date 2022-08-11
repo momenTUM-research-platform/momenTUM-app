@@ -264,7 +264,7 @@ export class PvtPage implements OnInit {
     const surveyData = {
       module_index: this.moduleIndex,
       module_name: this.moduleName,
-      entries: this.reactionTimes,
+      responses: this.reactionTimes,
       response_time: moment().format(),
       response_time_in_ms: moment().valueOf(),
       alert_time: this.alertTime,
