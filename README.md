@@ -1,15 +1,58 @@
-# Initial Starter - MomenTUM App
+# MomenTUM
+
+The purpose of this document is to give the respective reader an overview of the general idea and implementation of the momenTUM mobile application and how it is built.
+
+**MomenTUM** is a cross-platform mobile application for collecting and monitoring intervention studies. It is licensed under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/).
+
+It supports:
+
+- A diverse range of elements, including slider, text input, date/time, audio, video, image, and more, with support for branching logic.
+- Flexible module scheduling, to deliver surveys and/or interventions to participants at random or fixed intervals.
+- Participant randomisation into distinct conditions with different modules and scheduling.
+- Study registration via scanning a QR code or directly entering protocol URL.
+- Dynamic feedback charts to track participant progress on specific variables.
+- Distributed architecture, such that study protocols and data can be stored on your own server.
+
+#### Technologies used for implementation:
+
+- [Ionic](https://ionicframework.com/) - Cross-platform mobile app development
+- [node.js](https://nodejs.org/en/) - Cross-platform JavaScript run-time environment
+- [Chart.js](Chart.js) - Open source HTML5 charts
+
+## Requirements Analysis
+
+### User requirements
+
+- A student/subject will have the option to use the reaction-time test.
+- A student/subject will have the option to see draft studies that they did not submit yet.
+- A student/subject will have access to see already submitted studies.
+- A student/subject can have access to see all the surveys in the study.
+
+### System requirements
+
+- A student/subject can view new and upcoming studies or already submitted/ongoing studies.
+- A student/subject has the option withdraw from the study
+- A student/subject can choose notification preferences.
+
+## Usecase Diagram
+
+<img src="https://i.postimg.cc/rmxzt3GF/Use-case.png" height="300">
+
+## Citation
+
+If you use schema in your own research, please cite the following:
+
+> Shatte, A. B. R., & Teague, S. J. (2020). schema: An open-source, distributed mobile platform for deploying mHealth research tools and interventions. BMC Medical Research Methodology, 20(1), 1-12. Retrieved from [https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-00973-5](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-00973-5)
+
+> Shatte, A. B. R., & Teague, S. J. (2019, June 12). schema (Version 1.0). Zenodo. http://doi.org/10.5281/zenodo.3243918
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3243918.svg)](https://doi.org/10.5281/zenodo.3243918)
+
+# Development
 
 This is an ionic-angular mobile application.
 This readme gives a step by step installation guide for the respective
 reader to follow along with building the app.
-
-# Usages
-
-Sample URLs:
-
-- https://tuspl22-momentum.srv.mwn.de/api/surveys/demo
-- https://ashatte.io/schema/sleep.json
 
 ## Installations
 
@@ -24,7 +67,10 @@ Sample URLs:
 
 #### 3. Install Ionic
 
-    $ sudo npm install -g @ionic/cli
+    $ npm install -g @ionic/cli
+    $ npm i -g cordova
+    $ npm i -g native-run
+    $ npm i -g @angular/cli
 
 #### 4. Make sure your installations are complete and working by running the following commands
 
@@ -32,7 +78,7 @@ Sample URLs:
 
 #### 5. Install node_modules
 
-    $ sudo npm i
+    $ npm i
 
 ### Useless
 
@@ -40,7 +86,7 @@ Sample URLs:
 
     $ ionic start [new-app-name] tabs --type=angular
 
-# Previewing
+## Previewing
 
 The following guide shows how to use Cordova to build for Browser, Android and iOS platform targets.
 <br>
