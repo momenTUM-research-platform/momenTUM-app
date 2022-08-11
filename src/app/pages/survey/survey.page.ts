@@ -79,7 +79,7 @@ export class SurveyPage implements OnInit {
     uuid: '',
     unlock_after: [],
     shuffle: false,
-  }
+  };
 
   questions: any;
 
@@ -116,12 +116,12 @@ export class SurveyPage implements OnInit {
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
-        (<HTMLElement>(
+        ((
           document.querySelector('iframe[src^="' + e.data.url + '"]')
-        )).style.height = `${e.data.frameHeight + 10}px`;
-        (<HTMLElement>(
+        ) as HTMLElement ).style.height = `${e.data.frameHeight + 10}px`;
+        ((
           document.querySelector('iframe[src^="' + e.data.url + '"]')
-        )).style.width = `99%`;
+        ) as HTMLElement ).style.width = `99%`;
       }
     });
 

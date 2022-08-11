@@ -3,7 +3,7 @@ import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
 import { LogEvent, Study, SurveyData } from 'types';
 
@@ -13,6 +13,7 @@ import { LogEvent, Study, SurveyData } from 'types';
 export class SurveyDataService {
   constructor(
     private httpClient: HttpClient,
+    private httpClient2: HttpClient,
     private http2: HTTP,
     private storage: Storage,
     private platform: Platform,
@@ -27,16 +28,23 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string) {
     return new Promise((resolve, reject) => {
-      this.http2.setRequestTimeout(7);
-      // Now a get request
-      this.http2
-        .get(surveyURL, { seed: 'f2d91e73' }, {})
-        .then((data) => {
-          resolve(data);
-        })
-        .catch((error) => {
-          console.log('Error message:' + error);
-          reject(error);
+      this.httpClient2
+        .get(surveyURL, { headers: new HttpHeaders({ timeout: `${20000}` }) })
+        .subscribe({
+          next: (v) => {
+            resolve(v);
+            console.log('Remote data: ' + v);
+          },
+          error: (error) => {
+            console.log('Error in get Remote Data ' + error || '');
+            resolve(false);
+            console.log('Error message:' + error);
+            reject(error);
+          },
+          complete: () => {
+            console.log('Complete');
+            resolve(true);
+          },
         });
     });
   }
