@@ -28,24 +28,23 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string) {
     return new Promise((resolve, reject) => {
-      this.httpClient2
-        .get(surveyURL, { headers: new HttpHeaders({ timeout: `${20000}` }) })
-        .subscribe({
-          next: (v) => {
-            resolve(v);
-            console.log('Remote data: ' + v);
-          },
-          error: (error) => {
-            console.log('Error in get Remote Data ' + error || '');
-            resolve(false);
-            console.log('Error message:' + error);
-            reject(error);
-          },
-          complete: () => {
-            console.log('Complete');
-            resolve(true);
-          },
-        });
+      const nheaders = { headers: new HttpHeaders({ timeout: `${7000}` })};
+      this.httpClient.get(surveyURL, nheaders)
+      .subscribe({
+        next: (data) => {
+          resolve(data);
+        },
+        error: (error) => {
+          console.info('Error in get Remote Data: ' + error || '');
+          reject(error);
+          resolve(false);
+        },
+        complete: () => {
+          console.info('Complete');
+          resolve(true);
+        },
+      });
+
     });
   }
 
