@@ -31,7 +31,7 @@ export class HomePage implements OnInit {
   // track whether the user is currently enrolled in a study
   isEnrolledInStudy = false;
   // stores the details of the study
-  study: Study | null = null; // this is defined as null because it is actually needed to render the html
+  study: Study | null = null;
   // stores the list of tasks to be completed by the user
   task_list: any[] = [];
   // dark mode
@@ -246,15 +246,12 @@ export class HomePage implements OnInit {
       const result = await this.surveyDataService.getRemoteData(url);
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
-      let validStudy: boolean;
-      // @ts-expect-error
+      // @ts-ignore
       const study: Study = JSON.parse(result.data);
       // checks if the returned text is parseable as JSON, and whether it contains
       // some of the key fields used by schema so it can determine whether it is
       // actually a schema study URL
-      // @ts-ignore
-
-      validStudy =
+      const validStudy =
         study.properties !== undefined && // @ts-ignore
         study.modules !== undefined && // @ts-ignore
         study.properties.study_id !== undefined;
