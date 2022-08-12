@@ -2,7 +2,7 @@
 
 The purpose of this document is to give the respective reader an overview of the general idea and implementation of the momenTUM mobile application and how it is built.
 
-**MomenTUM** is a cross-platform mobile application for collecting and monitoring intervention studies. It is licensed under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/).
+**momenTUM** is a cross-platform mobile application for collecting and monitoring intervention studies. It is licensed under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/).
 
 It supports:
 
