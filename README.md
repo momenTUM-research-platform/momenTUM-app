@@ -1,4 +1,4 @@
-# MomenTUM
+# momenTUM
 
 The purpose of this document is to give the respective reader an overview of the general idea and implementation of the momenTUM mobile application and how it is built.
 
