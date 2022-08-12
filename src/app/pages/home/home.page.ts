@@ -107,6 +107,10 @@ export class HomePage implements OnInit {
     this.statusBar.overlaysWebView(false);
     this.statusBar.backgroundColorByHexString('#0F2042');
 
+    //Initiallize theme and toggle accordingly
+    ChangeTheme.initializeTheme();
+    this.toggleTheme();
+
     // need to subscribe to this event in order
     // to ensure that the page will refresh every
     // time it is navigated to because ionViewWillEnter()
