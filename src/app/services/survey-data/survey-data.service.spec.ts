@@ -13,15 +13,28 @@ describe('SurveyDataService', () => {
   let service: SurveyDataService;
   let httpClient: HttpClient;
   let httpTestingController: HttpTestingController;
+  let angularStorageSpy: jasmine.SpyObj<Storage>;
 
   beforeEach(() => {
+    const spyStorage = jasmine.createSpyObj('Storage', [
+      'create',
+      'get',
+      'set',
+    ]);
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [ HTTP, Storage],
+      providers: [
+        HTTP,
+        {
+          provide: Storage,
+          useValue: spyStorage,
+        },
+      ],
     });
     service = TestBed.inject(SurveyDataService);
     httpClient = TestBed.inject(HttpClient);
     httpTestingController = TestBed.inject(HttpTestingController);
+    angularStorageSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
   });
 
   afterEach(() => {
@@ -53,7 +66,7 @@ describe('SurveyDataService', () => {
         conditions: ['Default'],
         cache: false,
         created_by: 'Study for the MPI melatonin validation study',
-      }
+      },
     };
 
     service
@@ -66,26 +79,54 @@ describe('SurveyDataService', () => {
         console.log(error);
       });
 
-    const mockRequest = httpTestingController.expectOne(
-      mockURL
-    );
+    const mockRequest = httpTestingController.expectOne(mockURL);
 
     expect(mockRequest.request.method).toEqual('GET');
 
     // Resolve with our mock data
     mockRequest.flush(mockResponse);
-
-
-
   });
 
   //async saveToLocalStorage(key, data)
+  it('should get save and get data from local storage', async () => {
+    const key = 'KEY';
+    const data = 'DATA';
+
+    const saved: any = angularStorageSpy.set(key, data);
+    const res: any = await service.saveToLocalStorage(key, data);
+
+    expect(res).toBe(saved);
+  });
 
   //sendSurveyDataToServer(surveyData)
+  it('should send survey data to the server', async () => {
+    const current_study_key = 'current-study';
+    const uuid_key = 'uuid';
+    const surveyData = {
+      module_index: 1,
+      module_name: "Test",
+      responses: {
+        ["id"]: "Test",
+      },
+      response_time: "Test",
+      response_time_in_ms: 1,
+      alert_time: "Test",
+    };
+
+    const saved_study: any =  await angularStorageSpy.set(current_study_key, "data");
+    const uuid_study: any =  await angularStorageSpy.set(current_study_key, "data");
+    const res: any = await service.sendSurveyDataToServer(surveyData);
+
+    expect(res).toBe("saved");
+  });
+
 
   //logPageVisitToServer(logEvent)
 
   //uploadPendingData(dataType)
 
   //attemptHttpPost(postURL, bodyData)
+  it('should attempt HTTP post', async () => {
+    //await service.attemptHttpPost();
+  });
 });

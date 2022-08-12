@@ -233,20 +233,20 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <ion-datetime *ngIf="question.subtype === 'datetime'" style="font-size:small;"
+                <ion-datetime color="blue" locale="de-DE" *ngIf="question.subtype === 'datetime'" style="font-size:small;"
                   [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY, hh:mm a"
                   (ionChange)="setAnswer(question)"></ion-datetime>
               </ion-col>
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <ion-datetime  *ngIf="question.subtype === 'date'" style="font-size:small;" [(ngModel)]="question.model"
+                <ion-datetime color="blue"  *ngIf="question.subtype === 'date'" style="font-size:small;" [(ngModel)]="question.model"
                   displayFormat="DDDD MMM DD, YYYY" (ionChange)="setAnswer(question)"></ion-datetime>
               </ion-col>
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <ion-datetime  *ngIf="question.subtype === 'time'" style="font-size:small;" [(ngModel)]="question.model"
+                <ion-datetime color="blue"  locale="de-DE" *ngIf="question.subtype === 'time'" style="font-size:small;" [(ngModel)]="question.model"
                   displayFormat="hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
               </ion-col>
             </ion-row>

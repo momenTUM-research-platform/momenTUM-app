@@ -17,6 +17,7 @@ import { TranslateConfigService } from '../../translate-config.service';
 import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-home',
@@ -36,6 +37,8 @@ export class HomePage implements OnInit {
   task_list: Array<any> = new Array();
   // dark mode
   darkMode = false;
+  //image
+  tum_image = "assets/imgs/tum-icon.png";
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
@@ -87,23 +90,22 @@ export class HomePage implements OnInit {
     if (ChangeTheme.getTheme() === 'light') {
       // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
+      this.tum_image = "assets/imgs/tum-light.png";
       ChangeTheme.setTheme(true);
-      this.darkMode = true;
+
     } else {
       // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'moon');
+      this.tum_image = "assets/imgs/tum-icon.png";
       ChangeTheme.setTheme(false);
-      this.darkMode = false;
     }
   }
 
   ngOnInit() {
     // set statusBar to be visible on Android
-    this.statusBar.styleLightContent();
+    // this.statusBar.styleLightContent();
+    this.statusBar.overlaysWebView(false);
     this.statusBar.backgroundColorByHexString('#0F2042');
-
-    // Theme set to the stored prefered type
-    ChangeTheme.initializeTheme();
 
     // need to subscribe to this event in order
     // to ensure that the page will refresh every
@@ -247,11 +249,15 @@ export class HomePage implements OnInit {
 
     try {
       const result = await this.surveyDataService.getRemoteData(url);
+
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
+      console.log('Enrolling in a study.... ');
       // @ts-expect-error
+
       const study: Study = JSON.parse(result.data);
+      console.log('Enrolling in a study.... ');
       // checks if the returned text is parseable as JSON, and whether it contains
       // some of the key fields used by schema so it can determine whether it is
       // actually a schema study URL
@@ -265,14 +271,28 @@ export class HomePage implements OnInit {
         console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
       }
-    } catch (e) {
-      // @ts-expect-error
-      console.log('JSON Invalid format: exception: ' + e.message, e);
+    } catch (e: any) {
+      console.log('JSON Invalid format: exception: ' + e);
       if (this.loadingService) {
         // Added this condition
         this.loadingService.dismiss();
       }
-      this.displayEnrolError(isQRCode);
+      switch (e.name) {
+        // ERROR in the JSON
+        case "SyntaxError":
+          this.displayEnrolError(isQRCode, true, false);
+          break;
+        // Error in the URL and request
+        case "HttpErrorResponse":
+          this.displayEnrolError(isQRCode, false, true);
+            break;
+
+        default:
+          break;
+      }
+      // This means invalid URL
+
+
     }
   }
   /**
@@ -451,7 +471,7 @@ export class HomePage implements OnInit {
    *
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
    */
-  async displayEnrolError(isQRCode: boolean) {
+  async displayEnrolError(isQRCode: boolean, isJSONinvalid: boolean, isURLproblem: boolean) {
     const msg = isQRCode
       ? "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code."
       : "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL or ID.";

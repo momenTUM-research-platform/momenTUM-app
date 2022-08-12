@@ -26,24 +26,40 @@ export class SurveyDataService {
    * @param surveyURL The web URL where a survey is hosted.
    */
   getRemoteData(surveyURL: string) {
-    return new Promise((resolve, reject) => {
-      const headers = { headers: new HttpHeaders({ timeout: `${7000}` })};
-      this.httpClient.get(surveyURL, headers)
-      .subscribe({
-        next: (data) => {
+    //{seed: 'f2d91e73'}
+    // return new Promise((resolve) => {
+    //   // Now a get request
+    //   this.httpClient
+    //     .get(surveyURL, {
+    //       headers: new HttpHeaders({
+    //         'Access-Control-Allow-Origin': '*',
+    //         'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT',
+    //         Accept: 'application/json',
+    //         'content-type': 'application/json',
+    //         timeout: `${7000}`,
+    //       }),
+    //       params: { seed: 'f2d91e73' },
+    //     })
+    //     .toPromise()
+    //     .then((data) => {
+    //       resolve(data);
+    //     })
+    //     .catch((error) => {
+    //       console.log('Error message: %j', error);
+    //       resolve(error);
+    //     });
+    // });
+    return new Promise(resolve => {
+      this.http2.setRequestTimeout(7);
+      // Now a get request
+      this.http2.get(surveyURL, {seed: 'f2d91e73'}, {}).then(data => {
           resolve(data);
-        },
-        error: (error) => {
-          console.info('Error in get Remote Data: ' + error || '');
-          reject(error);
-          resolve(false);
-        },
-        complete: () => {
-          console.info('Complete');
-          resolve(true);
-        },
+
+        }).catch(error => {
+          console.log('Error message:' + error);
+          resolve(error);
+        });
       });
-    });
   }
 
   /**
@@ -53,7 +69,7 @@ export class SurveyDataService {
    * @param data
    */
   async saveToLocalStorage(key: string, data: string) {
-    this.storage.set(key, data);
+    return await this.storage.set(key, data);
   }
 
   /**

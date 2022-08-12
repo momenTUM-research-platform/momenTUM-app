@@ -19,14 +19,13 @@
   </ion-refresher>
 
   <!-- Displayed if user is not enrolled in a study -->
-  <ion-img src="assets/imgs/tum-light.png" *ngIf="darkMode" [hidden]="hideEnrolOptions" class="enrolment-img-dark">
+  <ion-img src="{{tum_image}}" [hidden]="hideEnrolOptions" class="enrolment-img-light">
   </ion-img>
-  <ion-img src="assets/imgs/tum-icon.png" *ngIf="!darkMode" [hidden]="hideEnrolOptions" class="enrolment-img-light">
-  </ion-img>
+
   <div [hidden]="hideEnrolOptions" style="margin-top:5%">
     <h1 style="text-align:center;">Let's get started</h1>
     <p class="welcome-msg">
-      Welcome to <span style="color:#0065BD;">momenTUM</span> - a platform to participate in research surveys directly
+      Welcome to <span style="color:#3070b3;">momenTUM</span> - a platform to participate in research surveys directly
       from your smartphone.
     </p>
   </div>
