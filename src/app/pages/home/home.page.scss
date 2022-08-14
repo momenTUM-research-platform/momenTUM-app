@@ -90,3 +90,12 @@ ion-item {
 ion-list {
   --ion-item-background: transparent;
 }
+
+// this class is used for links such as the privacy policy one on the home page. Maybe this could be global since its reusable?
+.link {
+  color:#0065BD;
+
+}
+.link:hover {
+  color: #989aa2;
+}

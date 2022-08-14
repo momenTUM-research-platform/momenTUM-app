@@ -17,6 +17,8 @@ import { TranslateConfigService } from '../../translate-config.service';
 import { Study } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
+import { ViewChild } from '@angular/core';
+import { IonModal } from '@ionic/angular';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +26,8 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
+  @ViewChild(IonModal) modal: IonModal;
+
   // resume event subscription
   resumeEvent: any;
   // flag to display enrol options
@@ -482,5 +486,13 @@ export class HomePage implements OnInit {
     setTimeout(() => {
       refresher.target.complete();
     }, 250);
+  }
+
+  cancel() {
+    this.modal.dismiss(null, 'cancel');
+  }
+
+  confirm() {
+    this.modal.dismiss(null, 'confirm');
   }
 }

@@ -1,7 +1,6 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-title>
-
       <span class="header-title-thin">momenTUM</span>
     </ion-title>
     <ion-buttons slot="secondary">
@@ -27,7 +26,7 @@
     <h1 style="text-align:center;">Let's get started</h1>
     <p class="welcome-msg">
       Welcome to <span style="color:#0065BD;">momenTUM</span> - a platform to participate in research surveys directly
-      from your smartphone.
+      from your smartphone. Please read our <span id="open-modal" class="link">privacy policy</span>qq and confirm, before using the app.
     </p>
   </div>
   <!-- Displays if user is enrolled in a study -->
@@ -61,6 +60,31 @@
     </ion-item>
 
   </div>
+
+  <!-- Privacy Policy -->
+  <ion-modal trigger="open-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-buttons slot="start">
+            <ion-button (click)="cancel()">Cancel</ion-button>
+          </ion-buttons>
+            <ion-title>
+              <span class="header-title-thick">PRIVACY POLICY</span>
+            </ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-textarea>
+          this is a sample privacy policy text.
+        </ion-textarea>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>
 
 <ion-footer [hidden]="hideEnrolOptions">
@@ -80,4 +104,5 @@
       <ion-button expand="fill" size="medium" color="secondary">Study ID</ion-button>
     </ion-label>
   </ion-item>
+
 </ion-footer>
