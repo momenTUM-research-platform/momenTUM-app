@@ -197,3 +197,17 @@ interface LogEvent {
   event: string;
   module_index: any;
 }
+
+interface Translations {
+  btn_cancel: string;
+  btn_dismiss: string;
+  btn_enrol: string;
+  'btn_enter-url': string;
+  'btn_study-id': string;
+  'error_loading-qr-code': string;
+  'error_loading-study': string;
+  heading_error: string;
+  label_loading: string;
+  msg_caching: string;
+  msg_camera: string;
+}
