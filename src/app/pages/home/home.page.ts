@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, QueryList} from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
@@ -14,10 +14,10 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { Study } from 'types';
+import {Study, Translations} from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
-import { ViewChild } from '@angular/core';
+import { ViewChildren } from '@angular/core';
 import { IonModal } from '@ionic/angular';
 
 @Component({
@@ -26,8 +26,9 @@ import { IonModal } from '@ionic/angular';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  @ViewChild(IonModal) modal: IonModal;
 
+  // the privacy policy modal and the info modals
+  @ViewChildren(IonModal) modals: QueryList<IonModal>;
   // resume event subscription
   resumeEvent: any;
   // flag to display enrol options
@@ -41,10 +42,11 @@ export class HomePage implements OnInit {
   // dark mode
   darkMode = false;
 
+
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
   // is loaded successfully
-  translations = {
+  translations: Translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
     btn_enrol: 'Enrol',
@@ -133,24 +135,13 @@ export class HomePage implements OnInit {
     // check if dark mode
     this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // load the correct translations for dynamic labels/messages
-    const labels = [
-      'btn_cancel',
-      'btn_dismiss',
-      'btn_enrol',
-      'btn_enter-url',
-      'btn_study-id',
-      'error_loading-qr-code',
-      'error_loading-study',
-      'heading_error',
-      'label_loading',
-      'msg_caching',
-      'msg_camera',
-    ];
-    // @ts-ignore
-    this.translate.get(labels).subscribe((res) => {
-      this.translations = res;
-    });
+    // translate
+    let key: keyof Translations;
+    for (key in this.translations) {
+      await this.translate.get(key).subscribe((res) => {
+        this.translations[key] = res;
+      });
+    }
 
     this.localNotifications.requestPermission();
 
@@ -330,6 +321,7 @@ export class HomePage implements OnInit {
    * Handles the alert dialog to enrol via Study ID
    */
   async enterStudyID() {
+    console.log(this.translations.btn_cancel)
     const alert = await this.alertController.create({
       header: this.translations['btn_study-id'],
       cssClass: 'alertStyle',
@@ -488,11 +480,16 @@ export class HomePage implements OnInit {
     }, 250);
   }
 
-  cancel() {
-    this.modal.dismiss(null, 'cancel');
-  }
-
-  confirm() {
-    this.modal.dismiss(null, 'confirm');
+  /**
+   * Handles the info and privacy policy modal's cancel buttons.
+   * @param modal defines which modal needs to be canceled.
+   * */
+  cancel(modal: 'info' | 'privacy policy') {
+    if (modal === 'info') {
+      this.modals.toArray()[1].dismiss(null, 'cancel');
+    }
+    else {
+      this.modals.toArray()[0].dismiss(null, 'cancle');
+    }
   }
 }

@@ -11,7 +11,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="page-home ion-no-padding" scroll="false">
+<ion-content class="page-home ion-no-padding" scroll-y="false">
   <ion-refresher [hidden]="!hideEnrolOptions" slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content color="primary" pullingIcon="arrow-dropdown" refreshingSpinner="crescent">
     </ion-refresher-content>
@@ -25,8 +25,8 @@
   <div [hidden]="hideEnrolOptions" style="margin-top:5%">
     <h1 style="text-align:center;">Let's get started</h1>
     <p class="welcome-msg">
-      Welcome to <span style="color:#0065BD;">momenTUM</span> - a platform to participate in research surveys directly
-      from your smartphone. Please read our <span id="open-modal" class="link">privacy policy</span>qq and confirm, before using the app.
+      Welcome to <span id="open-info" class="link">momenTUM</span> - a platform to participate in research surveys directly
+      from your smartphone. Please read our <span id="open-privacy-policy" class="link">privacy policy</span> and confirm, before using the app.
     </p>
   </div>
   <!-- Displays if user is enrolled in a study -->
@@ -62,19 +62,16 @@
   </div>
 
   <!-- Privacy Policy -->
-  <ion-modal trigger="open-modal">
+  <ion-modal trigger="open-privacy-policy">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
           <ion-buttons slot="start">
-            <ion-button (click)="cancel()">Cancel</ion-button>
+            <ion-button (click)="cancel('privacy policy')">Cancel</ion-button>
           </ion-buttons>
             <ion-title>
-              <span class="header-title-thick">PRIVACY POLICY</span>
+              <span class="header-title-thin">Privacy Policy</span>
             </ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
-          </ion-buttons>
         </ion-toolbar>
       </ion-header>
       <ion-content class="ion-padding">
@@ -84,6 +81,37 @@
       </ion-content>
     </ng-template>
   </ion-modal>
+
+  <!-- Info Page -->
+  <ion-modal trigger="open-info">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-buttons slot="start">
+            <ion-button (click)="cancel('info')">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>
+            <span class="header-title-thin">Info</span>
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-textarea>
+          If you downloaded momenTUM, you either want to conduct a study,
+          or you're someone, who was told to participate in a study.
+          If you were told to participate in a study,
+          momenTUM will be easy to use:
+          Just enter the study link / QR Code / study ID that has been given to you, and click enter.
+          If you want to create your own study, you have to do some preparation.
+          You have to set up a server according to our API,
+          then you will be ready to distribute your own study links.
+          For more information check out our Github, or contact us.
+          github repo:
+        </ion-textarea>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 
 </ion-content>
 
