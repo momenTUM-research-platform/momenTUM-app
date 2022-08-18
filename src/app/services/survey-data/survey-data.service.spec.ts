@@ -49,7 +49,7 @@ describe('SurveyDataService', () => {
 
   it('should get remote data from survey URL', () => {
     const mockURL =
-      'http://tuspl22-momentum.srv.mwn.de/api/v1/study/mpi_melatonin_validation_2022';
+      'http://tuspl22-momentum.srv.mwn.de/api/v1/study/mpi_melatonin_validation_2022?seed=f2d91e73';
     const mockResponse = {
       properties: {
         study_id: 'mpi_melatonin_validation_2022',
@@ -75,7 +75,7 @@ describe('SurveyDataService', () => {
         expect(res).toBeTruthy();
         expect(res.properties).toBe(mockResponse.properties);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.log(error);
       });
 

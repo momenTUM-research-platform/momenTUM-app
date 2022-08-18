@@ -257,8 +257,7 @@ export class HomePage implements OnInit {
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
-      console.log('Enrolling in a study.... ');
-      // @ts-expect-error
+      console.log('Enrolling in a study.... %j', result.data);
 
       const study: Study = JSON.parse(result.data);
       console.log('Enrolling in a study.... ');
