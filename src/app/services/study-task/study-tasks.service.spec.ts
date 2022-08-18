@@ -121,7 +121,7 @@ describe('StudyTasksService', () => {
     // returns a study task and also stores it in the storage
     const response: object[] = await service.generateStudyTasks(study);
 
-    angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
+    //angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
 
     expect(response[0])
       .withContext('response was same as stubValue')

@@ -154,7 +154,6 @@ export class StudyTasksService {
    */
   async getAllTasks(): Promise<Task[]> {
     const tasks = await this.storage.get('study-tasks');
-
     return tasks;
   }
 

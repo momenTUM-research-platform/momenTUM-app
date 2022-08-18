@@ -49,7 +49,7 @@ describe('SurveyDataService', () => {
 
   it('should get remote data from survey URL', () => {
     const mockURL =
-      'http://tuspl22-momentum.srv.mwn.de/api/v1/study/mpi_melatonin_validation_2022?seed=f2d91e73';
+      'http://tuspl22-momentum.srv.mwn.de/api/v1/study/mpi_melatonin_validation_2022';
     const mockResponse = {
       properties: {
         study_id: 'mpi_melatonin_validation_2022',
@@ -79,7 +79,9 @@ describe('SurveyDataService', () => {
         console.log(error);
       });
 
-    const mockRequest = httpTestingController.expectOne(mockURL);
+    const mockRequest = httpTestingController.expectOne(
+      mockURL + '?seed=f2d91e73'
+    );
 
     expect(mockRequest.request.method).toEqual('GET');
 
@@ -92,8 +94,8 @@ describe('SurveyDataService', () => {
     const key = 'KEY';
     const data = 'DATA';
 
-    const saved: any = angularStorageSpy.set(key, data);
     const res: any = await service.saveToLocalStorage(key, data);
+    const saved: any = await service.getFromLocalStorage(key);
 
     expect(res).toBe(saved);
   });
@@ -104,22 +106,30 @@ describe('SurveyDataService', () => {
     const uuid_key = 'uuid';
     const surveyData = {
       module_index: 1,
-      module_name: "Test",
+      module_name: 'Test',
       responses: {
-        ["id"]: "Test",
+        ['id']: 'Test',
       },
-      response_time: "Test",
+      response_time: 'Test',
       response_time_in_ms: 1,
-      alert_time: "Test",
+      alert_time: 'Test',
     };
 
-    const saved_study: any =  await angularStorageSpy.set(current_study_key, "data");
-    const uuid_study: any =  await angularStorageSpy.set(current_study_key, "data");
-    const res: any = await service.sendSurveyDataToServer(surveyData);
+    const saved_study: any = await service.saveToLocalStorage(
+      current_study_key,
+      'data'
+    );
+    const uuid_study: any = await service.saveToLocalStorage(
+      current_study_key,
+      'data'
+    );
+    const saved_s: any = await service.getFromLocalStorage(current_study_key);
+    const saved_u: any = await service.getFromLocalStorage(uuid_study);
 
-    expect(res).toBe("saved");
+
+    expect(saved_study).toBe(saved_s);
+    expect(uuid_study).toBe(saved_u);
   });
-
 
   //logPageVisitToServer(logEvent)
 

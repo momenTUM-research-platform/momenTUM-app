@@ -41,19 +41,17 @@ export class SurveyDataService {
           params: { seed: 'f2d91e73' },
         })
         .subscribe(
-          val => {
-              console.log("PUT call successful value returned in body",
-                          val);
+          (val) => {
+            console.log('PUT call successful value returned in body', val);
           },
-          response => {
-              console.log("PUT call in error", response);
+          (response) => {
+            console.log('PUT call in error', response);
           },
           () => {
-              console.log("The PUT observable is now completed.");
+            console.log('The PUT observable is now completed.');
           }
-      );
+        );
     });
-
   }
 
   /**
@@ -67,6 +65,18 @@ export class SurveyDataService {
   }
 
   /**
+   * Saves data to local storage
+   *
+   * @param key
+   * @param data
+   */
+  async getFromLocalStorage(key: string): Promise<any> {
+    const data = await this.storage.get(key);
+    console.log('Data from storage is: ' + data);
+    return data;
+  }
+
+  /**
    * Attempts to submit a survey response to the server, and if unsuccessful saves it for later attempts
    *
    * @param surveyData An object containing all metadata about a survey response
@@ -77,8 +87,12 @@ export class SurveyDataService {
       this.storage.get('uuid'),
       this.studyTasksService.getAllTasks(),
     ]).then((values) => {
+      console.log('studyJSON IS: ' + values[0]);
+      console.log('UUID IS: ' + values[1]);
+
       const studyJSON = JSON.parse(values[0]);
       const uuid = values[1];
+
       const tasks = values[2];
       const dataUuid = this.uuidService.generateUUID('pending-data');
 

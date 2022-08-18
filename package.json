@@ -64,7 +64,7 @@
     "ng2-charts": "^4.0.0",
     "phonegap-plugin-barcodescanner": "8.0.1",
     "rm": "0.1.8",
-    "rxjs": "^6.5.3",
+    "rxjs": "^7.5.3",
     "sass-loader": "^13.0.2",
     "storage-angular": "^0.0.1",
     "tslib": "^2.4.0",
