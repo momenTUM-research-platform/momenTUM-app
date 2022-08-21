@@ -66,8 +66,8 @@
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
-          <ion-buttons slot="start">
-            <ion-button (click)="cancel('privacy policy')">Cancel</ion-button>
+          <ion-buttons slot="end">
+            <ion-button (click)="confirm()">Confirm</ion-button>
           </ion-buttons>
             <ion-title>
               <span class="header-title-thin">Privacy Policy</span>
@@ -88,7 +88,7 @@
       <ion-header>
         <ion-toolbar color="primary">
           <ion-buttons slot="start">
-            <ion-button (click)="cancel('info')">Cancel</ion-button>
+            <ion-button (click)="exit()">Exit</ion-button>
           </ion-buttons>
           <ion-title>
             <span class="header-title-thin">Info</span>
@@ -97,16 +97,7 @@
       </ion-header>
       <ion-content class="ion-padding">
         <ion-textarea>
-          If you downloaded momenTUM, you either want to conduct a study,
-          or you're someone, who was told to participate in a study.
-          If you were told to participate in a study,
-          momenTUM will be easy to use:
-          Just enter the study link / QR Code / study ID that has been given to you, and click enter.
-          If you want to create your own study, you have to do some preparation.
-          You have to set up a server according to our API,
-          then you will be ready to distribute your own study links.
-          For more information check out our Github, or contact us.
-          github repo:
+          this is a sample information text
         </ion-textarea>
       </ion-content>
     </ng-template>

@@ -68,6 +68,9 @@ export class HomePage implements OnInit {
   // the current language of the device
   selectedLanguage: string;
 
+  // privacy policy confirmed
+  ppConfirmed: boolean;
+
   constructor(
     private barcodeScanner: BarcodeScanner,
     private surveyDataService: SurveyDataService,
@@ -202,8 +205,11 @@ export class HomePage implements OnInit {
         this.storage.set('uuid-set', true);
         // set a flag that notifications are enabled
         this.storage.set('notifications-enabled', true);
+        // present the privacy policy page
+        this.modals.toArray()[0].present();
       }
     });
+
   }
 
   /**
@@ -263,6 +269,7 @@ export class HomePage implements OnInit {
       this.displayEnrolError(isQRCode);
     }
   }
+
   /**
    * Uses the barcode scanner to enrol in a study
    */
@@ -481,15 +488,16 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Handles the info and privacy policy modal's cancel buttons.
-   * @param modal defines which modal needs to be canceled.
+   * Handles the info page exit button.
    * */
-  cancel(modal: 'info' | 'privacy policy') {
-    if (modal === 'info') {
-      this.modals.toArray()[1].dismiss(null, 'cancel');
-    }
-    else {
-      this.modals.toArray()[0].dismiss(null, 'cancle');
-    }
+  exit() {
+    this.modals.toArray()[1].dismiss(null, 'cancel');
+  }
+
+  /**
+   * Handles the privacy policy confirm button.
+   * */
+  confirm() {
+    this.modals.toArray()[0].dismiss(null, 'confirm');
   }
 }
