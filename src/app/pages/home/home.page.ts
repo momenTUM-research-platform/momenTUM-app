@@ -14,7 +14,7 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import {Study, Translations} from 'types';
+import { Study, Translations } from 'types';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
 import { ViewChildren } from '@angular/core';
@@ -27,7 +27,7 @@ import { IonModal } from '@ionic/angular';
 })
 export class HomePage implements OnInit {
 
-  // the privacy policy modal and the info modals
+  // the privacy policy modal at index 0 of the list and the info modal at index 1
   @ViewChildren(IonModal) modals: QueryList<IonModal>;
   // resume event subscription
   resumeEvent: any;
@@ -41,7 +41,6 @@ export class HomePage implements OnInit {
   task_list: any[] = [];
   // dark mode
   darkMode = false;
-
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
@@ -63,13 +62,8 @@ export class HomePage implements OnInit {
       'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
   };
 
-  safeURL: string;
-
   // the current language of the device
   selectedLanguage: string;
-
-  // privacy policy confirmed
-  ppConfirmed: boolean;
 
   constructor(
     private barcodeScanner: BarcodeScanner,
@@ -138,10 +132,10 @@ export class HomePage implements OnInit {
     // check if dark mode
     this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // translate
+    // translate text
     let key: keyof Translations;
     for (key in this.translations) {
-      await this.translate.get(key).subscribe((res) => {
+      this.translate.get(key).subscribe((res) => {
         this.translations[key] = res;
       });
     }
@@ -155,12 +149,11 @@ export class HomePage implements OnInit {
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
-    try {
-      await this.storage.get('uuid');
-    } catch {
+    await this.storage.get('uuid')
+      .catch(() => {
       console.log('Storage did not exist, creating');
-      await this.storage.create();
-    }
+      return this.storage.create();
+    });
     Promise.all([this.storage.get('current-study')]).then((values) => {
       const studyObject = values[0];
       if (studyObject !== null) {
@@ -185,13 +178,15 @@ export class HomePage implements OnInit {
 
         // load the study tasks
         this.loadStudyDetails();
-      } else {
+      }
+      else {
         this.hideEnrolOptions = false;
         if (this.loadingService) {
           // Added this condition
           this.loadingService.dismiss();
         }
       }
+
     });
 
     // on first run, generate a UUID for the user
