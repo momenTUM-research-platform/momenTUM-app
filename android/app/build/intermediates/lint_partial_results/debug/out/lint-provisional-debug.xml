@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 7.2.2" type="conditional_incidents">
+
+    <incident
+        id="UnusedAttribute"
+        severity="warning"
+        message="">
+        <fix-data requiresApi="23"/>
+        <location
+            file="${:app*debug*sourceProvider*0*manifest*0}"
+            line="11"
+            column="9"
+            startOffset="409"
+            endLine="11"
+            endColumn="44"
+            endOffset="444"/>
+        <map>
+            <entry
+                name="minSdk"
+                int="22"/>
+            <entry
+                name="requiresApi"
+                int="23"/>
+            <entry
+                name="message"
+                string="Attribute `usesCleartextTraffic` is only used in API level 23 and higher (current min is %1$d)"/>
+        </map>
+    </incident>
+
+</incidents>
