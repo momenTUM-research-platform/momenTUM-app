@@ -150,7 +150,7 @@ export class HomePage implements OnInit {
 
     // check if user is currently enrolled in study
     try {
-      await this.storage.get('uuid')
+      await this.storage.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
       await this.storage.create();
