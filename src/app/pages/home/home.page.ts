@@ -149,11 +149,12 @@ export class HomePage implements OnInit {
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
-    await this.storage.get('uuid')
-      .catch(() => {
+    try {
+      await this.storage.get('uuid')
+    } catch {
       console.log('Storage did not exist, creating');
-      return this.storage.create();
-    });
+      await this.storage.create();
+    }
     Promise.all([this.storage.get('current-study')]).then((values) => {
       const studyObject = values[0];
       if (studyObject !== null) {
@@ -323,7 +324,6 @@ export class HomePage implements OnInit {
    * Handles the alert dialog to enrol via Study ID
    */
   async enterStudyID() {
-    console.log(this.translations.btn_cancel)
     const alert = await this.alertController.create({
       header: this.translations['btn_study-id'],
       cssClass: 'alertStyle',
