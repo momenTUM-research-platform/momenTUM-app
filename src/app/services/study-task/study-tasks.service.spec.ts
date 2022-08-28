@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { StudyTasksService } from './study-tasks.service';
 import { Storage } from '@ionic/storage-angular';
-import { Task, Study } from 'types';
+import { Task, Study } from '../../models/types';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;

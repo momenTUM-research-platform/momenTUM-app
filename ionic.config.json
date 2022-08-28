@@ -1,10 +1,7 @@
 {
-  "name": "momenTUM",
+  "name": "momenTUM-final",
   "integrations": {
-    "capacitor": {
-      "enabled": false
-    },
-    "cordova": {}
+    "capacitor": {}
   },
   "type": "angular"
 }

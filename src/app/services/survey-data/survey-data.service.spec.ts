@@ -46,7 +46,6 @@ describe('SurveyDataService', () => {
   });
 
   //getRemoteData(surveyURL: string)
-
   it('should get remote data from survey URL', () => {
     const mockURL =
       'http://tuspl22-momentum.srv.mwn.de/api/v1/study/mpi_melatonin_validation_2022';
@@ -124,11 +123,14 @@ describe('SurveyDataService', () => {
       'data'
     );
     const saved_s: any = await service.getFromLocalStorage(current_study_key);
-    const saved_u: any = await service.getFromLocalStorage(uuid_study);
+    const saved_u: any = await service.sendSurveyDataToServer(uuid_study);
 
 
     expect(saved_study).toBe(saved_s);
     expect(uuid_study).toBe(saved_u);
+
+
+
   });
 
   //logPageVisitToServer(logEvent)

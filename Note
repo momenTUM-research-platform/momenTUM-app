@@ -1,0 +1,145 @@
+Functions to be
+
+1. Unit-testing
+    Pages:
+      1. Home
+        [x] Oncreate or ngOnInit
+        [] ionViewWillEnter()
+        [] attemptToDownloadStudy
+        [] scanBarcode
+        [] enterURL
+        [] enterStudyID
+        [] enrolInStudy
+        [] loadStudyDetails
+        [] displayEnrolError
+        [] displayBarcodeError
+        [] sortTasksList
+        [] doRefresh
+
+      2. Progress
+        [x] Oncreate or ngOnInit
+        [] ionViewWillEnter
+        [] diffDays
+        [] ionViewWillLeave
+
+      3. PVT
+        [x] Oncreate or ngOnInit
+        [] start
+        [] exit
+        [] navHome
+        [] countdown
+        [] RTT
+        [] runTimer
+        [] handleResult
+        [] instructionRTT
+        [] runInstructionTimer
+        [] setUpVariables
+        [] getModule
+        [] submit
+        [] getUniformRand
+
+      4. Settings
+        [x] Oncreate or ngOnInit
+        [] ionViewWillEnter
+        [] ionViewWillLeave
+        [] withdrawFromStudy
+        [] openSupportURL
+        [] openSupportEmail
+
+      5. Survey
+        [x] Oncreate or ngOnInit
+        [] back
+        [] setupQuestionVariables
+        [] setAnswer
+        [] changeCheckStatus
+        [] openExternalFile
+        [] toggleDynamicQuestions
+        [] submit
+        [] shuffle
+
+    Services:
+      1. Loading
+        [x] Oncreate or ngOnInit
+        [x] present
+        [x] dismiss
+
+      2. Study Task
+        [x] Oncreate or ngOnInit
+        [x] generateStudyTasks
+        [x] getAllTasks
+        [x] getTaskDisplayList
+        [] checkTaskIsUnlocked
+
+      3. Survey Cache
+        [x] Oncreate or ngOnInit
+        [x] downloadFile
+        [x] getMediaURLs
+        [] cacheAllMedia
+        [] downloadAllMedia
+        [] checkIfFinished
+        [] updateMediaURLsInStudy
+
+      4. Survey Data
+        [x] Oncreate or ngOnInit
+        [x] getRemoteData
+        [x] saveToLocalStorage
+        [x] getFromLocalStorage
+        [] sendSurveyDataToServer
+        [] logPageVisitToServer
+        [] uploadPendingData
+        [] attemptHttpPost
+
+      5. UUID
+        [x] Oncreate or ngOnInit
+        [] generateUUID
+
+
+
+2. End-to-End testing
+    Pages:
+      1. Home
+        [x] Oncreate or ngOnInit
+        [] scanBarcode
+        [] enterURL
+        [] enterStudyID
+        [] enrolInStudy
+        [] displayEnrolError
+        [] displayBarcodeError
+        [] doRefresh
+      2. PVT
+        [x] Oncreate or ngOnInit
+        [] start
+        [] exit
+        [] submit
+        [] navHome
+
+      3. Settings
+        [x] Oncreate or ngOnInit
+        [] withdrawFromStudy
+        [] openSupportURL
+        [] openSupportEmail
+        [] toggleNotifications
+
+      4. Survey
+        [x] Oncreate or ngOnInit
+        [] showToast
+        [] ngOnInit
+        [] back
+        [] setupQuestionVariables
+        [] setAnswer
+        [] changeCheckStatus
+        [] openExternalFile
+        [] toggleDynamicQuestions
+        [] submit
+        [] shuffle
+      5. PVT
+        [x] Oncreate or ngOnInit
+
+    Services:
+      1. Notification
+        [x] Oncreate or ngOnInit
+        [] scheduleDummyNotification
+        [] scheduleNotification
+        [] cancelAllNotifications
+        [] setNext30Notifications
+        [] checkTaskIsUnlocked

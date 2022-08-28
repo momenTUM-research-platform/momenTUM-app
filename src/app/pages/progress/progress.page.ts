@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Storage } from '@ionic/storage';
 import * as moment from 'moment';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-progress',
@@ -82,7 +82,7 @@ export class ProgressPage {
   ];
 
   constructor(
-    private storage: Storage,
+    private storage: StorageService,
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
     private translateConfigService: TranslateConfigService
@@ -105,11 +105,11 @@ export class ProgressPage {
       const enrolmentDate = values[1];
 
       if (studyObject !== null) {
-        this.studyJSON = JSON.parse(studyObject);
+        this.studyJSON = JSON.parse(studyObject.toString());
         this.enrolledInStudy = true;
 
         // calculate the study day
-        this.studyDay = this.diffDays(new Date(enrolmentDate), new Date());
+        this.studyDay = this.diffDays(new Date(enrolmentDate.toString()), new Date());
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({

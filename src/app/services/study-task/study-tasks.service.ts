@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
-import { Study, Task } from 'types';
+import { Study, Task } from '../../models/types';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudyTasksService {
-  constructor(private storage: Storage) {}
+  constructor(private storage: StorageService) {}
 
   /**
    * Creates a list of tasks (e.g. surveys, interventions) based on their
@@ -154,14 +154,16 @@ export class StudyTasksService {
    */
   async getAllTasks(): Promise<Task[]> {
     const tasks = await this.storage.get('study-tasks');
-    return tasks;
+    return  JSON.parse(tasks.toString());
   }
 
   /**
    * Gets the tasks that are currently available for the user to complete
    */
   async getTaskDisplayList(): Promise<Task[]> {
-    const study_tasks = await this.storage.get('study-tasks');
+    const study_tasks: Task[] = JSON.parse(
+      (await this.storage.get('study-tasks')).toString()
+    );
     let tasks_to_display = [];
     const sticky_tasks = [];
     const time_tasks = [];

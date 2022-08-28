@@ -3,7 +3,6 @@ import { SurveyDataService } from '../../services/survey-data/survey-data.servic
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { Storage } from '@ionic/storage-angular';
 
 @Component({
   selector: 'app-pvt',

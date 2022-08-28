@@ -5,8 +5,8 @@ import {
 } from '@ionic-native/file-transfer/ngx';
 import { LoadingService } from '../loading/loading-service.service';
 import { File, FileEntry } from '@ionic-native/file/ngx';
-import { Storage } from '@ionic/storage-angular';
-import { Media, Study } from 'types';
+import { Media, Study } from '../../models/types';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +24,7 @@ export class SurveyCacheService {
   constructor(
     private fileTransfer: FileTransfer,
     private file: File,
-    private storage: Storage,
+    private storage: StorageService,
     private loadingService: LoadingService
   ) {}
 
@@ -123,7 +123,7 @@ export class SurveyCacheService {
   updateMediaURLsInStudy() {
     this.storage.get('current-study').then((studyString) => {
       try {
-        const studyObject = JSON.parse(studyString);
+        const studyObject = JSON.parse(studyString.toString());
         // update the banner url first
         // @ts-ignore
         studyObject.properties.banner_url = this.localMediaURLs.banner;

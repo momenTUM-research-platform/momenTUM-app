@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
 import { NavController, AlertController } from '@ionic/angular';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-settings',
@@ -39,7 +39,7 @@ export class SettingsPage {
   };
 
   constructor(
-    private storage: Storage,
+    private storage: StorageService,
     private navController: NavController,
     private alertController: AlertController,
     private iab: InAppBrowser,
@@ -66,16 +66,16 @@ export class SettingsPage {
       if (studyObject !== null) {
         console.log('I found a study!');
         this.isEnrolled = true;
-        this.study = JSON.parse(studyObject);
+        this.study = JSON.parse(studyObject.toString());
       } else {
         this.isEnrolled = false;
       }
 
       // get the uuid from storage to display in the list
-      this.uuid = values[1];
+      this.uuid = values[1].toString();
 
       // get the status of the notifications
-      const notificationsEnabled = values[2];
+      const notificationsEnabled = values[2] as unknown as boolean;
       if (notificationsEnabled === null) {
         this.notificationsEnabled = false;
       } else {
@@ -136,11 +136,11 @@ export class SettingsPage {
                 this.surveyDataService.uploadPendingData('pending-data')
               )
               .then(
-                () => this.storage.remove('current-study')
+                () => this.storage.removeItem('current-study')
                 // then remove all the pending study tasks from storage
               )
               .then(
-                () => this.storage.remove('study-tasks')
+                () => this.storage.removeItem('study-tasks')
                 // then cancel all remaining notifications and navigate to home
               )
               .then(() => {

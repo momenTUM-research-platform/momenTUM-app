@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
-import { Task } from 'types';
+import { Task } from '../../models/types';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +9,7 @@ import { Task } from 'types';
 export class NotificationsService {
   constructor(
     private localNotifications: LocalNotifications,
-    private storage: Storage
+    private storage: StorageService
   ) {}
 
   /**
@@ -75,7 +75,7 @@ export class NotificationsService {
     );
 
     if (notificationsEnabled) {
-      const tasks = await this.storage.get('study-tasks');
+      const tasks: Task[] = JSON.parse((await this.storage.get('study-tasks')).toString());
       if (tasks !== null) {
         let alertCount = 0;
         for (const task of tasks) {

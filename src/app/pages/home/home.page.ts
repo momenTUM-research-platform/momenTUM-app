@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
-import { Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { AlertController, RefresherCustomEvent } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
@@ -14,10 +13,12 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { Study } from 'types';
+
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Study } from '../../models/types';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-home',
@@ -78,7 +79,7 @@ export class HomePage implements OnInit {
     private loadingService: LoadingService,
     private alertController: AlertController,
     private localNotifications: LocalNotifications,
-    private storage: Storage,
+    private storage: StorageService,
     private translateConfigService: TranslateConfigService,
     private translate: TranslateService
   ) {
@@ -171,13 +172,13 @@ export class HomePage implements OnInit {
       await this.storage.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
-      await this.storage.create();
+      await this.storage.init();
     }
     Promise.all([this.storage.get('current-study')]).then((values) => {
       const studyObject = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
-        this.study = JSON.parse(studyObject);
+        this.study = JSON.parse(studyObject.toString());
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({

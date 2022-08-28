@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { HTTP } from '@ionic-native/http/ngx';
-import { LogEvent, Study, SurveyData } from 'types';
+import { LogEvent, Study, SurveyData } from '../../models/types';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class SurveyDataService {
   constructor(
     private httpClient: HttpClient,
     private http2: HTTP,
-    private storage: Storage,
+    private storage: StorageService,
     private platform: Platform,
     private uuidService: UuidService,
     private studyTasksService: StudyTasksService
@@ -26,31 +26,18 @@ export class SurveyDataService {
    * @param surveyURL The web URL where a survey is hosted.
    */
   getRemoteData(surveyURL: string): any {
-    // {seed: 'f2d91e73'}
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      this.http2.setRequestTimeout(7);
       // Now a get request
-      this.httpClient
-        .get(surveyURL, {
-          headers: new HttpHeaders({
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT',
-            Accept: 'application/json',
-            'content-type': 'application/json',
-            timeout: `${7000}`,
-          }),
-          params: { seed: 'f2d91e73' },
+      this.http2
+        .get(surveyURL, { seed: 'f2d91e73' }, {})
+        .then((data) => {
+          resolve(data);
         })
-        .subscribe(
-          (val) => {
-            console.log('PUT call successful value returned in body', val);
-          },
-          (response) => {
-            console.log('PUT call in error', response);
-          },
-          () => {
-            console.log('The PUT observable is now completed.');
-          }
-        );
+        .catch((error) => {
+          console.log('Error message:' + error);
+          reject(error);
+        });
     });
   }
 
@@ -90,7 +77,7 @@ export class SurveyDataService {
       console.log('studyJSON IS: ' + values[0]);
       console.log('UUID IS: ' + values[1]);
 
-      const studyJSON = JSON.parse(values[0]);
+      const studyJSON = JSON.parse(values[0].toString());
       const uuid = values[1];
 
       const tasks = values[2];
@@ -99,7 +86,7 @@ export class SurveyDataService {
       // create form data to store the survey data
       const bodyData = new FormData();
       bodyData.append('data_type', 'survey_response');
-      bodyData.append('user_id', uuid);
+      bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', String(surveyData.module_index));
       bodyData.append('module_name', surveyData.module_name);
@@ -139,14 +126,14 @@ export class SurveyDataService {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then((values) => {
-      const studyJSON = JSON.parse(values[0]);
+      const studyJSON = JSON.parse(values[0].toString());
       const uuid = values[1];
       const logUuid = this.uuidService.generateUUID('pending-log');
 
       // create form data to store the log data
       const bodyData = new FormData();
       bodyData.append('data_type', 'log');
-      bodyData.append('user_id', uuid);
+      bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', logEvent.module_index);
       bodyData.append('page', logEvent.page);
@@ -179,7 +166,7 @@ export class SurveyDataService {
   uploadPendingData(dataType: 'pending-log' | 'pending-data') {
     return Promise.all([this.storage.get('current-study'), this.storage.keys()])
       .then((values) => {
-        const studyJSON = JSON.parse(values[0]);
+        const studyJSON = JSON.parse(values[0].toString());
         const keys = values[1];
 
         const pendingLogKeys = [];
@@ -196,7 +183,7 @@ export class SurveyDataService {
       .then((data) => {
         data.pendingLogKeys.map((pendingKey) => {
           this.storage.get(pendingKey).then((log) => {
-            const logJSONObj = JSON.parse(log);
+            const logJSONObj = JSON.parse(log.toString());
             const bodyData = new FormData();
             for (const key in logJSONObj) {
               if (logJSONObj.hasOwnProperty(key)) {
@@ -206,7 +193,7 @@ export class SurveyDataService {
             this.attemptHttpPost(data.post_url, bodyData).then(
               (postSuccessful) => {
                 if (postSuccessful) {
-                  this.storage.remove(pendingKey);
+                  this.storage.removeItem(pendingKey);
                 }
               }
             );

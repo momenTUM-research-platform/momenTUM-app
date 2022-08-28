@@ -1,27 +1,15 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { Storage } from '@ionic/storage-angular';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
-import {
-  DateTime, External,
-  Instruction, Media,
-  Module,
-  Multi,
-  Option,
-  Question,
-  Responses,
-  Slider,
-  Study,
-  Task,
-  Text,
-  YesNo
-} from 'types';
+import { Study, Option, Module, Task, Question, Responses } from '../../models/types';
+import { StorageService } from '../../services/storage/storage.service';
+
 
 @Component({
   selector: 'app-survey',
@@ -92,7 +80,7 @@ export class SurveyPage implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private storage: Storage,
+    private storage: StorageService,
     private statusBar: StatusBar,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
@@ -166,7 +154,7 @@ export class SurveyPage implements OnInit {
         });
 
         // extract the JSON from the study object
-        this.study = JSON.parse(studyObject);
+        this.study = JSON.parse(studyObject.toString());
 
         // get the correct module
         this.survey = this.study.modules[this.module_index];
@@ -190,7 +178,7 @@ export class SurveyPage implements OnInit {
 
         // get the user ID and then set up question variables
         // initialise all of the questions to be displayed
-        this.setupQuestionVariables(uuid);
+        this.setupQuestionVariables(uuid.toString());
 
         // set the submit text as appropriate
         if (this.current_section < this.num_sections) {
