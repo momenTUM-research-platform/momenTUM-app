@@ -197,7 +197,7 @@ npm run cypress
 
 # Notes on Capacitor 
 
-ionic start momenTUM-final blank --capacitor --type=angular --package-id=com.tum.momentum
+ionic start momenTUM blank --capacitor --type=angular --package-id=com.tum.momentum
 
 sudo npm install @capacitor/android
 sudo npx cap add android
