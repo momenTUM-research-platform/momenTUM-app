@@ -4,7 +4,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, InjectionToken } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { UrlSerializer } from '@angular/router';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
-import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,

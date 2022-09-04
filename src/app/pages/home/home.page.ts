@@ -10,7 +10,7 @@ import { SurveyCacheService } from '../../services/survey-cache/survey-cache.ser
 import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 
@@ -39,7 +39,7 @@ export class HomePage implements OnInit {
   // dark mode
   darkMode = false;
   //image
-  tum_image = "assets/imgs/tum-icon.png";
+  tum_image = 'assets/imgs/tum-icon.png';
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
@@ -91,13 +91,12 @@ export class HomePage implements OnInit {
     if (ChangeTheme.getTheme() === 'light') {
       // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
-      this.tum_image = "assets/imgs/tum-light.png";
+      this.tum_image = 'assets/imgs/tum-light.png';
       ChangeTheme.setTheme(true);
-
     } else {
       // @ts-ignore
       document.querySelector('ion-icon').setAttribute('name', 'moon');
-      this.tum_image = "assets/imgs/tum-icon.png";
+      this.tum_image = 'assets/imgs/tum-icon.png';
       ChangeTheme.setTheme(false);
     }
   }
@@ -247,21 +246,22 @@ export class HomePage implements OnInit {
    *
    * @param url The URL to attempt to download a study from
    */
-  async attemptToDownloadStudy(url: string, isQRCode: boolean) {
+  async attemptToDownloadStudy(url: string, isQRCode: boolean, isStudyID: boolean) {
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
+
     try {
+
       const result = await this.surveyDataService.getRemoteData(url);
 
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
-      console.log('Enrolling in a study.... %j', result.data);
 
-      const study: Study = JSON.parse(result.data);
-      console.log('Enrolling in a study.... ');
+      const study: Study = JSON.parse(JSON.stringify(result));
+
       // checks if the returned text is parseable as JSON, and whether it contains
       // some of the key fields used by schema so it can determine whether it is
       // actually a schema study URL
@@ -271,32 +271,45 @@ export class HomePage implements OnInit {
         study.properties !== undefined && // @ts-ignore
         study.modules !== undefined && // @ts-ignore
         study.properties.study_id !== undefined;
+
       if (validStudy) {
         console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
+      }else{
+        if (this.loadingService) {
+          // Added this condition
+          this.loadingService.dismiss();
+        }
+        this.displayEnrolError(isQRCode, true, true, isStudyID);
       }
+
+
     } catch (e: any) {
-      console.log('JSON Invalid format: exception: ' + e);
+      console.log('Enrolling exception: ' + e);
       if (this.loadingService) {
         // Added this condition
         this.loadingService.dismiss();
       }
       switch (e.name) {
         // ERROR in the JSON
-        case "SyntaxError":
-          this.displayEnrolError(isQRCode, true, false);
+        case 'SyntaxError':
+          this.displayEnrolError(isQRCode, true, false, isStudyID);
           break;
         // Error in the URL and request
-        case "HttpErrorResponse":
-          this.displayEnrolError(isQRCode, false, true);
-            break;
+        case 'HttpErrorResponse':
+          this.displayEnrolError(isQRCode, false, true, isStudyID);
+          break;
+
+          // Error in the URL and request
+        case 'TypeError':
+          this.displayEnrolError(isQRCode, true, true, isStudyID);
+          break;
 
         default:
+          this.displayEnrolError(isQRCode, true, true, isStudyID);
           break;
       }
       // This means invalid URL
-
-
     }
   }
   /**
@@ -307,7 +320,7 @@ export class HomePage implements OnInit {
       .scan()
       .then((barcodeData) => {
         if (!barcodeData.cancelled) {
-          this.attemptToDownloadStudy(barcodeData.text, true);
+          this.attemptToDownloadStudy(barcodeData.text, true, false);
         }
       })
       .catch((err) => {
@@ -343,7 +356,7 @@ export class HomePage implements OnInit {
         {
           text: this.translations.btn_enrol,
           handler: (response) => {
-            this.attemptToDownloadStudy(response.url, false);
+            this.attemptToDownloadStudy(response.url, false, false);
           },
         },
       ],
@@ -379,7 +392,7 @@ export class HomePage implements OnInit {
             // create URL for study
             const url =
               'https://tuspl22-momentum.srv.mwn.de/api/surveys/' + response.id;
-            this.attemptToDownloadStudy(url, false);
+            this.attemptToDownloadStudy(url, false, true);
           },
         },
       ],
@@ -428,7 +441,9 @@ export class HomePage implements OnInit {
         const tasks = this.study
           ? this.studyTasksService.generateStudyTasks(this.study)
           : [];
-        console.log(tasks);
+
+        console.log('Tasks are: ', tasks);
+
         // setup the notifications
         this.notificationsService.setNext30Notifications();
 
@@ -475,10 +490,65 @@ export class HomePage implements OnInit {
    *
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
    */
-  async displayEnrolError(isQRCode: boolean, isJSONinvalid: boolean, isURLproblem: boolean) {
-    const msg = isQRCode
-      ? "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code."
-      : "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL or ID.";
+  async displayEnrolError(
+    isQRCode: boolean,
+    isJSONinvalid: boolean,
+    isURLproblem: boolean,
+    isStudyID: boolean
+  ) {
+
+    let msg  = "We couldn't load your study.";
+
+    /**
+     * Is Only QRCode
+     */
+    if (isQRCode && !isJSONinvalid && !isURLproblem) {
+      msg = "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.";
+    }
+    /**
+     * Is QRCode and JSON Invalid format
+     */
+    if (isQRCode && isJSONinvalid && !isURLproblem) {
+      msg = "We couldn't load your study. The downloaded study is invalid format. Please ensure you are scanning the correct code.";
+    }
+    /**
+     * Is Only JSON Invalid format
+     */
+    if (!isQRCode && isJSONinvalid && !isURLproblem) {
+      msg = "We couldn't load your study. The downloaded study is invalid format. Please ensure you are entering the correct URL or ID.";
+    }
+    /**
+     * Is JSON Invalid format and is URL Problem
+     */
+    if (!isQRCode && isJSONinvalid && isURLproblem) {
+      msg = "We couldn't load your study. The URL is the problem or the downloaded study is invalid format.\
+       Please ensure you are entering the correct URL or ID.";
+    }
+    /**
+     * Is only URL Problem
+     */
+    if (!isQRCode && !isJSONinvalid && isURLproblem) {
+      msg = "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL or ID.";
+    }
+    /**
+     * Is URL Problem and QRCode
+     */
+    if (isQRCode && !isJSONinvalid && isURLproblem) {
+      msg = "We couldn't load your study. The URL is invalid. Please ensure you are scanning the correct code.";
+    }
+    /**
+     * All three is the problem
+     */
+    if (isQRCode && isJSONinvalid && isURLproblem) {
+      msg = "We couldn't load your study. The downloaded study is invalid. Please check your internet connection and ensure \
+      you are scanning the correct code.";
+    }
+
+    if(isStudyID){
+      msg = "We couldn't load your study. The study ID is invalid or doesn't exit. Please check your internet connection and ensure \
+      you entered the correct study ID.";
+    }
+    
     const alert = await this.alertController.create({
       header: 'Oops...',
       message: msg,

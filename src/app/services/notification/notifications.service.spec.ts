@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 
 import { NotificationsService } from './notifications.service';
 import { Storage } from '@ionic/storage-angular';

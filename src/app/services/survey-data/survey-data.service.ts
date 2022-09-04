@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
-import { LogEvent, Study, SurveyData } from '../../models/types';
+import { HttpClient } from '@angular/common/http';
+import { Http } from '@capacitor-community/http';
+import { LogEvent, SurveyData, Study } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({
@@ -13,7 +13,6 @@ import { StorageService } from '../storage/storage.service';
 export class SurveyDataService {
   constructor(
     private httpClient: HttpClient,
-    private http2: HTTP,
     private storage: StorageService,
     private platform: Platform,
     private uuidService: UuidService,
@@ -27,15 +26,20 @@ export class SurveyDataService {
    */
   getRemoteData(surveyURL: string): any {
     return new Promise((resolve, reject) => {
-      this.http2.setRequestTimeout(7);
+      const options = {
+        url: surveyURL,
+        headers: {},
+        connectTimeout: 60000,
+      };
+
       // Now a get request
-      this.http2
-        .get(surveyURL, { seed: 'f2d91e73' }, {})
+      Http
+        .get(options)
         .then((data) => {
-          resolve(data);
+          resolve(data.data);
         })
         .catch((error) => {
-          console.log('Error message:' + error);
+          console.log('[From Get Remote Data] Error message: ' + error);
           reject(error);
         });
     });
@@ -74,10 +78,8 @@ export class SurveyDataService {
       this.storage.get('uuid'),
       this.studyTasksService.getAllTasks(),
     ]).then((values) => {
-      console.log('studyJSON IS: ' + values[0]);
-      console.log('UUID IS: ' + values[1]);
 
-      const studyJSON = JSON.parse(values[0].toString());
+      const studyJSON =  JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
 
       const tasks = values[2];
@@ -126,7 +128,7 @@ export class SurveyDataService {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then((values) => {
-      const studyJSON = JSON.parse(values[0].toString());
+      const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
       const logUuid = this.uuidService.generateUUID('pending-log');
 
@@ -166,7 +168,7 @@ export class SurveyDataService {
   uploadPendingData(dataType: 'pending-log' | 'pending-data') {
     return Promise.all([this.storage.get('current-study'), this.storage.keys()])
       .then((values) => {
-        const studyJSON = JSON.parse(values[0].toString());
+        const studyJSON =  JSON.parse(JSON.parse(JSON.stringify(values[0])));
         const keys = values[1];
 
         const pendingLogKeys = [];

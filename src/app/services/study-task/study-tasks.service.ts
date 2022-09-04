@@ -142,6 +142,7 @@ export class StudyTasksService {
       return dateA.getTime() - dateB.getTime();
     });
 
+    console.log("Tasks from generateStudyTasks: " , study_tasks);
     // save tasks and condition to storage
     this.storage.set('condition', condition);
     this.storage.set('study-tasks', study_tasks);
@@ -162,8 +163,10 @@ export class StudyTasksService {
    */
   async getTaskDisplayList(): Promise<Task[]> {
     const study_tasks: Task[] = JSON.parse(
-      (await this.storage.get('study-tasks')).toString()
+      JSON.stringify(await this.storage.get('study-tasks'))
     );
+
+    console.log("Study tasks are: ", study_tasks);
     let tasks_to_display = [];
     const sticky_tasks = [];
     const time_tasks = [];

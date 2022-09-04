@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
-import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
+import { Plugin } from '@capacitor/core';
 import { Task } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
+import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotificationsService {
   constructor(
-    private localNotifications: LocalNotifications,
-    private storage: StorageService
+    private storage: StorageService,
+    private localNotificatins: LocalNotifications
   ) {}
 
   /**
@@ -18,7 +20,7 @@ export class NotificationsService {
    * @param task The task that the notification is for
    */
   scheduleDummyNotification() {
-    this.localNotifications.schedule({
+    this.localNotificatins.schedule({
       title: 'Hello',
       text: 'World',
       foreground: true,
@@ -38,7 +40,7 @@ export class NotificationsService {
    * @param task The task that the notification is for
    */
   scheduleNotification(task: Task) {
-    this.localNotifications.schedule({
+    this.localNotificatins.schedule({
       id: task.task_id,
       title: task.alert_title,
       text: task.alert_message,
@@ -61,14 +63,14 @@ export class NotificationsService {
    * Cancels all notifications that have been set
    */
   cancelAllNotifications() {
-    this.localNotifications.cancelAll();
+    this.localNotificatins.cancelAll();
   }
 
   /**
    * Sets the next 30 notifications based on the next 30 tasks
    */
   async setNext30Notifications() {
-    await this.localNotifications.cancelAll();
+    await this.localNotificatins.cancelAll();
 
     const notificationsEnabled = await this.storage.get(
       'notifications-enabled'
@@ -96,7 +98,7 @@ export class NotificationsService {
       }
     }
 
-    /*this.localNotifications.cancelAll().then(() => {
+    /*LocalNotifications.cancelAll().then(() => {
       this.storage.get('notifications-enabled').then(notificationsEnabled => {
         if (notificationsEnabled) {
           this.storage.get('study-tasks').then((tasks) => {

@@ -196,22 +196,30 @@ npm run cypress
 ```
 
 # Notes on Capacitor 
-
+```
 ionic start momenTUM blank --capacitor --type=angular --package-id=com.tum.momentum
-
+```
+```
 sudo npm install @capacitor/android
-sudo npx cap add android
 sudo npm run build
+sudo npx cap add android
 sudo npx cap sync
 sudo npx cap open android
+ionic capacitor run android --livereload --external
+```
 
+```
 sudo npm install @capacitor/ios
-sudo npx cap add ios
 sudo npm run build
+sudo npx cap add ios
 sudo npx cap sync
 sudo npx cap run ios
+ionic capacitor run ios --livereload --external
+```
 
 For web
 1. Set bundledWebRuntime to true in the Capacitor configuration file
+```
 "bundledWebRuntime": true
 npx cap sync web
+```

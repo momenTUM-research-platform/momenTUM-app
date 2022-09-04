@@ -1,6 +1,17 @@
 export interface Study {
   properties: Properties;
   modules: Module[];
+  metadata: Metadata;
+}
+
+export interface Metadata {
+  url: string;
+  commits: Commit[];
+}
+
+export interface Commit {
+  id: string;
+  timestamp: number;
 }
 
 export interface Properties {
