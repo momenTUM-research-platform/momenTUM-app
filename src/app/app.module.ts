@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 
 /* plugins */
 import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
+//
 import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 
 import { IonicStorageModule } from '@ionic/storage-angular';

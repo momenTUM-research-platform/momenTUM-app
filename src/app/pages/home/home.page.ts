@@ -548,7 +548,7 @@ export class HomePage implements OnInit {
       msg = "We couldn't load your study. The study ID is invalid or doesn't exit. Please check your internet connection and ensure \
       you entered the correct study ID.";
     }
-    
+
     const alert = await this.alertController.create({
       header: 'Oops...',
       message: msg,
