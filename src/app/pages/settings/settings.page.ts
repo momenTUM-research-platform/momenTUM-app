@@ -145,7 +145,7 @@ export class SettingsPage {
               )
               .then(() => {
                 // cancel all notifications
-                this.notificsationsService.cancelAllNotifications();
+                this.notificsationsService.cancelAll();
                 // navigate to the home tab
                 this.navController.navigateRoot('/');
               });
