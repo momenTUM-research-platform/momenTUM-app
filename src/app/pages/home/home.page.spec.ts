@@ -1,7 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HTTP } from '@ionic-native/http/ngx';
-import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 import { Storage } from '@ionic/storage';
 import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
@@ -54,7 +53,6 @@ describe('HomePage', () => {
   let StatusBarSpy: jasmine.SpyObj<StatusBar>;
   let LoadingServiceSpy: jasmine.SpyObj<LoadingService>;
   let AlertControllerSpy: jasmine.SpyObj<AlertController>;
-  let LocalNotificationsSpy: jasmine.SpyObj<LocalNotifications>;
   let StorageSpy: jasmine.SpyObj<Storage>;
   let TranslateConfigServiceSpy: jasmine.SpyObj<TranslateConfigService>;
   let TranslateServiceSpy: jasmine.SpyObj<TranslateService>;
@@ -85,7 +83,6 @@ describe('HomePage', () => {
         BarcodeScanner,
         HTTP,
         Storage,
-        LocalNotifications,
         FileTransfer,
         File,
         StatusBar,

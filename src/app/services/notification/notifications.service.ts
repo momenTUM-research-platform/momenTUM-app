@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Plugin } from '@capacitor/core';
-import { Task } from '../../models/types';
+import { Attachment, LocalNotifications, LocalNotificationSchema, Channel,
+  ScheduleEvery, CancelOptions, PendingLocalNotificationSchema, ListChannelsResult, ActionPerformed } from '@capacitor/local-notifications';
+import { Task } from 'src/app/models/types';
 import { StorageService } from '../storage/storage.service';
-import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
-
+import { StudyTasksService } from '../study-task/study-tasks.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,66 +11,128 @@ import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications
 export class NotificationsService {
   constructor(
     private storage: StorageService,
-    private localNotificatins: LocalNotifications
+    private studyTasksService: StudyTasksService
   ) {}
 
-  /**
-   * Schedules a notification, taking parameters from a task
-   *
-   * @param task The task that the notification is for
-   */
-  scheduleDummyNotification() {
-    this.localNotificatins.schedule({
-      title: 'Hello',
-      text: 'World',
-      foreground: true,
-      trigger: { at: new Date(new Date().getTime() + 10000) },
-      smallIcon: 'res://notification_icon',
-      icon: 'res//notification_icon',
-      data: { task_index: 0 },
-      launch: true,
-      wakeup: true,
-      priority: 2,
+
+  async createChannel(channel: Channel): Promise<void> {
+    return await  LocalNotifications.createChannel(channel);
+  }
+
+  async deleteChannel(channel: Channel): Promise<void> {
+    return await LocalNotifications.deleteChannel(channel);
+  }
+
+  async listChannels(): Promise<ListChannelsResult> {
+    return await LocalNotifications.listChannels();
+  }
+
+  async fireQueuedEvents(){
+    // To be implmented
+    // Fire queued events once the device is ready and all listeners are registered.
+    throw new Error('Feature to fire queued events not available. ');
+
+  }
+
+
+
+  async addListenerOnClick(listenerFunction: any){
+    LocalNotifications.addListener('localNotificationActionPerformed', listenerFunction);
+  }
+
+
+  showLocalNotification(title: string, body: string, at: Date, smallIcon: string, largeIcon: string, largeBody: string,
+     summaryText: string, attachments: Attachment[], extra: any, ongoing: boolean, autoCancel: boolean,
+     id: number = Math.floor(Math.random() * 1000) + 1, repeats: boolean, every: ScheduleEvery, count: number, on: any): void {
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          title,
+          body,
+          id,
+          smallIcon,
+          largeIcon,
+          largeBody,
+          summaryText,
+          attachments,
+          extra,
+          ongoing,
+          autoCancel,
+          schedule: {
+            at,
+            repeats,
+            every,
+            count,
+            on
+          },
+        },
+      ],
     });
   }
+
 
   /**
    * Schedules a notification, takoing parameters from a task
    *
    * @param task The task that the notification is for
    */
-  scheduleNotification(task: Task) {
-    this.localNotificatins.schedule({
-      id: task.task_id,
-      title: task.alert_title,
-      text: task.alert_message,
-      foreground: true,
-      trigger: { at: new Date(Date.parse(task.time)) },
-      smallIcon: 'res://notification_icon',
-      icon: 'res//notification_icon',
-      data: {
-        task_index: task.index,
-        task_id: task.task_id,
-        task_time: task.time,
-      },
-      launch: true,
-      wakeup: true,
-      priority: 2,
+   scheduleNotification(task: Task) {
+    LocalNotifications.schedule({
+      notifications: [
+        {
+          title: task.alert_title,
+          body: task.alert_message,
+          id: task.task_id,
+          smallIcon: 'res://notification_icon',
+          largeIcon: 'res//notification_icon',
+          largeBody: task.alert_message,
+          summaryText: task.alert_title,
+          extra: {
+            task_index: task.index,
+            task_id: task.task_id,
+            task_time: task.time,
+          },
+          ongoing: false,
+          autoCancel: false,
+          schedule: {
+            at: new Date(Date.parse(task.time))
+          },
+        },
+      ],
     });
   }
+
 
   /**
    * Cancels all notifications that have been set
    */
-  cancelAllNotifications() {
-    this.localNotificatins.cancelAll();
+   async cancelAll(): Promise<void> {
+    LocalNotifications.removeAllDeliveredNotifications();
+    const cancelOptions: CancelOptions = { notifications: await this.getPending()};
+    LocalNotifications.cancel(cancelOptions);
+  }
+
+  /**
+   * Get a list of pending notifications.
+   */
+   async getPending(): Promise<LocalNotificationSchema[]> {
+    const pendingList: PendingLocalNotificationSchema[] = await  (await LocalNotifications.getPending()).notifications;
+    return pendingList as LocalNotificationSchema[];
+  }
+
+
+  /**
+   * Request permissions for notifications
+   */
+  async requestPermissions(){
+    await LocalNotifications.requestPermissions();
   }
 
   /**
    * Sets the next 30 notifications based on the next 30 tasks
    */
-  async setNext30Notifications() {
-    await this.localNotificatins.cancelAll();
+   async setNext30Notifications() {
+    await this.cancelAll();
 
     const notificationsEnabled = await this.storage.get(
       'notifications-enabled'
@@ -84,7 +146,7 @@ export class NotificationsService {
           const alertTime = new Date(Date.parse(task.time));
 
           if (alertTime > new Date()) {
-            if (this.checkTaskIsUnlocked(task, tasks)) {
+            if (this.studyTasksService.checkTaskIsUnlocked(task, tasks)) {
               this.scheduleNotification(task);
               alertCount++;
             }
@@ -97,58 +159,7 @@ export class NotificationsService {
         }
       }
     }
-
-    /*LocalNotifications.cancelAll().then(() => {
-      this.storage.get('notifications-enabled').then(notificationsEnabled => {
-        if (notificationsEnabled) {
-          this.storage.get('study-tasks').then((tasks) => {
-            if (tasks !== null) {
-              var alertCount = 0;
-              for (var i = 0; i < tasks.length; i++) {
-                var task = tasks[i];
-                var alertTime = new Date(Date.parse(task.time));
-
-                if (alertTime > new Date()) {
-                  if (this.checkTaskIsUnlocked(task, tasks)) {
-                    this.scheduleNotification(task);
-                    alertCount++;
-                  }
-                }
-
-                // only set 30 alerts into the future
-                if (alertCount === 30) break;
-              }
-            }
-          });
-        }
-      });
-    });*/
   }
 
-  /**
-   *
-   * @param task
-   * @param study_tasks
-   */
-  checkTaskIsUnlocked(task: Task, study_tasks: Task[]) {
-    // get a set of completed task uuids
-    const completedUUIDs = new Set();
-    for (const t of study_tasks) {
-      if (t.completed) {
-        completedUUIDs.add(t.uuid);
-      }
-    }
 
-    // get the list of prereqs from the task
-    const prereqs = task.unlock_after;
-    let unlock = true;
-    for (const prereq of prereqs) {
-      if (!completedUUIDs.has(prereq)) {
-        unlock = false;
-        break;
-      }
-    }
-
-    return unlock;
-  }
 }

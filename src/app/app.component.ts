@@ -1,5 +1,4 @@
 import { Component, OnInit, NgZone } from '@angular/core';
-import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
@@ -8,6 +7,8 @@ import { SurveyDataService } from './services/survey-data/survey-data.service';
 import * as moment from 'moment';
 import { AlertController } from '@ionic/angular';
 import { StorageService } from './services/storage/storage.service';
+import { NotificationsService } from './services/notification/notifications.service';
+import { ActionPerformed } from '@capacitor/local-notifications';
 
 
 @Component({
@@ -22,11 +23,9 @@ export class AppComponent implements OnInit {
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
-    private localNotifications: LocalNotifications,
+    private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
-    private ngZone: NgZone,
-    private alertCtrl: AlertController,
     private storage: StorageService
   ) {
     this.initializeApp();
@@ -47,23 +46,25 @@ export class AppComponent implements OnInit {
       this.readyApp();
     });
 
-    // handle notification click
-    this.localNotifications.on('click').subscribe(async (notification) => {
-      await this.isAppInForeground;
-      // log that the user clicked on this notification
-      const logEvent = {
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'notification-' + moment(notification.data.task_time).format(),
-        event: 'click',
-        module_index: notification.data.task_index,
-      };
-      this.surveyDataService.logPageVisitToServer(logEvent);
-      this.router.navigate(['survey/' + notification.data.task_id]);
-    });
+    this.notificationsService.addListenerOnClick(this.listenerFunc);
+
     // wait for device ready and then fire any pending click events
     await this.isAppInForeground;
-    this.localNotifications.fireQueuedEvents();
+    this.notificationsService.fireQueuedEvents();
+  }
+
+  async listenerFunc(notificationAction: ActionPerformed){
+    await this.isAppInForeground;
+    // log that the user clicked on this notification
+    const logEvent = {
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page: 'notification-' + moment(notificationAction.notification.extra.task_time).format(),
+      event: 'click',
+      module_index: notificationAction.notification.extra.task_index,
+    };
+    this.surveyDataService.logPageVisitToServer(logEvent);
+    this.router.navigate(['survey/' + notificationAction.notification.extra.task_id]);
   }
 
   initializeApp() {

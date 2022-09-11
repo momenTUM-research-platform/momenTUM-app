@@ -10,7 +10,6 @@ import { SurveyCacheService } from '../../services/survey-cache/survey-cache.ser
 import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { LocalNotifications } from '@awesome-cordova-plugins/local-notifications/ngx';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 
@@ -78,7 +77,6 @@ export class HomePage implements OnInit {
     private statusBar: StatusBar,
     private loadingService: LoadingService,
     private alertController: AlertController,
-    private localNotifications: LocalNotifications,
     private storage: StorageService,
     private translateConfigService: TranslateConfigService,
     private translate: TranslateService
@@ -158,7 +156,7 @@ export class HomePage implements OnInit {
       this.translations = res;
     });
 
-    this.localNotifications.requestPermission();
+    this.notificationsService.requestPermissions();
 
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
