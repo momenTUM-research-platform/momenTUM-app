@@ -140,11 +140,15 @@ export class NotificationsService {
   /**
    * Get a list of pending notifications.
    */
-  async getPending(): Promise<LocalNotificationSchema[]> {
+   async getPending(): Promise<LocalNotificationSchema[]> {
     const pendingList: PendingLocalNotificationSchema[] = await (
       await LocalNotifications.getPending()
     ).notifications;
-    return pendingList as LocalNotificationSchema[];
+    if (pendingList != null) {
+      return null;
+    } else {
+      return pendingList as LocalNotificationSchema[];
+    }
   }
 
   /**
