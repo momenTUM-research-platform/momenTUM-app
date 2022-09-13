@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { Platform } from '@ionic/angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
+import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { SurveyDataService } from './services/survey-data/survey-data.service';
@@ -21,7 +21,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     private platform: Platform,
-    private splashScreen: SplashScreen,
     private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
@@ -72,7 +71,7 @@ export class AppComponent implements OnInit {
         console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
       });
       //this.statusBar.styleDefault();
-      this.splashScreen.hide();
+      SplashScreen.hide();
     });
   }
 }

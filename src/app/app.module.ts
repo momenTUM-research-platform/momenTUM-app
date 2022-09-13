@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -47,7 +46,6 @@ export function LanguageLoader(http: HttpClient) {
     }),
   ],
   providers: [
-    SplashScreen,
     BarcodeScanner,
     InAppBrowser,
     File,
