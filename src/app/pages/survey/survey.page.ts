@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { StatusBar } from '@capacitor/status-bar';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
@@ -81,7 +81,6 @@ export class SurveyPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private storage: StorageService,
-    private statusBar: StatusBar,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
     private studyTasksService: StudyTasksService,
@@ -98,8 +97,8 @@ export class SurveyPage implements OnInit {
   ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
-    this.statusBar.overlaysWebView(false);
-    this.statusBar.backgroundColorByHexString('#0F2042');
+    StatusBar.setOverlaysWebView({overlay: false});
+    StatusBar.setBackgroundColor({color: '#0F2042'});
 
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {

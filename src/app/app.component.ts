@@ -1,7 +1,7 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { StatusBar } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { SurveyDataService } from './services/survey-data/survey-data.service';
 import * as moment from 'moment';
@@ -22,7 +22,6 @@ export class AppComponent implements OnInit {
   constructor(
     private platform: Platform,
     private splashScreen: SplashScreen,
-    private statusBar: StatusBar,
     private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
@@ -68,8 +67,10 @@ export class AppComponent implements OnInit {
   }
 
   initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.overlaysWebView(false);
+    this.platform.ready().then(async () => {
+      StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
+        console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+      });
       //this.statusBar.styleDefault();
       this.splashScreen.hide();
     });

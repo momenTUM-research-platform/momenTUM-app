@@ -12,7 +12,6 @@ import { SurveyCacheService } from '../../services/survey-cache/survey-cache.ser
 import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { Router, NavigationStart } from '@angular/router';
 import { TranslateConfigService } from '../../translate-config.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -50,7 +49,6 @@ describe('HomePage', () => {
   let UuidServiceSpy: jasmine.SpyObj<UuidService>;
   let RouterSpy: jasmine.SpyObj<Router>;
   let PlatformSpy: jasmine.SpyObj<Platform>;
-  let StatusBarSpy: jasmine.SpyObj<StatusBar>;
   let LoadingServiceSpy: jasmine.SpyObj<LoadingService>;
   let AlertControllerSpy: jasmine.SpyObj<AlertController>;
   let StorageSpy: jasmine.SpyObj<Storage>;
@@ -85,7 +83,6 @@ describe('HomePage', () => {
         Storage,
         FileTransfer,
         File,
-        StatusBar,
       ],
     }).compileComponents();
 

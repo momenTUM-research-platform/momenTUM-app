@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationStart } from '@angular/router';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { StatusBar } from '@capacitor/status-bar';
 import { AlertController, RefresherCustomEvent } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
@@ -74,7 +74,6 @@ export class HomePage implements OnInit {
     private uuidService: UuidService,
     private router: Router,
     private platform: Platform,
-    private statusBar: StatusBar,
     private loadingService: LoadingService,
     private alertController: AlertController,
     private storage: StorageService,
@@ -102,8 +101,12 @@ export class HomePage implements OnInit {
   ngOnInit() {
     // set statusBar to be visible on Android
     // this.statusBar.styleLightContent();
-    this.statusBar.overlaysWebView(false);
-    this.statusBar.backgroundColorByHexString('#0F2042');
+    StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
+      console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+    });
+    StatusBar.setBackgroundColor({color: '#0F2042'}).catch((e) => {
+      console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+    });
 
     //Initiallize theme and toggle accordingly
     ChangeTheme.initializeTheme();

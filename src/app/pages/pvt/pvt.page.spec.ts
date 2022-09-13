@@ -4,7 +4,6 @@ import { PvtPage } from './pvt.page';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { ChildrenOutletContexts } from '@angular/router';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
@@ -27,7 +26,6 @@ describe('PvtPage', () => {
           provide: Storage,
           useValue: spyStorage
         },
-        StatusBar,
 
         HttpClient,
         HttpHandler,
