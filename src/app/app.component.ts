@@ -48,7 +48,9 @@ export class AppComponent implements OnInit {
 
     // wait for device ready and then fire any pending click events
     await this.isAppInForeground;
-    this.notificationsService.fireQueuedEvents();
+    this.notificationsService.fireQueuedEvents().catch(() => {
+      console.log("ERROR caught: fireQueuedEvents is not yet implemented.");
+    });
   }
 
   async listenerFunc(notificationAction: ActionPerformed){
