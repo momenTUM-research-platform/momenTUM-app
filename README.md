@@ -201,18 +201,20 @@ ionic start momenTUM blank --capacitor --type=angular --package-id=com.tum.momen
 ```
 ```
 sudo npm install @capacitor/android
-sudo npm run build
 sudo npx cap add android
+sudo npm run build
 sudo npx cap sync
 sudo npx cap open android
+sudo npx cap run android
 ionic capacitor run android --livereload --external
 ```
 
 ```
 sudo npm install @capacitor/ios
-sudo npm run build
 sudo npx cap add ios
+sudo npm run build
 sudo npx cap sync
+sudo npx cap open ios
 sudo npx cap run ios
 ionic capacitor run ios --livereload --external
 ```

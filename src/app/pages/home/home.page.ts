@@ -3,7 +3,7 @@ import { Router, NavigationStart } from '@angular/router';
 import { StatusBar } from '@capacitor/status-bar';
 import { AlertController, RefresherCustomEvent } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
-import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
+
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
@@ -18,6 +18,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Study } from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
 @Component({
   selector: 'app-home',
@@ -66,7 +67,7 @@ export class HomePage implements OnInit {
   selectedLanguage: string;
 
   constructor(
-    private barcodeScanner: BarcodeScanner,
+    private barcodeService: BarcodeService,
     private surveyDataService: SurveyDataService,
     private notificationsService: NotificationsService,
     private surveyCacheService: SurveyCacheService,
@@ -76,7 +77,7 @@ export class HomePage implements OnInit {
     private platform: Platform,
     private loadingService: LoadingService,
     private alertController: AlertController,
-    private storage: StorageService,
+    private storageService: StorageService,
     private translateConfigService: TranslateConfigService,
     private translate: TranslateService
   ) {
@@ -169,16 +170,18 @@ export class HomePage implements OnInit {
 
     // check if user is currently enrolled in study
     try {
-      await this.storage.get('uuid');
+      await this.storageService.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
-      await this.storage.init();
+      await this.storageService.init();
     }
-    Promise.all([this.storage.get('current-study')]).then((values) => {
-      const studyObject = values[0];
+    Promise.all([this.storageService.get('current-study')]).then((values) => {
+      const studyObject: any = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
-        this.study = JSON.parse(studyObject.toString());
+
+        this.study = JSON.parse(studyObject);
+        console.log("Found study: ", this.study);
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -209,15 +212,15 @@ export class HomePage implements OnInit {
 
     // on first run, generate a UUID for the user
     // and set the notifications-enabled to true
-    this.storage.get('uuid-set').then((uuidSet) => {
+    this.storageService.get('uuid-set').then((uuidSet) => {
       if (!uuidSet) {
         // set a UUID
         const uuid = this.uuidService.generateUUID('');
-        this.storage.set('uuid', uuid);
+        this.storageService.set('uuid', uuid);
         // set a flag that UUID was set
-        this.storage.set('uuid-set', true);
+        this.storageService.set('uuid-set', true);
         // set a flag that notifications are enabled
-        this.storage.set('notifications-enabled', true);
+        this.storageService.set('notifications-enabled', true);
       }
     });
   }
@@ -317,11 +320,11 @@ export class HomePage implements OnInit {
    * Uses the barcode scanner to enrol in a study
    */
   async scanBarcode() {
-    this.barcodeScanner
-      .scan()
+    this.barcodeService
+      .startScan()
       .then((barcodeData) => {
-        if (!barcodeData.cancelled) {
-          this.attemptToDownloadStudy(barcodeData.text, true, false);
+        if (barcodeData.hasContent) {
+          this.attemptToDownloadStudy(barcodeData?.content, true, false);
         }
       })
       .catch((err) => {
@@ -415,10 +418,10 @@ export class HomePage implements OnInit {
     this.study = study;
 
     // set the enrolled date
-    this.storage.set('enrolment-date', new Date());
+    this.storageService.set('enrolment-date', new Date());
 
     // set an enrolled flag and save the JSON for the current study
-    this.storage
+    this.storageService
       .set('current-study', JSON.stringify(this.study))
       .then(async () => {
         // log the enrolment event
@@ -440,31 +443,35 @@ export class HomePage implements OnInit {
         }
         // setup the study task objects
         const tasks = this.study
-          ? this.studyTasksService.generateStudyTasks(this.study)
+          ? await this.studyTasksService.generateStudyTasks(this.study)
           : [];
 
-        console.log('Tasks are: ', tasks);
+        console.log('Length of tasks is: ', tasks.length);
+        console.log('Type of tasks is: ', typeof tasks);
 
         // setup the notifications
         this.notificationsService.setNext30Notifications();
 
         this.loadStudyDetails();
-        const studyTasks = await this.storage.get('study-tasks');
-        console.log('study tasks: ' + JSON.stringify(studyTasks));
+        const studyTasks = await this.storageService.get('study-tasks');
+
       });
   }
 
   /**
    * Loads the details of the current study, including overdue tasks
    */
-  loadStudyDetails() {
-    console.log('loading tasks');
+  async loadStudyDetails() {
+    console.log('loading tasks...');
+    //const tassk = await this.storageService.get('study-tasks');
+    //console.log("Just checking: ", tassk);
     //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
       for (const task of this.task_list) {
-        task.moment = moment(task.locale).fromNow();
+        task.moment = moment(task.time).fromNow();
+        console.log("Task Local: ", task.moment);
       }
 
       // show the study tasks

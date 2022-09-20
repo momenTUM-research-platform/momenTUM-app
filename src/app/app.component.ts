@@ -67,10 +67,10 @@ export class AppComponent implements OnInit {
     this.router.navigate(['survey/' + notificationAction.notification.extra.task_id]);
   }
 
-  initializeApp() {
+  async initializeApp() {
     this.platform.ready().then(async () => {
-      StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
-        console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+      await StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
+        console.log('StatusBar is not implemented, Web implementation error. ERROR: ' + e);
       });
       //this.statusBar.styleDefault();
       SplashScreen.hide();

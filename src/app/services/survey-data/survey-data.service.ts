@@ -82,7 +82,6 @@ export class SurveyDataService {
       const studyJSON =  JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
 
-      const tasks = values[2];
       const dataUuid = this.uuidService.generateUUID('pending-data');
 
       // create form data to store the survey data
@@ -218,7 +217,7 @@ export class SurveyDataService {
           console.log('Notice Survey: ' + v);
         },
         error: (e) => {
-          console.log('Error in attempt http post ' + e || '');
+          console.log('Error in attempt http post: ' , e || '');
           resolve(false);
         },
         complete: () => {

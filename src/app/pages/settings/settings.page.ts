@@ -62,11 +62,12 @@ export class SettingsPage {
     ]).then((values) => {
       // check if user is currently enrolled in study
       // to show/hide additional options
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       if (studyObject !== null) {
-        console.log('I found a study!');
+
         this.isEnrolled = true;
-        this.study = JSON.parse(studyObject.toString());
+        this.study = JSON.parse(studyObject);
+        console.log('I found a study!');
       } else {
         this.isEnrolled = false;
       }
@@ -82,14 +83,17 @@ export class SettingsPage {
         this.notificationsEnabled = notificationsEnabled;
       }
 
-      // log the user visiting this tab
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'settings',
-        event: 'entry',
-        module_index: -1,
-      });
+      console.log("isEnrolled: ", this.isEnrolled);
+      if (this.isEnrolled) {
+        // log the user visiting this tab
+        this.surveyDataService.logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'settings',
+          event: 'entry',
+          module_index: -1,
+        });
+      }
     });
   }
 

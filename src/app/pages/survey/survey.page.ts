@@ -97,8 +97,12 @@ export class SurveyPage implements OnInit {
   ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
-    StatusBar.setOverlaysWebView({overlay: false});
-    StatusBar.setBackgroundColor({color: '#0F2042'});
+    StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
+      console.log('StatusBar is not implemented, Web implementation error. ERROR: ' + e);
+    });
+    StatusBar.setBackgroundColor({color: '#0F2042'}).catch((e) => {
+      console.log('StatusBar is not implemented, Web implementation error. ERROR: ' + e);
+    });
 
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
@@ -119,14 +123,18 @@ export class SurveyPage implements OnInit {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then((values) => {
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       const uuid = values[1];
+
 
       // get the task object for this task
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
+
         for (let i = 0; i < this.tasks.length; i++) {
+          console.log("Tasks are ",  this.tasks[0] );
           if (this.task_id === String(this.tasks[i].task_id)) {
+
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
             this.task_index = i;
@@ -153,13 +161,16 @@ export class SurveyPage implements OnInit {
         });
 
         // extract the JSON from the study object
-        this.study = JSON.parse(studyObject.toString());
+        this.study = JSON.parse(studyObject);
+
 
         // get the correct module
         this.survey = this.study.modules[this.module_index];
 
+
         // shuffle modules if required
         if (this.survey.shuffle) {
+
           this.survey.sections = this.shuffle(this.survey.sections);
         }
 
@@ -545,7 +556,7 @@ export class SurveyPage implements OnInit {
         });
 
         // write tasks back to storage
-        this.storage.set('study-tasks', this.tasks).then(() => {
+        this.storage.set('study-tasks', JSON.stringify(this.tasks)).then(() => {
           // save an exit log
           this.surveyDataService.logPageVisitToServer({
             timestamp: moment().format(),

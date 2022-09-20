@@ -11,7 +11,6 @@ import { NgChartsModule } from 'ng2-charts';
 import { FormsModule } from '@angular/forms';
 
 /* plugins */
-import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
 
 import { IonicStorageModule } from '@ionic/storage-angular';
 import { HTTP } from '@ionic-native/http/ngx';
@@ -46,7 +45,6 @@ export function LanguageLoader(http: HttpClient) {
     }),
   ],
   providers: [
-    BarcodeScanner,
     InAppBrowser,
     File,
     FileTransfer,

@@ -101,11 +101,11 @@ export class ProgressPage {
       this.storage.get('current-study'),
       this.storage.get('enrolment-date'),
     ]).then((values) => {
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       const enrolmentDate = values[1];
 
       if (studyObject !== null) {
-        this.studyJSON = JSON.parse(studyObject.toString());
+        this.studyJSON = JSON.parse(studyObject);
         this.enrolledInStudy = true;
 
         // calculate the study day

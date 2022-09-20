@@ -38,7 +38,7 @@ export class NotificationsService {
   async fireQueuedEvents() {
     // To be implmented
     // Fire queued events once the device is ready and all listeners are registered.
-    throw new Error('Feature to fire queued events not available. ');
+    // throw new Error('Feature to fire queued events not available.');
   }
 
   async addListenerOnClick(listenerFunction: any) {
@@ -155,7 +155,14 @@ export class NotificationsService {
    * Request permissions for notifications
    */
   async requestPermissions() {
-    await LocalNotifications.requestPermissions();
+    const status: string =  (await LocalNotifications.checkPermissions()).display;
+    console.log("Status is: " + status);
+    if( status.endsWith('granted')){
+      // Do nothing
+    }else{
+      await LocalNotifications.requestPermissions();
+    }
+
   }
 
   /**
@@ -169,8 +176,9 @@ export class NotificationsService {
     );
 
     if (notificationsEnabled) {
+      const storage_tasks: any =  await this.storage.get('study-tasks');
       const tasks: Task[] = JSON.parse(
-        (await this.storage.get('study-tasks')).toString()
+        storage_tasks
       );
       if (tasks !== null) {
         let alertCount = 0;
