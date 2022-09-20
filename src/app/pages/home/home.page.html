@@ -12,9 +12,9 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="page-home ion-no-padding" scroll="false">
-  <ion-refresher [hidden]="!hideEnrolOptions" slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content color="primary" pullingIcon="arrow-dropdown" refreshingSpinner="crescent">
+<ion-content class="page-home ion-no-padding" scroll-y="false">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content color="primary" pullingIcon="caret-down-circle-outline" refreshingSpinner="crescent">
     </ion-refresher-content>
   </ion-refresher>
 
