@@ -176,18 +176,18 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <div *ngIf="question.modal == true">
+                <div *ngIf="question.modal === true">
                   <ion-item class="mult-select" lines="none">
                     <ion-label style="display:none;"></ion-label>
                     <ion-select *ngIf="question.radio" class="ion-radio-select-style" (ionChange)="setAnswer(question)"
                       [(ngModel)]="question.model" placeholder="Select..." okText="Select" cancelText="Dismiss">
-                      <ion-select-option color="secondary" *ngFor="let option of question.options">{{option.text}}
+                      <ion-select-option color="tertiary" *ngFor="let option of question.optionsChecked">"{{option.text}}"
                       </ion-select-option>
                     </ion-select>
                     <ion-select *ngIf="!question.radio" style="width:100%;max-width:100%;"
                       (ionChange)="setAnswer(question)" [(ngModel)]="question.model" placeholder="Select..."
                       okText="Select" cancelText="Dismiss" multiple>
-                      <ion-select-option color="secondary" *ngFor="let option of question.options">{{option.text}}
+                      <ion-select-option color="tertiary" *ngFor="let option of question.optionsChecked">{{option.text}}
                       </ion-select-option>
                     </ion-select>
                   </ion-item>
@@ -199,15 +199,15 @@
                 <div *ngIf="question.modal == false">
                   <ion-radio-group (ionChange)="setAnswer(question)" [(ngModel)]="question.model"
                     *ngIf="question.radio == true">
-                    <ion-item *ngFor="let option of question.options" class="radio-button-style" lines="none">
-                      <ion-label style="font-size:small;" class="ion-text-wrap">{{option.text}}</ion-label>
-                      <ion-radio slot="start" color="secondary" value="{{option.text}}"></ion-radio>
+                    <ion-item *ngFor="let option of question.optionsChecked" class="radio-button-style" lines="none">
+                      <ion-label style="font-size:medium;" class="ion-text-wrap">{{option.text}}</ion-label>
+                      <ion-radio slot="start" color="light" value="{{option.text}}"></ion-radio>
                     </ion-item>
                   </ion-radio-group>
 
                   <div radio-group *ngIf="question.radio == false">
-                    <ion-item *ngFor="let option of question.options" lines="none">
-                      <ion-label style="font-size:small;" class="ion-text-wrap">{{option.text}}</ion-label>
+                    <ion-item *ngFor="let option of question.optionsChecked" lines="none">
+                      <ion-label style="font-size:medium;" class="ion-text-wrap">{{option.text}}</ion-label>
                       <ion-checkbox color="secondary" (click)="changeCheckStatus(option, question)"
                         [(ngModel)]="option.checked"></ion-checkbox>
                     </ion-item>
@@ -233,7 +233,7 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <ion-datetime color="blue" locale="de-DE" *ngIf="question.subtype === 'datetime'" style="font-size:small;"
+                <ion-datetime color="blue" locale="en-GB-u-hc-h24" *ngIf="question.subtype === 'datetime'" style="font-size:small;"
                   [(ngModel)]="question.model" displayFormat="DDDD MMM DD, YYYY, hh:mm a"
                   (ionChange)="setAnswer(question)"></ion-datetime>
               </ion-col>
@@ -246,7 +246,7 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <ion-datetime color="blue"  locale="de-DE" *ngIf="question.subtype === 'time'" style="font-size:small;" [(ngModel)]="question.model"
+                <ion-datetime color="blue"  locale="en-GB-u-hc-h24" *ngIf="question.subtype === 'time'" style="font-size:small;" [(ngModel)]="question.model"
                   displayFormat="hh:mm a" (ionChange)="setAnswer(question)"></ion-datetime>
               </ion-col>
             </ion-row>

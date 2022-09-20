@@ -137,9 +137,11 @@ p {
   border-radius: 50px !important;
 }
 .item-radio-checked{
-  --ion-item-background:var(--ion-color-tertiary-shade);
-  color: var(--ion-input-color);
+  background:var(--ion-color-tertiary-shade);
+  color: var(--ion-color-tertiary-contrast);
 }
+
+
 
 ion-input{
   --background: var(--ion-input-color);
