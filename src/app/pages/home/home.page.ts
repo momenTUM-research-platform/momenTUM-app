@@ -12,11 +12,9 @@ import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
-import { HttpErrorResponse } from '@angular/common/http';
-import { Study } from '../../models/types';
+import { Study, Translations } from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
@@ -43,7 +41,7 @@ export class HomePage implements OnInit {
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
   // is loaded successfully
-  translations = {
+  translations: Translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
     btn_enrol: 'Enrol',
@@ -77,11 +75,8 @@ export class HomePage implements OnInit {
     private loadingService: LoadingService,
     private alertController: AlertController,
     private storage: StorageService,
-    private translateConfigService: TranslateConfigService,
     private translate: TranslateService
   ) {
-    this.selectedLanguage =
-      this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
   toggleTheme() {
@@ -140,24 +135,13 @@ export class HomePage implements OnInit {
     // check if dark mode
     this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // load the correct translations for dynamic labels/messages
-    const labels = [
-      'btn_cancel',
-      'btn_dismiss',
-      'btn_enrol',
-      'btn_enter-url',
-      'btn_study-id',
-      'error_loading-qr-code',
-      'error_loading-study',
-      'heading_error',
-      'label_loading',
-      'msg_caching',
-      'msg_camera',
-    ];
-    // @ts-ignore
-    this.translate.get(labels).subscribe((res) => {
-      this.translations = res;
-    });
+    // translate
+    let key: keyof Translations;
+    for (key in this.translations) {
+      this.translate.get(key).subscribe(translated_text => {
+        this.translations[key] = translated_text;
+      });
+    }
 
     this.notificationsService.requestPermissions();
 

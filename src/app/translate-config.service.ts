@@ -8,12 +8,14 @@ export class TranslateConfigService {
   constructor(private translate: TranslateService) {}
 
   /**
-   * Get the default language of the current device
+   * Get the default language of the current device.
+   * @developer: In case you want to add other languages,
+   * choose a language inside of this method.
+   * Then add the correct translate json file in assets/i18n
    */
   getDefaultLanguage() {
-    const language = this.translate.getBrowserLang() || 'en';
-    this.translate.setDefaultLang(language);
-    return language;
+    this.translate.setDefaultLang('en');
+    return 'en';
   }
 
   /**
