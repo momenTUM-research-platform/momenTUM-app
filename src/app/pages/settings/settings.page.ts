@@ -43,7 +43,7 @@ export class SettingsPage {
     private navController: NavController,
     private alertController: AlertController,
     private iab: InAppBrowser,
-    private notificsationsService: NotificationsService,
+    private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
     private surveyDataService: SurveyDataService
   ) {
@@ -149,7 +149,7 @@ export class SettingsPage {
               )
               .then(() => {
                 // cancel all notifications
-                this.notificsationsService.cancelAll();
+                this.notificationsService.cancelAll();
                 // navigate to the home tab
                 this.navController.navigateRoot('/');
               });
@@ -168,7 +168,7 @@ export class SettingsPage {
     // update the notifications flag
     this.storage.set('notifications-enabled', this.notificationsEnabled);
     // set the next 30 notifications (cancels all notifications before setting them if enabled)
-    this.notificsationsService.setNext30Notifications();
+    this.notificationsService.setNext30Notifications();
   }
 
   /**
