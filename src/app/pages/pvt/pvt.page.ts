@@ -3,6 +3,7 @@ import { SurveyDataService } from '../../services/survey-data/survey-data.servic
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-pvt',
@@ -42,7 +43,7 @@ export class PvtPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
-    private storage: Storage
+    private storageService: StorageService
   ) {
     this.reactionTimes = [];
     this.state = 'instructions';
@@ -256,9 +257,9 @@ export class PvtPage implements OnInit {
             break;
           }
         }
-        return this.storage.get('current-study');
+        return this.storageService.get('current-study');
       })
-      .then((studyObject) => JSON.parse(studyObject).modules[this.moduleIndex]);
+      .then((studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]);
   }
 
 
