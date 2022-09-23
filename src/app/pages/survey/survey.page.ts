@@ -461,19 +461,19 @@ export class SurveyPage implements OnInit {
         if ('hide_id' in q && q.hide_id === id) {
           const hideValue = q.hide_value;
 
-          if (q.type === 'multi' || q.type === 'yesno') {
+          if (question.type === 'multi' || question.type === 'yesno' || question.type === 'text') {
             // determine whether to hide/show the element
             const hideIf = q.hide_if;
-            const valueEquals = hideValue === q.response;
+            const valueEquals = hideValue === question.response;
             if (valueEquals === hideIf) {
               q.hideSwitch = false;
             } else {
               q.hideSwitch = true;
             }
           } else if (
-            q.type === 'slider' &&
+            question.type === 'slider' &&
             typeof hideValue === 'string' &&
-            q.response
+            question.response
           ) {
             const direction = hideValue.substring(0, 1);
             const cutoff = parseInt(
@@ -482,13 +482,13 @@ export class SurveyPage implements OnInit {
             );
             const lessThan = direction === '<';
             if (lessThan) {
-              if (q.response <= cutoff) {
+              if (question.response <= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
               }
             } else {
-              if (q.response >= cutoff) {
+              if (question.response >= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
