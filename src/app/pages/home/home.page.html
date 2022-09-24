@@ -13,7 +13,7 @@
 </ion-header>
 
 <!-- Check to make sure the isHidden property is in the right place -->
-<ion-content class="page-home ion-no-padding" scroll-y="false">
+<ion-content class="page-home ion-no-padding" [scrollY]="hideEnrolOptions">
   <ion-refresher *ngIf="hideEnrolOptions" slot="fixed" (ionRefresh)="doRefresh($event)">
     <ion-refresher-content color="primary" pullingIcon="chevron-down-circle-outline" refreshingSpinner="crescent">
     </ion-refresher-content>
