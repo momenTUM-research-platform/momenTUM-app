@@ -4,7 +4,6 @@ import { PvtPage } from './pvt.page';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { ChildrenOutletContexts } from '@angular/router';
-import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
 
@@ -29,7 +28,6 @@ describe('PvtPage', () => {
 
         HttpClient,
         HttpHandler,
-        HTTP,
         ChildrenOutletContexts,
       ],
     }).compileComponents();

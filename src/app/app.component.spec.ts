@@ -7,7 +7,6 @@ import { Platform } from '@ionic/angular';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage-angular';
 
 describe('AppComponent', () => {
@@ -24,7 +23,6 @@ describe('AppComponent', () => {
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [
         { provide: Platform, useValue: platformSpy },
-        HTTP,
         Storage,
       ],
     }).compileComponents();

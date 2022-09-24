@@ -6,7 +6,6 @@ import {
   HttpClient,
   HttpClientModule
 } from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -43,7 +42,6 @@ describe('ProgressPage', () => {
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
         HttpClient,
         Storage,
-        HTTP,
       ],
     }).compileComponents();
 

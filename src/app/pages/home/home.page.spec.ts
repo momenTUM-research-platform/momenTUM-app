@@ -1,6 +1,5 @@
 import { IonicModule } from '@ionic/angular';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage';
 import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
@@ -65,7 +64,6 @@ describe('HomePage', () => {
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
-        HTTP,
         Storage,
         FileTransfer,
         File,

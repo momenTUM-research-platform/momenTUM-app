@@ -4,7 +4,6 @@ import {
   HttpClientTestingModule,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { HTTP } from '@ionic-native/http/ngx';
 import { Storage } from '@ionic/storage-angular';
 
 import { SurveyDataService } from './survey-data.service';
@@ -24,7 +23,6 @@ describe('SurveyDataService', () => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        HTTP,
         {
           provide: Storage,
           useValue: spyStorage,

@@ -5,7 +5,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { Study, Option, Module, Task, Question, Responses } from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
@@ -87,7 +87,6 @@ export class SurveyPage implements OnInit {
     private surveyDataService: SurveyDataService,
     private toastController: ToastController,
     private ngZone: NgZone,
-    private iab: InAppBrowser
   ) { }
 
   /**
@@ -444,7 +443,9 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    this.iab.create(url, '_system');
+    Browser.open({url: url, windowName: '_system'}).catch((e) => {
+      console.log('ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e)
+    });
   }
 
   toggleDynamicQuestions(question: Question) {

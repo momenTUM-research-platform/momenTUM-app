@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController, AlertController } from '@ionic/angular';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
@@ -42,7 +42,6 @@ export class SettingsPage {
     private storage: StorageService,
     private navController: NavController,
     private alertController: AlertController,
-    private iab: InAppBrowser,
     private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
     private surveyDataService: SurveyDataService
@@ -177,8 +176,9 @@ export class SettingsPage {
    * @param support_url The current study's support website URL
    */
   openSupportURL(support_url: string) {
-    //window.location.href = support_url;
-    const browser = this.iab.create(support_url, '_system');
+    Browser.open({url: support_url, windowName: '_system'}).catch((e) => {
+      console.log('ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' + e)
+    });
   }
 
   /**
