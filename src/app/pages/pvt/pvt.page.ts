@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
+import {Task} from "../../models/types";
 
 @Component({
   selector: 'app-pvt',
@@ -27,6 +28,7 @@ export class PvtPage implements OnInit {
   alertTime: string;
 
   // HELPER VARIABLES:
+  taskIndex: number;
   reacted: boolean;
   reactedTooEarly: boolean;
   reactedTooLate: boolean;
@@ -250,12 +252,16 @@ export class PvtPage implements OnInit {
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
+        let taskIndex = 0;
         for (const task of tasks) {
           if (task_id === String(task.task_id)) {
             this.moduleIndex = task.index;
             this.alertTime = moment(task.time).format();
+            console.log('this is the task index: ' + taskIndex);
+            this.taskIndex = taskIndex;
             break;
           }
+          taskIndex++;
         }
         return this.storageService.get('current-study');
       })
@@ -265,17 +271,36 @@ export class PvtPage implements OnInit {
 
   /**
    * Composes the output data and sends it to the server.
+   * Edits the task list in the storage by marking the current task as completed.
+   * Logs the pvt submit to the server.
+   * Navigates back home.
    * */
   private async submit() {
-    const surveyData = {
+
+    const responseTime = moment().format();
+    const responseTimeInMs = moment().valueOf();
+
+    let tasks: Task[] = await this.studyTasksService.getAllTasks()
+    tasks[this.taskIndex].completed = true;
+    tasks[this.taskIndex].response_time = responseTime;
+    tasks[this.taskIndex].response_time_ms = responseTimeInMs;
+
+    await this.surveyDataService.sendSurveyDataToServer({
       module_index: this.moduleIndex,
       module_name: this.moduleName,
       entries: this.reactionTimes,
-      response_time: moment().format(),
-      response_time_in_ms: moment().valueOf(),
+      response_time: responseTime,
+      response_time_in_ms: responseTimeInMs,
       alert_time: this.alertTime,
-    };
-    return this.surveyDataService.sendSurveyDataToServer(surveyData);
+    });
+    this.storageService.set('study-tasks', JSON.stringify(tasks));
+    this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'pvt',
+        event: 'submit',
+        module_index: this.moduleIndex,
+      });
   }
 
   /**
