@@ -92,9 +92,8 @@ interface Question {
     | 'yesno'
     | 'external';
   required: boolean;
-  rand_group: string;
 
-  // find out whats really needed
+  rand_group?: string;
   noToggle?: boolean;
   response?: number | string | [];
   hideSwitch?: boolean;
