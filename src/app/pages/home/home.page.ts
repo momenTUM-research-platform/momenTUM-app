@@ -77,8 +77,7 @@ export class HomePage implements OnInit {
     private alertController: AlertController,
     private storageService: StorageService,
     private translate: TranslateService
-  ) {
-  }
+  ) {}
 
   toggleTheme() {
     if (ChangeTheme.getTheme() === 'light') {
@@ -97,11 +96,17 @@ export class HomePage implements OnInit {
   ngOnInit() {
     // set statusBar to be visible on Android
     // this.statusBar.styleLightContent();
-    StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
-      console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+    StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, could be due to ios platform. ERROR: ' +
+          e
+      );
     });
-    StatusBar.setBackgroundColor({color: '#0F2042'}).catch((e) => {
-      console.log('StatusBar is not implemented, could be due to ios platform. ERROR: ' + e);
+    StatusBar.setBackgroundColor({ color: '#0F2042' }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, could be due to ios platform. ERROR: ' +
+          e
+      );
     });
 
     //Initiallize theme and toggle accordingly
@@ -140,7 +145,7 @@ export class HomePage implements OnInit {
     let key: keyof Translations;
     // eslint-disable-next-line guard-for-in
     for (key in this.translations) {
-      this.translate.get(key).subscribe(translated_text => {
+      this.translate.get(key).subscribe((translated_text) => {
         this.translations[key] = translated_text;
       });
     }
@@ -166,7 +171,7 @@ export class HomePage implements OnInit {
         // convert the study to a JSON object
 
         this.study = JSON.parse(studyObject);
-        console.log("Found study: ", this.study);
+        console.log('Found study: ', this.study);
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -235,14 +240,16 @@ export class HomePage implements OnInit {
    *
    * @param url The URL to attempt to download a study from
    */
-  async attemptToDownloadStudy(url: string, isQRCode: boolean, isStudyID: boolean) {
+  async attemptToDownloadStudy(
+    url: string,
+    isQRCode: boolean,
+    isStudyID: boolean
+  ) {
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
-
     try {
-
       const result = await this.surveyDataService.getRemoteData(url);
 
       // check if the data received from the URL contains JSON properties/modules
@@ -264,15 +271,13 @@ export class HomePage implements OnInit {
       if (validStudy) {
         console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
-      }else{
+      } else {
         if (this.loadingService) {
           // Added this condition
           this.loadingService.dismiss();
         }
         this.displayEnrolError(isQRCode, true, true, isStudyID);
       }
-
-
     } catch (e: any) {
       console.log('Enrolling exception: ' + e);
       if (this.loadingService) {
@@ -289,7 +294,7 @@ export class HomePage implements OnInit {
           this.displayEnrolError(isQRCode, false, true, isStudyID);
           break;
 
-          // Error in the URL and request
+        // Error in the URL and request
         case 'TypeError':
           this.displayEnrolError(isQRCode, true, true, isStudyID);
           break;
@@ -439,7 +444,6 @@ export class HomePage implements OnInit {
 
         this.loadStudyDetails();
         const studyTasks = await this.storageService.get('study-tasks');
-
       });
   }
 
@@ -456,7 +460,7 @@ export class HomePage implements OnInit {
 
       for (const task of this.task_list) {
         task.moment = moment(task.time).fromNow();
-        console.log("Task Local: ", task.moment);
+        console.log('Task Local: ', task.moment);
       }
 
       // show the study tasks
@@ -489,56 +493,79 @@ export class HomePage implements OnInit {
     isURLproblem: boolean,
     isStudyID: boolean
   ) {
-
-    let msg  = "We couldn't load your study.";
+    let msg = "We couldn't load your study.";
 
     /**
      * Is Only QRCode
      */
     if (isQRCode && !isJSONinvalid && !isURLproblem) {
-      msg = "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.";
+      msg =
+        "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.";
     }
     /**
      * Is QRCode and JSON Invalid format
      */
     if (isQRCode && isJSONinvalid && !isURLproblem) {
-      msg = "We couldn't load your study. The downloaded study is invalid format. Please ensure you are scanning the correct code.";
+      msg =
+        "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are scanning the correct code.";
     }
     /**
      * Is Only JSON Invalid format
      */
     if (!isQRCode && isJSONinvalid && !isURLproblem) {
-      msg = "We couldn't load your study. The downloaded study is invalid format. Please ensure you are entering the correct URL or ID.";
+      if (isStudyID) {
+        msg =
+          "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are entering the correct ID.";
+      } else {
+        msg =
+          "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are entering the correct URL.";
+      }
     }
     /**
      * Is JSON Invalid format and is URL Problem
      */
     if (!isQRCode && isJSONinvalid && isURLproblem) {
-      msg = "We couldn't load your study. The URL is the problem or the downloaded study is invalid format.\
-       Please ensure you are entering the correct URL or ID.";
+      if (isStudyID) {
+        msg =
+          "We couldn't load your study. The URL is the problem or the downloaded study is an invalid format.\
+       Please ensure you are entering the correct ID.";
+      } else {
+        msg =
+          "We couldn't load your study. The URL is the problem or the downloaded study is an invalid format.\
+       Please ensure you are entering the correct URL.";
+      }
     }
     /**
      * Is only URL Problem
      */
     if (!isQRCode && !isJSONinvalid && isURLproblem) {
-      msg = "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL or ID.";
+      if (isStudyID) {
+        msg =
+          "We couldn't load your study. The URL is an invalid. Please ensure you are entering the correct ID.";
+      } else {
+        msg =
+          "We couldn't load your study. The URL is an invalid. Please ensure you are entering the correct URL.";
+      }
     }
     /**
      * Is URL Problem and QRCode
      */
     if (isQRCode && !isJSONinvalid && isURLproblem) {
-      msg = "We couldn't load your study. The URL is invalid. Please ensure you are scanning the correct code.";
+      msg =
+        "We couldn't load your study. The URL is an invalid. Please ensure you are scanning the correct code.";
     }
     /**
      * All three is the problem
      */
     if (isQRCode && isJSONinvalid && isURLproblem) {
-      msg = "We couldn't load your study. The downloaded study is invalid. Please check your internet connection and ensure \
+      msg =
+        "We couldn't load your study. The downloaded study is an invalid. Please check your internet connection and ensure \
       you are scanning the correct code.";
     }
 
-    if(isStudyID){
-      msg = "We couldn't load your study. The study ID is invalid or doesn't exit. Please check your internet connection and ensure \
+    if (isStudyID) {
+      msg =
+        "We couldn't load your study. The study ID is an invalid or doesn't exist. Please check your internet connection and ensure \
       you entered the correct study ID.";
     }
 

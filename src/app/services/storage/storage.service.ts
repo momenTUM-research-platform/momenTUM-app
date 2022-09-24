@@ -8,9 +8,7 @@ export class StorageService {
   private nStorage: Storage | null = null;
 
   constructor(private storage: Storage) {
-
-
-
+    this.init();
   }
 
   async init() {
@@ -28,7 +26,8 @@ export class StorageService {
   }
 
   public async get(key: string): Promise<{ value: any }> {
-    console.log("Storage getting for: ", key);
+    console.log("Storage getting for key: ", key);
+    console.log("Storage getting for value: ", await this.nStorage.get(key));
     return await this.nStorage.get(key);
   }
 

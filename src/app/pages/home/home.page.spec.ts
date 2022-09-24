@@ -5,7 +5,6 @@ import { Storage } from '@ionic/storage';
 import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { RouterTestingModule } from '@angular/router/testing';
-import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
@@ -41,19 +40,7 @@ import { HomePage } from './home.page';
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
-  let BarcodeScannerSpy: jasmine.SpyObj<BarcodeScanner>;
   let SurveyDataServiceSpy: jasmine.SpyObj<SurveyDataService>;
-  let NotificationsServiceSpy: jasmine.SpyObj<NotificationsService>;
-  let SurveyCacheServiceSpy: jasmine.SpyObj<SurveyCacheService>;
-  let StudyTasksServiceSpy: jasmine.SpyObj<StudyTasksService>;
-  let UuidServiceSpy: jasmine.SpyObj<UuidService>;
-  let RouterSpy: jasmine.SpyObj<Router>;
-  let PlatformSpy: jasmine.SpyObj<Platform>;
-  let LoadingServiceSpy: jasmine.SpyObj<LoadingService>;
-  let AlertControllerSpy: jasmine.SpyObj<AlertController>;
-  let StorageSpy: jasmine.SpyObj<Storage>;
-  let TranslateConfigServiceSpy: jasmine.SpyObj<TranslateConfigService>;
-  let TranslateServiceSpy: jasmine.SpyObj<TranslateService>;
 
   beforeEach(waitForAsync(() => {
     const surveySpy = jasmine.createSpyObj('SurveyDataServiceSpy', ['logPageVisitToServer', 'uploadPendingData']);
@@ -78,7 +65,6 @@ describe('HomePage', () => {
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
-        BarcodeScanner,
         HTTP,
         Storage,
         FileTransfer,
