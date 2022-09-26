@@ -1,22 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, NavigationStart } from '@angular/router';
-import { StatusBar } from '@capacitor/status-bar';
-import { AlertController, RefresherCustomEvent } from '@ionic/angular';
-import { Platform } from '@ionic/angular';
+import {Component, OnInit} from '@angular/core';
+import {NavigationStart, Router} from '@angular/router';
+import {StatusBar, Style} from '@capacitor/status-bar';
+import {AlertController, Platform, RefresherCustomEvent} from '@ionic/angular';
 
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
-import { UuidService } from '../../services/uuid/uuid.service';
-import { LoadingService } from '../../services/loading/loading-service.service';
-import { NotificationsService } from '../../services/notification/notifications.service';
+import {SurveyDataService} from '../../services/survey-data/survey-data.service';
+import {StudyTasksService} from '../../services/study-task/study-tasks.service';
+import {SurveyCacheService} from '../../services/survey-cache/survey-cache.service';
+import {UuidService} from '../../services/uuid/uuid.service';
+import {LoadingService} from '../../services/loading/loading-service.service';
+import {NotificationsService} from '../../services/notification/notifications.service';
 import * as moment from 'moment';
-import { TranslateConfigService } from '../../translate-config.service';
-import { ChangeTheme } from '../../shared/change-theme';
-import { TranslateService } from '@ngx-translate/core';
-import { Study, Translations } from '../../models/types';
-import { StorageService } from '../../services/storage/storage.service';
-import { BarcodeService } from '../../services/barcode/barcode.service';
+import {ChangeTheme} from '../../shared/change-theme';
+import {TranslateService} from '@ngx-translate/core';
+import {Study, Translations} from '../../models/types';
+import {StorageService} from '../../services/storage/storage.service';
+import {BarcodeService} from '../../services/barcode/barcode.service';
 
 @Component({
   selector: 'app-home',
@@ -81,12 +79,32 @@ export class HomePage implements OnInit {
 
   toggleTheme() {
     if (ChangeTheme.getTheme() === 'light') {
-      // @ts-ignore
+      StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
+        console.log(
+          'StatusBar.setBackgroundColor(): ' +
+          e
+        );
+      });
+      StatusBar.setStyle({style: Style.Dark}).catch((e) => {
+        console.log(
+          'StatusBar.setStyle(): ' + e
+        )
+      });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
       this.tum_image = 'assets/imgs/tum-light.png';
       ChangeTheme.setTheme(true);
     } else {
-      // @ts-ignore
+      StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
+        console.log(
+          'StatusBar.setBackgroundColor(): ' +
+          e
+        );
+      });
+      StatusBar.setStyle({style: Style.Light}).catch((e) => {
+        console.log(
+          'StatusBar.setStyle(): ' + e
+        )
+      });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
       this.tum_image = 'assets/imgs/tum-icon.png';
       ChangeTheme.setTheme(false);
@@ -94,31 +112,36 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() {
-    // set statusBar to be visible on Android
-    // this.statusBar.styleLightContent();
-    StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
-      console.log(
-        'StatusBar is not implemented, could be due to ios platform. ERROR: ' +
-          e
-      );
-    });
-    StatusBar.setBackgroundColor({ color: '#0F2042' }).catch((e) => {
-      console.log(
-        'StatusBar is not implemented, could be due to ios platform. ERROR: ' +
-          e
-      );
-    });
-
-    //Initiallize theme and toggle accordingly
+    // Initialize theme, toggle icon, and StatusBar accordingly
     ChangeTheme.initializeTheme();
-
     if (ChangeTheme.getTheme() === 'light') {
-      // @ts-ignore
+      StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
+        console.log(
+          'StatusBar.setBackgroundColor(): ' +
+          e
+        );
+      });
+      StatusBar.setStyle({style: Style.Light}).catch((e) => {
+        console.log(
+          'StatusBar.setStyle(): ' + e
+        )
+      });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
     } else {
-      // @ts-ignore
+      StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
+        console.log(
+          'StatusBar.setBackgroundColor(): ' +
+          e
+        );
+      });
+      StatusBar.setStyle({style: Style.Dark}).catch((e) => {
+        console.log(
+          'StatusBar.setStyle(): ' + e
+        )
+      });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
     }
+
     // need to subscribe to this event in order
     // to ensure that the page will refresh every
     // time it is navigated to because ionViewWillEnter()
