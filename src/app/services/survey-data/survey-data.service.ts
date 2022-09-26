@@ -85,7 +85,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url,
+        studyJSON?.properties.post_url+ "/response",
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
@@ -127,7 +127,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url,
+        studyJSON?.properties.post_url + "/log",
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {

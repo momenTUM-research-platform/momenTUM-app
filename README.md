@@ -54,7 +54,6 @@ This is an ionic-angular mobile application.
 This readme gives a step by step installation guide for the respective
 reader to follow along with building the app.
 
-
 ## Installations
 
 #### 1. Install node and npm
@@ -80,12 +79,6 @@ reader to follow along with building the app.
 #### 5. Install node_modules
 
     $ npm i
-
-### Useless
-
-#### 1. To create a new app with tabs
-
-    $ ionic start [new-app-name] tabs --type=angular
 
 ## Previewing
 
