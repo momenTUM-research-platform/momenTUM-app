@@ -113,7 +113,6 @@
     --background-rgb: 255,241,242;
     color: #3070b3 !important;
     --placeholder-color: #000000 !important;
-
     border-radius: 16px;
     box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
   }
@@ -318,7 +317,24 @@
     --ion-tab-bar-background: #1f1f1f;
 
 
+    .ion-color-blue {
+      --ion-color-base: var(--ion-color-secondary);
+      --ion-color-base-rgb: var(--ion-color-secondary-rgb);
+      --ion-color-contrast: var(--ion-color-secondary-contrast);
+      --ion-color-contrast-rgb: var(--ion-color-secondary-contrast-rgb);
+      --ion-color-shade: var(--ion-color-secondary-shade);
+      --ion-color-tint: var(--ion-color-secondary-tint);
+    }
 
+
+    ion-datetime {
+      --background: #ffffff;
+      --background-rgb: 255,241,242;
+      color: #3070b3 !important;
+      --placeholder-color: #000000 !important;
+      border-radius: 16px;
+      box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+    }
 
   }
 

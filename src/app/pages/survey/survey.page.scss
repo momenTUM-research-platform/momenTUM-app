@@ -2,6 +2,10 @@
     font-weight: 50;
 }
 
+ion-icon {
+  font-size: 50px;
+}
+
 .videoPlayer {
     width: 100%;
 }
@@ -23,6 +27,18 @@
 
 p {
     white-space: pre-wrap;
+}
+
+.light-blue-toolbar{
+  height: fit-content;
+  --min-height: 37px;
+  --ion-item-background: var(--ion-color-tertiary);
+  --padding-start: 10px;
+  --inner-padding-start: 0px;
+  --border-radius: 10px !important;
+  --vertical-align: middle;
+  text-align: center;
+  color: var(--ion-color-tertiary-contrast);
 }
 
 .slider-label-left {
@@ -59,7 +75,7 @@ p {
   --padding-start: 0px;
   --inner-padding-start: 0px;
   --margin-start: 50px;
-  border-radius: 10px !important;
+  border-radius: 10px;
   overflow: hidden;
   font-weight: 400;
   font-size: 18px;
@@ -72,7 +88,7 @@ p {
   --ion-item-background:var(--ion-color-tertiary);
   --margin: 5px;
   margin: 5px;
-  border-radius: 10px !important;
+  border-radius: 10px ;
   overflow: hidden;
   font-weight: 400;
   font-size: 18px;
@@ -84,7 +100,8 @@ p {
 .light-blue-card-bg{
   --ion-item-background:var(--ion-color-tertiary);
   width:100%;
-  border-radius: 10px !important;
+  border-radius: 10px;
+  --border-radius: 10px !important;
   overflow: hidden;
   font-weight: 400;
   font-size: 18px;
@@ -103,6 +120,7 @@ p {
 .light-blue-card-div{
   margin-top: 10px;
   margin-bottom: 10px;
+  border-radius: 10px;
   width:100%;
 }
 
@@ -135,9 +153,10 @@ p {
   margin-top: 10px !important;
   margin-bottom: 10px !important;
   border-radius: 50px !important;
+  --border-radius: 50px !important;
 }
 .item-radio-checked{
-  background:var(--ion-color-tertiary-shade);
+  background: var(--ion-color-tertiary-contrast);
   color: var(--ion-color-tertiary-contrast);
 }
 

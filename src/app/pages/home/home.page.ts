@@ -111,8 +111,14 @@ export class HomePage implements OnInit {
 
     //Initiallize theme and toggle accordingly
     ChangeTheme.initializeTheme();
-    this.toggleTheme();
 
+    if (ChangeTheme.getTheme() === 'light') {
+      // @ts-ignore
+      document.querySelector('ion-icon').setAttribute('name', 'moon');
+    } else {
+      // @ts-ignore
+      document.querySelector('ion-icon').setAttribute('name', 'sunny');
+    }
     // need to subscribe to this event in order
     // to ensure that the page will refresh every
     // time it is navigated to because ionViewWillEnter()
