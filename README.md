@@ -191,7 +191,7 @@ For testing, run the following command.
 Cypress is used for E2E-Testing, which simulates a user interacting with the app. To run, start the app in the browser and then start cypress. A new cypress window will open.
 
 ```
-ionic cordova run browser
+ionic serve
 npm run cypress
 ```
 

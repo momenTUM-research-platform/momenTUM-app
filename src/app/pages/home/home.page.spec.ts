@@ -6,18 +6,6 @@ import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
-import { UuidService } from '../../services/uuid/uuid.service';
-import { LoadingService } from '../../services/loading/loading-service.service';
-import { NotificationsService } from '../../services/notification/notifications.service';
-import { Router, NavigationStart } from '@angular/router';
-import { TranslateConfigService } from '../../translate-config.service';
-import { TranslateService } from '@ngx-translate/core';
-import { AlertController } from '@ionic/angular';
-import { Platform } from '@ionic/angular';
-import * as moment from 'moment';
-
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,

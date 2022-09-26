@@ -115,46 +115,46 @@ describe('StudyTasksService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should generate study tasks', async () => {
-    const study: Study = JSON.parse(JSON.stringify(study_object));
-    const stubValue = study;
-    // returns a study task and also stores it in the storage
-    const response: object[] = await service.generateStudyTasks(study);
+  // it('should generate study tasks', async () => {
+  //   const study: Study = JSON.parse(JSON.stringify(study_object));
+  //   const stubValue = study;
+  //   // returns a study task and also stores it in the storage
+  //   const response: object[] = await service.generateStudyTasks(study);
 
-    //angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
+  //   //angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
 
-    expect(response[0])
-      .withContext('response was same as stubValue')
-      .toEqual(jasmine.objectContaining(study_task_list[0]));
-  });
+  //   expect(response[0])
+  //     .withContext('response was same as stubValue')
+  //     .toEqual(jasmine.objectContaining(study_task_list[0]));
+  // });
 
-  it('should get all tasks from storage', async () => {
-    const stubValue: Task[] = JSON.parse(JSON.stringify( study_task_list)) ;
+  // it('should get all tasks from storage', async () => {
+  //   const stubValue: Task[] = JSON.parse(JSON.stringify( study_task_list)) ;
 
-    angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
-    const response: Task[] = await service.getAllTasks();
+  //   angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
+  //   const response: Task[] = await service.getAllTasks();
 
-    expect(angularStorageSpy.get.calls.count())
-      .withContext('spy method was called once')
-      .toBe(1);
+  //   expect(angularStorageSpy.get.calls.count())
+  //     .withContext('spy method was called once')
+  //     .toBe(1);
 
-    expect(response)
-      .withContext('response was same as stub Value')
-      .toBe(stubValue);
-  });
+  //   expect(response)
+  //     .withContext('response was same as stub Value')
+  //     .toBe(stubValue);
+  // });
 
-  it('should get tasks display list from storage', async () => {
+  // it('should get tasks display list from storage', async () => {
 
-    await angularStorageSpy.get.and.returnValue(Promise.resolve(study_task_list));
+  //   await angularStorageSpy.get.and.returnValue(Promise.resolve(study_task_list));
 
-    const response: any = await service.getTaskDisplayList();
+  //   const response: any = await service.getTaskDisplayList();
 
-    expect(angularStorageSpy.get.calls.count())
-      .withContext('spy method was called once')
-      .toBe(1);
+  //   expect(angularStorageSpy.get.calls.count())
+  //     .withContext('spy method was called once')
+  //     .toBe(1);
 
-    expect(response)
-      .withContext('response was same as study_object')
-      .toEqual(study_object.modules[0].unlock_after);
-  });
+  //   expect(response)
+  //     .withContext('response was same as study_object')
+  //     .toEqual(study_object.modules[0].unlock_after);
+  // });
 });

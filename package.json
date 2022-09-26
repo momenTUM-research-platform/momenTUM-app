@@ -9,7 +9,8 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "cypress": "cypress open"
   },
   "private": true,
   "dependencies": {
@@ -44,7 +45,6 @@
     "@ionic/storage-angular": "^3.0.6",
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
-    "install": "^0.13.0",
     "ionic-native": "^2.9.0",
     "moment": "^2.29.4",
     "nanoid": "^4.0.0",
@@ -71,6 +71,7 @@
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "5.3.0",
     "@typescript-eslint/parser": "5.3.0",
+    "cypress": "^10.8.0",
     "eslint": "^7.6.0",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-jsdoc": "30.7.6",
