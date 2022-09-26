@@ -3,7 +3,6 @@ import { IonicModule } from '@ionic/angular';
 import { CUSTOM_ELEMENTS_SCHEMA, InjectionToken } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { UrlSerializer } from '@angular/router';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -14,7 +13,6 @@ import {
 } from '@ngx-translate/core';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { LanguageLoader } from '../../app.module';
-import { HTTP } from '@ionic-native/http/ngx';
 import { SettingsPage } from './settings.page';
 
 describe('SettingsPage', () => {
@@ -44,8 +42,6 @@ describe('SettingsPage', () => {
 
         Storage,
         UrlSerializer,
-        InAppBrowser,
-        HTTP,
       ],
     }).compileComponents();
 
