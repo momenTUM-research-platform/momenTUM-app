@@ -10,7 +10,6 @@ import * as moment from 'moment';
 import { Study, Option, Module, Task, Question, Responses } from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
 
-
 @Component({
   selector: 'app-survey',
   templateUrl: './survey.page.html',
