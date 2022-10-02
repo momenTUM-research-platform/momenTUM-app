@@ -1,20 +1,9 @@
-export interface Study {
+declare interface Study {
   properties: Properties;
   modules: Module[];
-  metadata: Metadata;
 }
 
-export interface Metadata {
-  url: string;
-  commits: Commit[];
-}
-
-export interface Commit {
-  id: string;
-  timestamp: number;
-}
-
-export interface Properties {
+declare interface Properties {
   study_id: string;
   study_name: string;
   instructions: string;
@@ -30,7 +19,7 @@ export interface Properties {
   cache: boolean;
 }
 
-export interface Module {
+declare interface Module {
   type: string;
   name: string;
   submit_text: string;
