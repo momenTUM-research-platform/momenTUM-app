@@ -2,12 +2,13 @@ import { TestBed } from '@angular/core/testing';
 
 import { StudyTasksService } from './study-tasks.service';
 import { Storage } from '@ionic/storage-angular';
+import { Study } from 'types';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;
   let angularStorageSpy: jasmine.SpyObj<Storage>;
 
-  const study_object = {
+  const study_object: Study = {
     properties: {
       study_name: 'Demo',
       study_id: '3ZDOGAH',
@@ -57,6 +58,7 @@ describe('StudyTasksService', () => {
         },
         sections: [
           {
+            id: '',
             name: 'Section 1',
             questions: [
               {
@@ -67,6 +69,7 @@ describe('StudyTasksService', () => {
                 hide_id: '',
                 hide_value: '',
                 hide_if: true,
+                rand_group: '',
               },
             ],
             shuffle: false,
@@ -74,7 +77,7 @@ describe('StudyTasksService', () => {
         ],
         shuffle: false,
         condition: '*',
-        uuid: 'dee87a08-8616-453a-9a6e-9e8f8ea9c942',
+        id: 'dee87a08-8616-453a-9a6e-9e8f8ea9c942',
         unlock_after: [],
       },
     ],
@@ -109,17 +112,19 @@ describe('StudyTasksService', () => {
 
     angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
 
-    const study_task_list = [{
-      uuid: study_object.modules[0].uuid,
-      name: study_object.modules[0].name,
-      unlock_after: study_object.modules[0].unlock_after,
-      sticky: study_object.modules[0].alerts.sticky,
-      sticky_label: study_object.modules[0].alerts.sticky_label,
-      alert_title: study_object.modules[0].alerts.title,
-      alert_message: study_object.modules[0].alerts.message,
-      timeout: study_object.modules[0].alerts.timeout,
-      timeout_after: study_object.modules[0].alerts.timeout_after
-    }];
+    const study_task_list = [
+      {
+        uuid: study_object.modules[0].id,
+        name: study_object.modules[0].name,
+        unlock_after: study_object.modules[0].unlock_after,
+        sticky: study_object.modules[0].alerts.sticky,
+        sticky_label: study_object.modules[0].alerts.sticky_label,
+        alert_title: study_object.modules[0].alerts.title,
+        alert_message: study_object.modules[0].alerts.message,
+        timeout: study_object.modules[0].alerts.timeout,
+        timeout_after: study_object.modules[0].alerts.timeout_after,
+      },
+    ];
 
     expect(response[0])
       .withContext('response was same as stubValue')

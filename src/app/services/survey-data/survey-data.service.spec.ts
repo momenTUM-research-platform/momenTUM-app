@@ -99,7 +99,7 @@ describe('SurveyDataService', () => {
           ],
           shuffle: false,
           condition: 'Control',
-          uuid: '3fb09fcd-4fca-4074-a395-34d65ee5a521',
+          id: '3fb09fcd-4fca-4074-a395-34d65ee5a521',
           unlock_after: [],
         },
         {
@@ -275,7 +275,6 @@ describe('SurveyDataService', () => {
 
     // Resolve with our mock data
     mockRequest.flush(mockResponse);
-
   });
 
   //async saveToLocalStorage(key, data)

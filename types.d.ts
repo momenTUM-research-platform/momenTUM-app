@@ -61,6 +61,7 @@ export interface Module {
     max_points: number;
   };
   sections: {
+    id: string;
     name: string;
     shuffle: boolean;
     questions: (
@@ -74,7 +75,7 @@ export interface Module {
       | Media
     )[];
   }[];
-  uuid: string;
+  id: string;
   unlock_after: string[];
   shuffle: boolean;
 }
