@@ -62,7 +62,7 @@
             ],
             "shuffle": false,
             "condition": "Control",
-            "uuid": "3fb09fcd-4fca-4074-a395-34d65ee5a521",
+            "id": "3fb09fcd-4fca-4074-a395-34d65ee5a521",
             "unlock_after": []
         },
         {
@@ -214,7 +214,7 @@
             ],
             "shuffle": false,
             "condition": "*",
-            "uuid": "dee87a08-8616-453a-9a6e-9e8f8ea9c942",
+            "id": "dee87a08-8616-453a-9a6e-9e8f8ea9c942",
             "unlock_after": []
         }
     ]

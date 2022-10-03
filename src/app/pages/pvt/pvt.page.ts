@@ -67,7 +67,7 @@ export class PvtPage implements OnInit {
    * Launches the whole process from counting down to finishing the RTT.
    * */
   async start() {
-    this.state = 'countdown' // load view of countdown
+    this.state = 'countdown'; // load view of countdown
     await this.countdown(3);
     this.state = 'RTT'; // load view of RTT
     await this.RTT();
@@ -103,6 +103,7 @@ export class PvtPage implements OnInit {
 
   /**
    * Counts down to 0. The number being counted down is stored in the **counter** variable of this class.
+   *
    * @param from the number (in seconds) deciding the start of the countdown.
    * */
   private async countdown(from: number) {
@@ -127,10 +128,10 @@ export class PvtPage implements OnInit {
       this.reactedTooLate = false;
 
       // calculate random time to wait
-      let wait = PvtPage.getUniformRand(this.min, this.max);
+      const wait = PvtPage.getUniformRand(this.min, this.max);
 
       // wait for random amount of time while checking if the user exited or the user reacted
-      let start = Date.now();
+      const start = Date.now();
       while (!(Date.now() - start > wait || this.exited || this.reacted)) {
         await this.sleep(0);
       }
@@ -221,7 +222,7 @@ export class PvtPage implements OnInit {
    * Defines all Input variables, which are defined in the study.
    * */
   private async setUpVariables() {
-    const task_id = this.route.snapshot.paramMap.get('task_id')
+    const task_id = this.route.snapshot.paramMap.get('task_id');
     await this.getModule(task_id)
       .then((module) => {
         this.trials = module.trials;
@@ -237,6 +238,7 @@ export class PvtPage implements OnInit {
 
   /**
    * Finds a module in the local storage by one of its task_id's.
+   *
    * @param task_id the task_id of a task of this module.
    * @returns A Promise with the correct module from the local storage.
    * */
@@ -274,6 +276,7 @@ export class PvtPage implements OnInit {
 
   /**
    * Waits for a certain amount of milliseconds.
+   *
    * @param ms number of milliseconds that the function waits
    * @returns a promise
    * */
@@ -283,6 +286,7 @@ export class PvtPage implements OnInit {
 
   /**
    * Uses Math.random() to calculate a uniformly distributed random number between min and max.
+   *
    * @param min minimum number that can be generated.
    * @param max maximum number that can be generated.
    * @returns a uniformly distributed random number between the parameters.

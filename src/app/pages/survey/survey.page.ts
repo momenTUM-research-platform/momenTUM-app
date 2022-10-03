@@ -9,8 +9,10 @@ import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 import * as moment from 'moment';
 import {
-  DateTime, External,
-  Instruction, Media,
+  DateTime,
+  External,
+  Instruction,
+  Media,
   Module,
   Multi,
   Option,
@@ -20,7 +22,7 @@ import {
   Study,
   Task,
   Text,
-  YesNo
+  YesNo,
 } from 'types';
 
 @Component({
@@ -71,15 +73,16 @@ export class SurveyPage implements OnInit {
     },
     sections: [
       {
+        id: '',
         name: '',
         shuffle: false,
         questions: [],
-      }
+      },
     ],
-    uuid: '',
+    id: '',
     unlock_after: [],
     shuffle: false,
-  }
+  };
 
   questions: any;
 
@@ -101,7 +104,7 @@ export class SurveyPage implements OnInit {
     private toastController: ToastController,
     private ngZone: NgZone,
     private iab: InAppBrowser
-  ) { }
+  ) {}
 
   /**
    * Triggered when the survey page is first opened
