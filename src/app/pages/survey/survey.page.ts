@@ -7,7 +7,14 @@ import { SurveyDataService } from '../../services/survey-data/survey-data.servic
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
-import { Study, Option, Module, Task, Question, Responses } from '../../models/types';
+import {
+  Study,
+  Option,
+  Module,
+  Task,
+  Question,
+  Responses,
+} from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
@@ -61,7 +68,7 @@ export class SurveyPage implements OnInit {
         name: '',
         shuffle: false,
         questions: [],
-      }
+      },
     ],
     uuid: '',
     unlock_after: [],
@@ -85,8 +92,8 @@ export class SurveyPage implements OnInit {
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
     private toastController: ToastController,
-    private ngZone: NgZone,
-  ) { }
+    private ngZone: NgZone
+  ) {}
 
   /**
    * Triggered when the survey page is first opened
@@ -95,22 +102,30 @@ export class SurveyPage implements OnInit {
   ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
-    StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
-      console.log('StatusBar is not implemented, Web implementation error. ERROR: ' + e);
+    StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, Web implementation error. ERROR: ' + e
+      );
     });
-    StatusBar.setBackgroundColor({color: '#0F2042'}).catch((e) => {
-      console.log('StatusBar is not implemented, Web implementation error. ERROR: ' + e);
+    StatusBar.setBackgroundColor({ color: '#0F2042' }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, Web implementation error. ERROR: ' + e
+      );
     });
 
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
-        ((
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        ) as HTMLElement ).style.height = `${e.data.frameHeight + 10}px`;
-        ((
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        ) as HTMLElement ).style.width = `99%`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.height = `${e.data.frameHeight + 10}px`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.width = `99%`;
       }
     });
 
@@ -124,15 +139,13 @@ export class SurveyPage implements OnInit {
       const studyObject: any = values[0];
       const uuid = values[1];
 
-
       // get the task object for this task
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
 
         for (let i = 0; i < this.tasks.length; i++) {
-          console.log("Tasks are ",  this.tasks[0] );
+          console.log('Tasks are ', this.tasks[0]);
           if (this.task_id === String(this.tasks[i].task_id)) {
-
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
             this.task_index = i;
@@ -161,14 +174,11 @@ export class SurveyPage implements OnInit {
         // extract the JSON from the study object
         this.study = JSON.parse(studyObject);
 
-
         // get the correct module
         this.survey = this.study.modules[this.module_index];
 
-
         // shuffle modules if required
         if (this.survey.shuffle) {
-
           this.survey.sections = this.shuffle(this.survey.sections);
         }
 
@@ -403,7 +413,7 @@ export class SurveyPage implements OnInit {
    * @param question The question that has been answered
    */
   changeCheckStatus(option: Option, question: Question) {
-    console.log("Changing the status of: ", option.text);
+    console.log('Changing the status of: ', option.text);
     // get question responses and split
     let responses: string[] = [];
 
@@ -442,8 +452,10 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    Browser.open({url: url, windowName: '_system'}).catch((e) => {
-      console.log('ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e)
+    Browser.open({ url, windowName: '_system' }).catch((e) => {
+      console.log(
+        'ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e
+      );
     });
   }
 
@@ -461,7 +473,11 @@ export class SurveyPage implements OnInit {
         if ('hide_id' in q && q.hide_id === id) {
           const hideValue = q.hide_value;
 
-          if (question.type === 'multi' || question.type === 'yesno' || question.type === 'text') {
+          if (
+            question.type === 'multi' ||
+            question.type === 'yesno' ||
+            question.type === 'text'
+          ) {
             // determine whether to hide/show the element
             const hideIf = q.hide_if;
             const valueEquals = hideValue === question.response;

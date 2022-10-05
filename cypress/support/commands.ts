@@ -30,7 +30,9 @@ declare global {
   namespace Cypress {
     interface Chainable {
       clearIonicStorage(): Chainable<void>;
-      setStudy(): Chainable<void>;
+      createAndStoreStudy(): void;
+      setStudy(): Promise<void>;
+
       // login(email: string, password: string): Chainable<void>
       // drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
@@ -43,14 +45,28 @@ declare global {
 import { Storage } from '@ionic/storage';
 
 const storage = new Storage();
+let store: Storage;
+
 // @ts-ignore
 Cypress.Commands.add('clearIonicStorage', async () => {
-  const store = await storage.create();
+  store = await storage.create();
   store.clear();
 });
 
+Cypress.Commands.add('createAndStoreStudy', () => {
+  const uniqueId =
+    Date.now().toString(36) + Math.random().toString(36).substring(2);
+  cy.fixture('study-tasks.json').then(async (studyData) => {
+    store = await storage.create();
+
+    await store.set('enrolment-date', new Date());
+    await store.set('uuid', uniqueId);
+    await store.set('current-study', JSON.stringify(studyData.study));
+    await store.set('study-tasks', JSON.stringify(studyData.tasks));
+  });
+});
+
 Cypress.Commands.add('setStudy', async () => {
-  const store = await storage.create();
   store.set('condition', 'Control');
   store.set(
     'current-study',

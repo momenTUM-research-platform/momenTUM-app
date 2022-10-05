@@ -19,5 +19,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "extends": "./tsconfig.json",
+  "include": [
+    "**/*.spec.ts"
+  ],
 }

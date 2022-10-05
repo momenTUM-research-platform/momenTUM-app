@@ -3,9 +3,9 @@
     "strict": true,
     "baseUrl": "../node_modules",
     "target": "es5",
-    "lib": ["es5", "dom"],
+    "lib": ["es5", "dom", "ES2015"],
     "types": ["cypress", "@testing-library/cypress"]
   },
-  "exclude": [],
+  "exclude": ["**/*.spec.ts"],
   "include": ["./**/*.ts"]
 }

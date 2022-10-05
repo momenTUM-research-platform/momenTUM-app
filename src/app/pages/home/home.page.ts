@@ -1,20 +1,24 @@
-import {Component, OnInit} from '@angular/core';
-import {NavigationStart, Router} from '@angular/router';
-import {StatusBar, Style} from '@capacitor/status-bar';
-import {AlertController, Platform, RefresherCustomEvent} from '@ionic/angular';
+import { Component, OnInit } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import {
+  AlertController,
+  Platform,
+  RefresherCustomEvent,
+} from '@ionic/angular';
 
-import {SurveyDataService} from '../../services/survey-data/survey-data.service';
-import {StudyTasksService} from '../../services/study-task/study-tasks.service';
-import {SurveyCacheService} from '../../services/survey-cache/survey-cache.service';
-import {UuidService} from '../../services/uuid/uuid.service';
-import {LoadingService} from '../../services/loading/loading-service.service';
-import {NotificationsService} from '../../services/notification/notifications.service';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
+import { UuidService } from '../../services/uuid/uuid.service';
+import { LoadingService } from '../../services/loading/loading-service.service';
+import { NotificationsService } from '../../services/notification/notifications.service';
 import * as moment from 'moment';
-import {ChangeTheme} from '../../shared/change-theme';
-import {TranslateService} from '@ngx-translate/core';
-import {Study, Translations} from '../../models/types';
-import {StorageService} from '../../services/storage/storage.service';
-import {BarcodeService} from '../../services/barcode/barcode.service';
+import { ChangeTheme } from '../../shared/change-theme';
+import { TranslateService } from '@ngx-translate/core';
+import { Study, Translations } from '../../models/types';
+import { StorageService } from '../../services/storage/storage.service';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
 @Component({
   selector: 'app-home',
@@ -80,30 +84,20 @@ export class HomePage implements OnInit {
   toggleTheme() {
     if (ChangeTheme.getTheme() === 'light') {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log(
-          'StatusBar.setBackgroundColor(): ' +
-          e
-        );
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
-      StatusBar.setStyle({style: Style.Dark}).catch((e) => {
-        console.log(
-          'StatusBar.setStyle(): ' + e
-        )
+      StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
       this.tum_image = 'assets/imgs/tum-light.png';
       ChangeTheme.setTheme(true);
     } else {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log(
-          'StatusBar.setBackgroundColor(): ' +
-          e
-        );
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
-      StatusBar.setStyle({style: Style.Light}).catch((e) => {
-        console.log(
-          'StatusBar.setStyle(): ' + e
-        )
+      StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
       this.tum_image = 'assets/imgs/tum-icon.png';
@@ -116,28 +110,18 @@ export class HomePage implements OnInit {
     ChangeTheme.initializeTheme();
     if (ChangeTheme.getTheme() === 'light') {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log(
-          'StatusBar.setBackgroundColor(): ' +
-          e
-        );
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
-      StatusBar.setStyle({style: Style.Light}).catch((e) => {
-        console.log(
-          'StatusBar.setStyle(): ' + e
-        )
+      StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log(
-          'StatusBar.setBackgroundColor(): ' +
-          e
-        );
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
-      StatusBar.setStyle({style: Style.Dark}).catch((e) => {
-        console.log(
-          'StatusBar.setStyle(): ' + e
-        )
+      StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
     }
@@ -414,7 +398,8 @@ export class HomePage implements OnInit {
           handler: (response) => {
             // create URL for study
             const url =
-              'https://tuspl22-momentum.srv.mwn.de/api/surveys/' + response.id;
+              'https://tuspl22-momentum.srv.mwn.de/api/v1/studies/' +
+              response.id;
             this.attemptToDownloadStudy(url, false, true);
           },
         },
