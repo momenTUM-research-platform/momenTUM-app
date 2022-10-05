@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
-import {Task} from "../../models/types";
+import { Task } from '../../models/types';
 
 @Component({
   selector: 'app-pvt',
@@ -89,8 +89,7 @@ export class PvtPage implements OnInit {
     if (this.showResults) {
       this.state = 'results';
       this.submit();
-    }
-    else {
+    } else {
       this.submit();
       this.navHome();
     }
@@ -176,24 +175,20 @@ export class PvtPage implements OnInit {
   private async handleResult() {
     if (this.exited) {
       return;
-    }
-    else if (this.timer === -1) {
+    } else if (this.timer === -1) {
       this.reactedTooEarly = true;
       this.timer = -1;
       this.reactionTimes.push(-2);
       this.trials++;
-    }
-    else if (this.timer > this.timeToTimeout) {
+    } else if (this.timer > this.timeToTimeout) {
       this.reactedTooLate = true;
       this.timer = -1;
       this.reactionTimes.push(-1);
       this.trials++;
-    }
-    else {
+    } else {
       this.reactionTimes.push(this.timer);
     }
   }
-
 
   /**
    * Conducts a fake RTT for the instruction page.
@@ -212,7 +207,7 @@ export class PvtPage implements OnInit {
    * */
   private async runInstructionTimer() {
     this.instructionTimer = 0;
-    const runTime = 250 + Math.random()*100;
+    const runTime = 250 + Math.random() * 100;
     const start = Date.now();
     do {
       this.instructionTimer = Date.now() - start;
@@ -225,22 +220,17 @@ export class PvtPage implements OnInit {
    * */
   private async setUpVariables() {
     const task_id = this.route.snapshot.paramMap.get('task_id');
-    await this.getModule(task_id)
-      .then((module) => {
-        this.trials = module.trials;
-        this.min = module.min_waiting;
-        this.max = module.max_waiting;
-        this.moduleName = module.name;
-        this.showResults = module.show;
-        this.timeToTimeout = module.max_reaction;
-        this.enableExit = module.exit;
-        this.submitText = module.submit_text;
-      });
+    await this.getModule(task_id).then((module) => {
+      this.trials = module.trials;
+      this.min = module.min_waiting;
+      this.max = module.max_waiting;
+      this.moduleName = module.name;
+      this.showResults = module.show;
+      this.timeToTimeout = module.max_reaction;
+      this.enableExit = module.exit;
+      this.submitText = module.submit_text;
+    });
   }
-
-
-
-
 
   /**
    * Finds a module in the local storage by one of its task_id's.
@@ -265,9 +255,10 @@ export class PvtPage implements OnInit {
         }
         return this.storageService.get('current-study');
       })
-      .then((studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]);
+      .then(
+        (studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]
+      );
   }
-
 
   /**
    * Composes the output data and sends it to the server.
@@ -276,11 +267,10 @@ export class PvtPage implements OnInit {
    * Navigates back home.
    * */
   private async submit() {
-
     const responseTime = moment().format();
     const responseTimeInMs = moment().valueOf();
 
-    let tasks: Task[] = await this.studyTasksService.getAllTasks()
+    const tasks: Task[] = await this.studyTasksService.getAllTasks();
     tasks[this.taskIndex].completed = true;
     tasks[this.taskIndex].response_time = responseTime;
     tasks[this.taskIndex].response_time_ms = responseTimeInMs;
@@ -295,12 +285,12 @@ export class PvtPage implements OnInit {
     });
     this.storageService.set('study-tasks', JSON.stringify(tasks));
     this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'pvt',
-        event: 'submit',
-        module_index: this.moduleIndex,
-      });
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page: 'pvt',
+      event: 'submit',
+      module_index: this.moduleIndex,
+    });
   }
 
   /**
@@ -320,7 +310,7 @@ export class PvtPage implements OnInit {
    * @param max maximum number that can be generated.
    * @returns a uniformly distributed random number between the parameters.
    * */
-  private  getUniformRand(min: number, max: number): number {
-    return  min + Math.random() * (max - min);
+  private getUniformRand(min: number, max: number): number {
+    return min + Math.random() * (max - min);
   }
 }
