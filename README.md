@@ -50,134 +50,117 @@ If you use schema in your own research, please cite the following:
 
 # Development
 
-This is an ionic-angular mobile application.
-This readme gives a step by step installation guide for the respective
-reader to follow along with building the app.
+For a more detailed tutorial on how to develop Ionic projects visit:
 
-## Installations
+>https://ionicframework.com/docs
 
-#### 1. Install node and npm
+## Set up local project
 
-[Download from here](https://nodejs.org/en/download/)
+Navigate to the destination of your project and clone the GitHub repository:
 
-#### 2. Make sure your installations are complete and working by running the following commands
+      cd /full/path/to/your/destination
+      git clone https://github.com/TUMChronobiology/momenTUM-app.git
+      cd momenTUM-app
 
-    $ node -v
-    $ npm -v
+[Install node and npm](https://nodejs.org/en/download/) or check whether they are installed:
 
-#### 3. Install Ionic
+      node -v
+      npm -v
 
-    $ npm install -g @ionic/cli
-    $ npm i -g cordova
-    $ npm i -g native-run
-    $ npm i -g @angular/cli
+Install global npm packages:
 
-#### 4. Make sure your installations are complete and working by running the following commands
+      npm i -g @ionic/cli @angular/cli native-run cordova-res
 
-    $ ionic -v
+Navigate to the momenTUM-app folder and install the dependencies:
 
-#### 5. Install node_modules
+      cd /path/to/momenTUM-app
+      npm i
 
-    $ npm i
+## Build and run project
 
-## Previewing
+### Run in web browser
 
-The following guide shows how to use Cordova to build for Browser, Android and iOS platform targets.
-<br>
+Run a development server with live-reload in your browser:
 
-## Browser Preview
+      ionic serve
 
-#### 1. Install cordova browers
+### Build and run on iOS emulator
+Notice: iOS apps can only be developed on macOS with Xcode installed.
 
-    $ ionic cordova platform add browser
+Download Xcode:
+>https://developer.apple.com/xcode/.
 
-#### 2. Prepare
+Once Xcode is installed, make sure the command-line tools are selected for use:
 
-    $ ionic cordova prepare browser
+      xcode-select --install
 
-#### 2. Run the following command
+Create an iOS emulator:
+> 1. Open Xcode.
+> 2. Navigate to Window » Devices and Simulators.
+> 3. Create a new simulator, if it doesn't already exist.
 
-    $ ionic cordova run browser
+Generate a native project:
 
-## iOS Preview
+      ionic cap add ios
 
-#### 1. Xcode installation with an emulator
+Open in Xcode:
 
-Note: If you don't already have an xcode and an emulator installed, follow the following guide
-to install it. <br>[Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
+      ionic cap open ios
 
-#### 2. Cordova Setup
+Sign the App:
+>1. Click on the Project root.
+>2. under the Signing section, ensure Automatically manage signing is enabled.
+>3. Then, select a Development Team.
 
-    $ npm install -g ios-sim
-    $ brew install ios-deploy
+You can now close Xcode and build & run the App on iOS with live-reload:
 
-#### 3. Project Setup​
+      ionic cap copy ios
+      ionic cap run ios -l
 
-Generate the native project, if it does not already exist. (You can only install one)
+For debugging, you can use the Safari Browser:
+> 1. Open Safari
+> 2. Navigate to Develop >> _name_of_emulator_ >> localhost
 
-#### For Cordova, run the following:
+Alternatively, you can run the native iOS Project in Xcode.
 
-    $ ionic cordova prepare ios
+### Android
 
-#### 2. Running with cordova
+Install [Android Studio](https://developer.android.com/studio/install):
+>https://developer.android.com/studio/install
 
-    $ ionic cordova run ios -l --external
+Install the Android SDK by opening Android Studio. It will lead you through the installation.
+Open ~/.bashrc, ~/.bash_profile, or similar bash startup scripts and add the following lines:
 
-#### Reference
+      export ANDROID_SDK_ROOT=/Path/to/android/sdk
+      # avdmanager, sdkmanager
+      export PATH=$PATH:$ANDROID_SDK_ROOT/tools/bin
+      # adb, logcat
+      export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+      # emulator
+      export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
 
-> https://ionicframework.com/docs/developing/ios#xcode-setup
+In Android Studio, open the _Virtual Device Manager_ and create a _Virtual Device_. Run the Device and keep the emulator running.
+Generate the android native project by running the following inside of the momenTUM-app directory:
 
-## Android Preview
+      ionic cap add android
 
-#### 1. Android Studio and Android SDK installation
+Build the web assets and copy them into the native project:
 
-Note: If you don't already have android studio or an emulator installed, follow the following guide
-to install it. <br>[Guide here](https://ionicframework.com/docs/developing/android#android-studio)
+      ionic cap copy android
 
-#### 2. Cordova Setup
+Run the app with live-reload:
 
-Additional setup is required for Cordova to support programmatic builds. This section is not necessary for Capacitor.
+      ionic cap run android -l
 
-> Install Java [here](https://ionicframework.com/docs/developing/android#java) <br>
-> Install Gradle [here](https://ionicframework.com/docs/developing/android#gradle)
+For debugging, open [chrome://inspect](chrome://inspect) with the Chrome Web Browser.
 
-#### 3. Project Setup​
-
-Generate the native project, if it does not already exist. (You can only install one)
-
-#### For Cordova, run the following:
-
-    $ ionic cordova prepare android
-
-#### 2. Running with cordova
-
-    $ ionic cordova run android
-
-    $ ionic cordova run android -l
-
-#### Reference
-
-> https://ionicframework.com/docs/developing/android#installing-android-studio
+Alternatively, you can run the native Android Project in Android Studio.
 
 # Testing
 
 For testing, run the following command.
 
     ng test
-
-## New features
-
-#### 1. Generating new features
-
-        $ ionic generate
-        ? What would you like to generate?
-        ❯ page
-        component
-        service
-        module
-        class
-        directive
-        guard
 
 ## End-to-end testing
 
@@ -186,35 +169,4 @@ Cypress is used for E2E-Testing, which simulates a user interacting with the app
 ```
 ionic serve
 npm run cypress
-```
-
-# Notes on Capacitor 
-```
-ionic start momenTUM blank --capacitor --type=angular --package-id=com.tum.momentum
-```
-```
-sudo npm install @capacitor/android
-sudo npx cap add android
-sudo npm run build
-sudo npx cap sync
-sudo npx cap open android
-sudo npx cap run android
-ionic capacitor run android --livereload --external
-```
-
-```
-sudo npm install @capacitor/ios
-sudo npx cap add ios
-sudo npm run build
-sudo npx cap sync
-sudo npx cap open ios
-sudo npx cap run ios
-ionic capacitor run ios --livereload --external
-```
-
-For web
-1. Set bundledWebRuntime to true in the Capacitor configuration file
-```
-"bundledWebRuntime": true
-npx cap sync web
 ```
