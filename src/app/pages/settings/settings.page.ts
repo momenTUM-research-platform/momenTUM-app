@@ -66,7 +66,6 @@ export class SettingsPage {
 
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
-        console.log('I found a study!');
       } else {
         this.isEnrolled = false;
       }

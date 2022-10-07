@@ -184,7 +184,6 @@ export class HomePage implements OnInit {
         // convert the study to a JSON object
 
         this.study = JSON.parse(studyObject);
-        console.log('Found study: ', this.study);
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -465,7 +464,6 @@ export class HomePage implements OnInit {
    * Loads the details of the current study, including overdue tasks
    */
   async loadStudyDetails() {
-    console.log('loading tasks...');
     //const tassk = await this.storageService.get('study-tasks');
     //console.log("Just checking: ", tassk);
     //this.jsonText = this.study['properties'].study_name;
@@ -474,7 +472,6 @@ export class HomePage implements OnInit {
 
       for (const task of this.task_list) {
         task.moment = moment(task.time).fromNow();
-        console.log('Task Local: ', task.moment);
       }
 
       // show the study tasks
