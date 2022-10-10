@@ -72,6 +72,7 @@ reader to follow along with building the app.
     $ npm i -g native-run
     $ npm i -g @angular/cli
 
+
 #### 4. Make sure your installations are complete and working by running the following commands
 
     $ ionic -v
