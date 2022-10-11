@@ -1,7 +1,6 @@
 <ion-header>
   <ion-toolbar  mode="md">
     <ion-buttons slot="start"  mode="md">
-      <!--<ion-back-button (click)="back()"></ion-back-button>-->
 
       <ion-item class="light-blue-toolbar" lines="none">
         <ion-button style="height: 35px;" size="medium" color="secondary" (click)="back()">
@@ -284,9 +283,7 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
                 <div *ngIf="!question.modal">
-                  <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
                   <ion-radio-group *ngIf="question.radio"
                     (ionChange)="setAnswer(question)"
                     [(ngModel)]="question.model"
@@ -306,8 +303,7 @@
                       ></ion-radio>
                     </ion-item>
                   </ion-radio-group>
-                  <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
-                  <div radio-group *ngIf="question.radio == false">
+                  <div radio-group *ngIf="!question.radio">
                     <ion-item
                       *ngFor="let option of question.optionsChecked"
                       lines="none"
