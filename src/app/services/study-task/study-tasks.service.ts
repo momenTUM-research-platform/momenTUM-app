@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Study, Task } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
 import { LoadingService } from '../loading/loading-service.service';
 
@@ -39,7 +38,7 @@ export class StudyTasksService {
       // if the module is assigned to the participant's condition
       // add it to the list, otherwise just skip it
       if (mod.condition === condition || mod.condition === '*') {
-        const module_uuid = mod.uuid;
+        const module_uuid = mod.id;
         const module_duration = mod.alerts.duration;
         const module_offset = mod.alerts.start_offset;
         const module_unlock_after =

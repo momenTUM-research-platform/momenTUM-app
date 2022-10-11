@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BarcodeScanner, ScanResult } from '@capacitor-community/barcode-scanner';
+import {
+  BarcodeScanner,
+  ScanResult,
+} from '@capacitor-community/barcode-scanner';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BarcodeService {
-
-  constructor() { }
+  constructor() {}
 
   public async startScan(): Promise<ScanResult> {
     // Check camera permission
@@ -25,7 +27,7 @@ export class BarcodeService {
     }
 
     return result;
-  };
+  }
 
   async checkPermission() {
     const status = await this.didUserGrantPermission();
@@ -33,12 +35,14 @@ export class BarcodeService {
     if (!status) {
       // the user denied permission for good
       // redirect user to app settings if they want to grant it anyway
-      const c = confirm('If you want to grant permission for using your camera, enable it in the app settings.');
+      const c = confirm(
+        'If you want to grant permission for using your camera, enable it in the app settings.'
+      );
       if (c) {
         BarcodeScanner.openAppSettings();
       }
     }
-  };
+  }
 
   async didUserGrantPermission() {
     // check if user already granted permission
@@ -63,7 +67,9 @@ export class BarcodeService {
       // user has not been requested this permission before
       // it is advised to show the user some sort of prompt
       // this way you will not waste your only chance to ask for the permission
-      const c = confirm('We need your permission to use your camera to be able to scan barcodes');
+      const c = confirm(
+        'We need your permission to use your camera to be able to scan barcodes'
+      );
       if (!c) {
         return false;
       }
@@ -92,8 +98,7 @@ export class BarcodeService {
 
     // user did not grant the permission, so he must have declined the request
     return false;
-  };
-
+  }
 
   public async stopScan(): Promise<void> {
     BarcodeScanner.showBackground();
@@ -102,8 +107,7 @@ export class BarcodeService {
 
   public prepare(): void {
     BarcodeScanner.prepare();
-  };
-
+  }
 
   askUser(): void {
     this.prepare();
@@ -115,5 +119,5 @@ export class BarcodeService {
     } else {
       this.stopScan();
     }
-  };
+  }
 }

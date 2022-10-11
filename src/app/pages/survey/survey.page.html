@@ -1,20 +1,22 @@
 <ion-header>
-  <ion-toolbar  mode="md">
-    <ion-buttons slot="start"  mode="md">
-
+  <ion-toolbar mode="md">
+    <ion-buttons slot="start" mode="md">
       <ion-item class="light-blue-toolbar" lines="none">
-        <ion-button style="height: 35px;" size="medium" color="secondary" (click)="back()">
+        <ion-button
+          style="height: 35px"
+          size="medium"
+          color="secondary"
+          (click)="back()"
+        >
           <ion-icon slot="icon-only" name="arrow-back">Home</ion-icon>
         </ion-button>
         <span class="text">{{this.current_section_name}}</span>
       </ion-item>
     </ion-buttons>
 
-    <ion-item slot="end" class="light-blue-toolbar" lines="none"  mode="md">
+    <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
       <span class="text">{{this.current_section}}/{{this.num_sections}}</span>
     </ion-item>
-
-
   </ion-toolbar>
 </ion-header>
 
@@ -284,7 +286,8 @@
             <ion-row class="ion-row-items">
               <ion-col>
                 <div *ngIf="!question.modal">
-                  <ion-radio-group *ngIf="question.radio"
+                  <ion-radio-group
+                    *ngIf="question.radio"
                     (ionChange)="setAnswer(question)"
                     [(ngModel)]="question.model"
                   >

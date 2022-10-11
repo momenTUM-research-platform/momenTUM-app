@@ -6,8 +6,8 @@ import { SurveyPage } from './survey.page';
 const routes: Routes = [
   {
     path: '',
-    component: SurveyPage
-  }
+    component: SurveyPage,
+  },
 ];
 
 @NgModule({

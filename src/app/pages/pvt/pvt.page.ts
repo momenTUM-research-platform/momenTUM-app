@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
-import { Task } from '../../models/types';
 
 @Component({
   selector: 'app-pvt',

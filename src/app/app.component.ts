@@ -10,7 +10,6 @@ import { StorageService } from './services/storage/storage.service';
 import { NotificationsService } from './services/notification/notifications.service';
 import { ActionPerformed } from '@capacitor/local-notifications';
 
-
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -49,27 +48,31 @@ export class AppComponent implements OnInit {
     // wait for device ready and then fire any pending click events
     await this.isAppInForeground;
     this.notificationsService.fireQueuedEvents().catch(() => {
-      console.log("ERROR caught: fireQueuedEvents is not yet implemented.");
+      console.log('ERROR caught: fireQueuedEvents is not yet implemented.');
     });
   }
 
-  async listenerFunc(notificationAction: ActionPerformed){
+  async listenerFunc(notificationAction: ActionPerformed) {
     await this.isAppInForeground;
     // log that the user clicked on this notification
     const logEvent = {
       timestamp: moment().format(),
       milliseconds: moment().valueOf(),
-      page: 'notification-' + moment(notificationAction.notification.extra.task_time).format(),
+      page:
+        'notification-' +
+        moment(notificationAction.notification.extra.task_time).format(),
       event: 'click',
       module_index: notificationAction.notification.extra.task_index,
     };
     this.surveyDataService.logPageVisitToServer(logEvent);
-    this.router.navigate(['survey/' + notificationAction.notification.extra.task_id]);
+    this.router.navigate([
+      'survey/' + notificationAction.notification.extra.task_id,
+    ]);
   }
 
   async initializeApp() {
     this.platform.ready().then(async () => {
-      await StatusBar.setOverlaysWebView({overlay: false}).catch((e) => {
+      await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
         console.log('StatusBar.setOverlaysWebView(): ' + e);
       });
       SplashScreen.hide();

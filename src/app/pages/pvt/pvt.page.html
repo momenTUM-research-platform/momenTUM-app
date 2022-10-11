@@ -1,63 +1,49 @@
 <ion-content scroll-y="false">
   <!--Tutorial Page-->
   <div *ngIf="state==='instructions'" class="pane">
-    <h1>
-      TUTORIAL
-    </h1>
+    <h1>TUTORIAL</h1>
     <p>
-      Welcome! Reaction-time-testing is easy: it's just a reflex game. Some numbers will flash onto the screen suddenly, and your job will be to respond as soon as possible by touching the screen. When someone plays it, the screen looks something like this:
+      Welcome! Reaction-time-testing is easy: it's just a reflex game. Some
+      numbers will flash onto the screen suddenly, and your job will be to
+      respond as soon as possible by touching the screen. When someone plays it,
+      the screen looks something like this:
     </p>
     <div class="timer-box">
-      <h2 class="timer-font">
-        {{instructionTimer}}
-      </h2>
+      <h2 class="timer-font">{{instructionTimer}}</h2>
     </div>
-    <p>
-      The game will last for {{trials}} trials.
-    </p>
+    <p>The game will last for {{trials}} trials.</p>
     <p *ngIf="enableExit">
-      You can also end the game at any time by clicking the x in the upper right corner.
+      You can also end the game at any time by clicking the x in the upper right
+      corner.
     </p>
-    <button (click)="start()">
-      < start >
-    </button>
+    <button (click)="start()">< start ></button>
   </div>
 
   <!--Countdown Page-->
   <div *ngIf="state==='countdown'" class="pane">
-    <h1>
-      Trial starts in {{counter}}
-    </h1>
+    <h1>Trial starts in {{counter}}</h1>
   </div>
 
   <!--RTT Page-->
   <div *ngIf="state==='RTT'" (touchstart)="reacted = true" class="pane">
-    <ion-icon class="top-right-position" size="large" (click)="exit()" name="close" *ngIf="enableExit"></ion-icon>
+    <ion-icon
+      class="top-right-position"
+      size="large"
+      (click)="exit()"
+      name="close"
+      *ngIf="enableExit"
+    ></ion-icon>
     <div class="timer-box center-abs">
-      <h2 *ngIf="timer >= 0">
-        {{timer}}
-      </h2>
-      <h2 *ngIf="reactedTooLate">
-        {{tooLateMessage}}
-      </h2>
-      <h2 *ngIf="reactedTooEarly">
-        {{tooEarlyMessage}}
-      </h2>
+      <h2 *ngIf="timer >= 0">{{timer}}</h2>
+      <h2 *ngIf="reactedTooLate">{{tooLateMessage}}</h2>
+      <h2 *ngIf="reactedTooEarly">{{tooEarlyMessage}}</h2>
     </div>
   </div>
 
   <!--Results Page-->
   <div *ngIf="state==='results'" class="pane">
-    <h1>
-      RESULTS
-    </h1>
-    <p *ngIf="showResults" class="center-abs">
-        {{reactionTimes}}
-    </p>
-    <button (mousedown)="navHome()">
-      < {{submitText}} >
-    </button>
+    <h1>RESULTS</h1>
+    <p *ngIf="showResults" class="center-abs">{{reactionTimes}}</p>
+    <button (mousedown)="navHome()">< {{submitText}} ></button>
   </div>
-
 </ion-content>
-

@@ -6,8 +6,8 @@ import { ProgressPage } from './progress.page';
 const routes: Routes = [
   {
     path: '',
-    component: ProgressPage
-  }
+    component: ProgressPage,
+  },
 ];
 
 @NgModule({

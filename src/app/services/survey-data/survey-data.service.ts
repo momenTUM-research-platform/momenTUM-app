@@ -4,7 +4,6 @@ import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 import { HttpClient } from '@angular/common/http';
 import { Http } from '@capacitor-community/http';
-import { LogEvent, SurveyData, Study } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({
@@ -33,8 +32,7 @@ export class SurveyDataService {
       };
 
       // Now a get request
-      Http
-        .get(options)
+      Http.get(options)
         .then((data) => {
           resolve(data.data);
         })
@@ -78,8 +76,7 @@ export class SurveyDataService {
       this.storage.get('uuid'),
       this.studyTasksService.getAllTasks(),
     ]).then((values) => {
-
-      const studyJSON =  JSON.parse(JSON.parse(JSON.stringify(values[0])));
+      const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
 
       const dataUuid = this.uuidService.generateUUID('pending-data');
@@ -102,7 +99,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url+ "/response",
+        studyJSON?.properties.post_url + '/response',
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
@@ -144,7 +141,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url + "/log",
+        studyJSON?.properties.post_url + '/log',
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
@@ -167,7 +164,7 @@ export class SurveyDataService {
   uploadPendingData(dataType: 'pending-log' | 'pending-data') {
     return Promise.all([this.storage.get('current-study'), this.storage.keys()])
       .then((values) => {
-        const studyJSON =  JSON.parse(JSON.parse(JSON.stringify(values[0])));
+        const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
         const keys = values[1];
 
         const pendingLogKeys = [];
@@ -217,7 +214,7 @@ export class SurveyDataService {
           console.log('Notice Survey: ' + v);
         },
         error: (e) => {
-          console.log('Error in attempt http post: ' , e || '');
+          console.log('Error in attempt http post: ', e || '');
           resolve(false);
         },
         complete: () => {

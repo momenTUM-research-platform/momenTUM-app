@@ -16,7 +16,6 @@ import { NotificationsService } from '../../services/notification/notifications.
 import * as moment from 'moment';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
-import { Study, Translations } from '../../models/types';
 import { StorageService } from '../../services/storage/storage.service';
 import { BarcodeService } from '../../services/barcode/barcode.service';
 

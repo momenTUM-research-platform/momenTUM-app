@@ -5,7 +5,6 @@ import {
 } from '@ionic-native/file-transfer/ngx';
 import { LoadingService } from '../loading/loading-service.service';
 import { File, FileEntry } from '@ionic-native/file/ngx';
-import { Media, Study } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({
@@ -64,7 +63,7 @@ export class SurveyCacheService {
     // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
-    console.log("Study object is: ", study);
+    console.log('Study object is: ', study);
     // get urls from media elements
     for (const module of study.modules) {
       for (const section of module.sections) {
@@ -131,11 +130,9 @@ export class SurveyCacheService {
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
-        console.log("Study object is: ", studyObject);
+        console.log('Study object is: ', studyObject);
         for (const module of studyObject.modules) {
-
           for (const section of module.sections) {
-
             const mediaQuestions = section.questions.filter(
               (question): question is Media => question.type === 'media'
             );

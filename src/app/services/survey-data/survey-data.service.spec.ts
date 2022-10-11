@@ -123,11 +123,8 @@ describe('SurveyDataService', () => {
   //   const saved_s: any = await service.getFromLocalStorage(current_study_key);
   //   const saved_u: any = await service.sendSurveyDataToServer(uuid_study);
 
-
   //   expect(saved_study).toBe(saved_s);
   //   expect(uuid_study).toBe(saved_u);
-
-
 
   // });
 

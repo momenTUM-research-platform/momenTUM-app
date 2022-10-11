@@ -30,7 +30,10 @@ describe('HomePage', () => {
   let SurveyDataServiceSpy: jasmine.SpyObj<SurveyDataService>;
 
   beforeEach(waitForAsync(() => {
-    const surveySpy = jasmine.createSpyObj('SurveyDataServiceSpy', ['logPageVisitToServer', 'uploadPendingData']);
+    const surveySpy = jasmine.createSpyObj('SurveyDataServiceSpy', [
+      'logPageVisitToServer',
+      'uploadPendingData',
+    ]);
     TestBed.configureTestingModule({
       declarations: [HomePage],
       imports: [
@@ -47,7 +50,7 @@ describe('HomePage', () => {
         }),
       ],
       providers: [
-        { provide: SurveyDataService, useValue: surveySpy},
+        { provide: SurveyDataService, useValue: surveySpy },
         { provide: USE_DEFAULT_LANG, useValue: true },
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
@@ -63,7 +66,9 @@ describe('HomePage', () => {
     fixture.detectChanges();
     // Jasmine Implmentation
     // Inject both the service-to-test and its (spy) dependency
-    SurveyDataServiceSpy = TestBed.inject(SurveyDataService) as jasmine.SpyObj<SurveyDataService>;
+    SurveyDataServiceSpy = TestBed.inject(
+      SurveyDataService
+    ) as jasmine.SpyObj<SurveyDataService>;
   }));
 
   it('should create', () => {
