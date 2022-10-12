@@ -1,13 +1,14 @@
 import { Component, OnInit, NgZone } from '@angular/core';
-import { LocalNotifications } from '@ionic-native/local-notifications/ngx';
 import { Platform } from '@ionic/angular';
-import { SplashScreen } from '@ionic-native/splash-screen/ngx';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { StatusBar } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { SurveyDataService } from './services/survey-data/survey-data.service';
 import * as moment from 'moment';
 import { AlertController } from '@ionic/angular';
-import { Storage } from '@ionic/storage-angular';
+import { StorageService } from './services/storage/storage.service';
+import { NotificationsService } from './services/notification/notifications.service';
+import { ActionPerformed } from '@capacitor/local-notifications';
 
 @Component({
   selector: 'app-root',
@@ -19,14 +20,10 @@ export class AppComponent implements OnInit {
 
   constructor(
     private platform: Platform,
-    private splashScreen: SplashScreen,
-    private statusBar: StatusBar,
-    private localNotifications: LocalNotifications,
+    private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
-    private ngZone: NgZone,
-    private alertCtrl: AlertController,
-    private storage: Storage
+    private storage: StorageService
   ) {
     this.initializeApp();
   }
@@ -34,7 +31,7 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     await this.platform.ready();
 
-    await this.storage.create();
+    await this.storage.init();
 
     this.platform.pause.subscribe(() => {
       this.isAppInForeground = new Promise((resolve) => {
@@ -46,30 +43,39 @@ export class AppComponent implements OnInit {
       this.readyApp();
     });
 
-    // handle notification click
-    this.localNotifications.on('click').subscribe(async (notification) => {
-      await this.isAppInForeground;
-      // log that the user clicked on this notification
-      const logEvent = {
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'notification-' + moment(notification.data.task_time).format(),
-        event: 'click',
-        module_index: notification.data.task_index,
-      };
-      this.surveyDataService.logPageVisitToServer(logEvent);
-      this.router.navigate(['survey/' + notification.data.task_id]);
-    });
+    this.notificationsService.addListenerOnClick(this.listenerFunc);
+
     // wait for device ready and then fire any pending click events
     await this.isAppInForeground;
-    this.localNotifications.fireQueuedEvents();
+    this.notificationsService.fireQueuedEvents().catch(() => {
+      console.log('ERROR caught: fireQueuedEvents is not yet implemented.');
+    });
   }
 
-  initializeApp() {
-    this.platform.ready().then(() => {
-      this.statusBar.overlaysWebView(false);
-      //this.statusBar.styleDefault();
-      this.splashScreen.hide();
+  async listenerFunc(notificationAction: ActionPerformed) {
+    await this.isAppInForeground;
+    // log that the user clicked on this notification
+    const logEvent = {
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page:
+        'notification-' +
+        moment(notificationAction.notification.extra.task_time).format(),
+      event: 'click',
+      module_index: notificationAction.notification.extra.task_index,
+    };
+    this.surveyDataService.logPageVisitToServer(logEvent);
+    this.router.navigate([
+      'survey/' + notificationAction.notification.extra.task_id,
+    ]);
+  }
+
+  async initializeApp() {
+    this.platform.ready().then(async () => {
+      await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
+        console.log('StatusBar.setOverlaysWebView(): ' + e);
+      });
+      SplashScreen.hide();
     });
   }
 }

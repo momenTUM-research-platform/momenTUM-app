@@ -9,12 +9,7 @@ import { SurveyPageRoutingModule } from './survey-routing.module';
 import { SurveyPage } from './survey.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    SurveyPageRoutingModule
-  ],
-  declarations: [SurveyPage]
+  imports: [CommonModule, FormsModule, IonicModule, SurveyPageRoutingModule],
+  declarations: [SurveyPage],
 })
 export class SurveyPageModule {}

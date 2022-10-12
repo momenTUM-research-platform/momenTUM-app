@@ -3,7 +3,7 @@ import { SurveyDataService } from '../../services/survey-data/survey-data.servic
 import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { Storage } from '@ionic/storage-angular';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-pvt',
@@ -27,6 +27,7 @@ export class PvtPage implements OnInit {
   alertTime: string;
 
   // HELPER VARIABLES:
+  taskIndex: number;
   reacted: boolean;
   reactedTooEarly: boolean;
   reactedTooLate: boolean;
@@ -43,7 +44,7 @@ export class PvtPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
-    private storage: Storage
+    private storageService: StorageService
   ) {
     this.reactionTimes = [];
     this.state = 'instructions';
@@ -87,8 +88,7 @@ export class PvtPage implements OnInit {
     if (this.showResults) {
       this.state = 'results';
       this.submit();
-    }
-    else {
+    } else {
       this.submit();
       this.navHome();
     }
@@ -128,7 +128,7 @@ export class PvtPage implements OnInit {
       this.reactedTooLate = false;
 
       // calculate random time to wait
-      const wait = PvtPage.getUniformRand(this.min, this.max);
+      const wait = this.getUniformRand(this.min, this.max);
 
       // wait for random amount of time while checking if the user exited or the user reacted
       const start = Date.now();
@@ -174,24 +174,20 @@ export class PvtPage implements OnInit {
   private async handleResult() {
     if (this.exited) {
       return;
-    }
-    else if (this.timer === -1) {
+    } else if (this.timer === -1) {
       this.reactedTooEarly = true;
       this.timer = -1;
       this.reactionTimes.push(-2);
       this.trials++;
-    }
-    else if (this.timer > this.timeToTimeout) {
+    } else if (this.timer > this.timeToTimeout) {
       this.reactedTooLate = true;
       this.timer = -1;
       this.reactionTimes.push(-1);
       this.trials++;
-    }
-    else {
+    } else {
       this.reactionTimes.push(this.timer);
     }
   }
-
 
   /**
    * Conducts a fake RTT for the instruction page.
@@ -210,7 +206,7 @@ export class PvtPage implements OnInit {
    * */
   private async runInstructionTimer() {
     this.instructionTimer = 0;
-    const runTime = 250 + Math.random()*100;
+    const runTime = 250 + Math.random() * 100;
     const start = Date.now();
     do {
       this.instructionTimer = Date.now() - start;
@@ -223,17 +219,16 @@ export class PvtPage implements OnInit {
    * */
   private async setUpVariables() {
     const task_id = this.route.snapshot.paramMap.get('task_id');
-    await this.getModule(task_id)
-      .then((module) => {
-        this.trials = module.trials;
-        this.min = module.min_waiting;
-        this.max = module.max_waiting;
-        this.moduleName = module.name;
-        this.showResults = module.show;
-        this.timeToTimeout = module.max_reaction;
-        this.enableExit = module.exit;
-        this.submitText = module.submit_text;
-      });
+    await this.getModule(task_id).then((module) => {
+      this.trials = module.trials;
+      this.min = module.min_waiting;
+      this.max = module.max_waiting;
+      this.moduleName = module.name;
+      this.showResults = module.show;
+      this.timeToTimeout = module.max_reaction;
+      this.enableExit = module.exit;
+      this.submitText = module.submit_text;
+    });
   }
 
   /**
@@ -246,32 +241,55 @@ export class PvtPage implements OnInit {
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
+        let taskIndex = 0;
         for (const task of tasks) {
           if (task_id === String(task.task_id)) {
             this.moduleIndex = task.index;
             this.alertTime = moment(task.time).format();
+            console.log('this is the task index: ' + taskIndex);
+            this.taskIndex = taskIndex;
             break;
           }
+          taskIndex++;
         }
-        return this.storage.get('current-study');
+        return this.storageService.get('current-study');
       })
-      .then((studyObject) => JSON.parse(studyObject).modules[this.moduleIndex]);
+      .then(
+        (studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]
+      );
   }
-
 
   /**
    * Composes the output data and sends it to the server.
+   * Edits the task list in the storage by marking the current task as completed.
+   * Logs the pvt submit to the server.
+   * Navigates back home.
    * */
   private async submit() {
-    const surveyData = {
+    const responseTime = moment().format();
+    const responseTimeInMs = moment().valueOf();
+
+    const tasks: Task[] = await this.studyTasksService.getAllTasks();
+    tasks[this.taskIndex].completed = true;
+    tasks[this.taskIndex].response_time = responseTime;
+    tasks[this.taskIndex].response_time_ms = responseTimeInMs;
+
+    await this.surveyDataService.sendSurveyDataToServer({
       module_index: this.moduleIndex,
       module_name: this.moduleName,
       entries: this.reactionTimes,
-      response_time: moment().format(),
-      response_time_in_ms: moment().valueOf(),
+      response_time: responseTime,
+      response_time_in_ms: responseTimeInMs,
       alert_time: this.alertTime,
-    };
-    return this.surveyDataService.sendSurveyDataToServer(surveyData);
+    });
+    this.storageService.set('study-tasks', JSON.stringify(tasks));
+    this.surveyDataService.logPageVisitToServer({
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page: 'pvt',
+      event: 'submit',
+      module_index: this.moduleIndex,
+    });
   }
 
   /**
@@ -291,7 +309,7 @@ export class PvtPage implements OnInit {
    * @param max maximum number that can be generated.
    * @returns a uniformly distributed random number between the parameters.
    * */
-  private static getUniformRand(min: number, max: number): number {
-    return  min + Math.random() * (max - min);
+  private getUniformRand(min: number, max: number): number {
+    return min + Math.random() * (max - min);
   }
 }

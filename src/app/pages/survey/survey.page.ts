@@ -1,29 +1,13 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { Storage } from '@ionic/storage-angular';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
+import { StatusBar } from '@capacitor/status-bar';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
-import {
-  DateTime,
-  External,
-  Instruction,
-  Media,
-  Module,
-  Multi,
-  Option,
-  Question,
-  Responses,
-  Slider,
-  Study,
-  Task,
-  Text,
-  YesNo,
-} from 'types';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-survey',
@@ -95,15 +79,13 @@ export class SurveyPage implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private storage: Storage,
-    private statusBar: StatusBar,
+    private storage: StorageService,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
     private toastController: ToastController,
-    private ngZone: NgZone,
-    private iab: InAppBrowser
+    private ngZone: NgZone
   ) {}
 
   /**
@@ -112,19 +94,31 @@ export class SurveyPage implements OnInit {
    */
   ngOnInit() {
     // set statusBar to visible on Android
-    //this.statusBar.styleLightContent();
-    this.statusBar.overlaysWebView(false);
-    this.statusBar.backgroundColorByHexString('#0F2042');
+    // this.statusBar.styleLightContent();
+    StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, Web implementation error. ERROR: ' + e
+      );
+    });
+    StatusBar.setBackgroundColor({ color: '#0F2042' }).catch((e) => {
+      console.log(
+        'StatusBar is not implemented, Web implementation error. ERROR: ' + e
+      );
+    });
 
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
-        (<HTMLElement>(
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        )).style.height = `${e.data.frameHeight + 10}px`;
-        (<HTMLElement>(
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        )).style.width = `99%`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.height = `${e.data.frameHeight + 10}px`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.width = `99%`;
       }
     });
 
@@ -135,13 +129,15 @@ export class SurveyPage implements OnInit {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then((values) => {
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       const uuid = values[1];
 
       // get the task object for this task
       this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
+
         for (let i = 0; i < this.tasks.length; i++) {
+          console.log('Tasks are ', this.tasks[0]);
           if (this.task_id === String(this.tasks[i].task_id)) {
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
@@ -193,7 +189,7 @@ export class SurveyPage implements OnInit {
 
         // get the user ID and then set up question variables
         // initialise all of the questions to be displayed
-        this.setupQuestionVariables(uuid);
+        this.setupQuestionVariables(uuid.toString());
 
         // set the submit text as appropriate
         if (this.current_section < this.num_sections) {
@@ -410,6 +406,7 @@ export class SurveyPage implements OnInit {
    * @param question The question that has been answered
    */
   changeCheckStatus(option: Option, question: Question) {
+    console.log('Changing the status of: ', option.text);
     // get question responses and split
     let responses: string[] = [];
 
@@ -448,7 +445,11 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    this.iab.create(url, '_system');
+    Browser.open({ url, windowName: '_system' }).catch((e) => {
+      console.log(
+        'ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e
+      );
+    });
   }
 
   toggleDynamicQuestions(question: Question) {
@@ -465,19 +466,23 @@ export class SurveyPage implements OnInit {
         if ('hide_id' in q && q.hide_id === id) {
           const hideValue = q.hide_value;
 
-          if (q.type === 'multi' || q.type === 'yesno') {
+          if (
+            question.type === 'multi' ||
+            question.type === 'yesno' ||
+            question.type === 'text'
+          ) {
             // determine whether to hide/show the element
             const hideIf = q.hide_if;
-            const valueEquals = hideValue === q.response;
+            const valueEquals = hideValue === question.response;
             if (valueEquals === hideIf) {
               q.hideSwitch = false;
             } else {
               q.hideSwitch = true;
             }
           } else if (
-            q.type === 'slider' &&
+            question.type === 'slider' &&
             typeof hideValue === 'string' &&
-            q.response
+            question.response
           ) {
             const direction = hideValue.substring(0, 1);
             const cutoff = parseInt(
@@ -486,13 +491,13 @@ export class SurveyPage implements OnInit {
             );
             const lessThan = direction === '<';
             if (lessThan) {
-              if (q.response <= cutoff) {
+              if (question.response <= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
               }
             } else {
-              if (q.response >= cutoff) {
+              if (question.response >= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
@@ -561,7 +566,7 @@ export class SurveyPage implements OnInit {
         });
 
         // write tasks back to storage
-        this.storage.set('study-tasks', this.tasks).then(() => {
+        this.storage.set('study-tasks', JSON.stringify(this.tasks)).then(() => {
           // save an exit log
           this.surveyDataService.logPageVisitToServer({
             timestamp: moment().format(),

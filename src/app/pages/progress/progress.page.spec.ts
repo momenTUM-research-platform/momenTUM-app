@@ -2,11 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 import { Storage } from '@ionic/storage-angular';
 import { ProgressPage } from './progress.page';
-import {
-  HttpClient,
-  HttpClientModule
-} from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -20,7 +16,6 @@ import { LanguageLoader } from '../../app.module';
 describe('ProgressPage', () => {
   let component: ProgressPage;
   let fixture: ComponentFixture<ProgressPage>;
-
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -43,7 +38,6 @@ describe('ProgressPage', () => {
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
         HttpClient,
         Storage,
-        HTTP,
       ],
     }).compileComponents();
 

@@ -5,8 +5,7 @@ import {
 } from '@ionic-native/file-transfer/ngx';
 import { LoadingService } from '../loading/loading-service.service';
 import { File, FileEntry } from '@ionic-native/file/ngx';
-import { Storage } from '@ionic/storage-angular';
-import { Media, Study } from 'types';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +23,7 @@ export class SurveyCacheService {
   constructor(
     private fileTransfer: FileTransfer,
     private file: File,
-    private storage: Storage,
+    private storage: StorageService,
     private loadingService: LoadingService
   ) {}
 
@@ -64,6 +63,7 @@ export class SurveyCacheService {
     // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
+    console.log('Study object is: ', study);
     // get urls from media elements
     for (const module of study.modules) {
       for (const section of module.sections) {
@@ -121,18 +121,23 @@ export class SurveyCacheService {
    * Replaces the remote URLs for media items with the local URLs
    */
   updateMediaURLsInStudy() {
-    this.storage.get('current-study').then((studyString) => {
+    this.storage.get('current-study').then((studyString: any) => {
       try {
-        const studyObject = JSON.parse(studyString);
+        const studyObject: Study = JSON.parse(studyString);
         // update the banner url first
         // @ts-ignore
         studyObject.properties.banner_url = this.localMediaURLs.banner;
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
+        console.log('Study object is: ', studyObject);
         for (const module of studyObject.modules) {
-          for (const section of module) {
-            for (const question of section) {
+          for (const section of module.sections) {
+            const mediaQuestions = section.questions.filter(
+              (question): question is Media => question.type === 'media'
+            );
+
+            for (const question of mediaQuestions) {
               if (question.id in this.localMediaURLs) {
                 question.src = this.localMediaURLs[question.id];
               }

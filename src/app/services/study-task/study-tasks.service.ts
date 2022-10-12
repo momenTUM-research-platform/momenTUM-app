@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
-import { Study, Task } from 'types';
+import { StorageService } from '../storage/storage.service';
+import { LoadingService } from '../loading/loading-service.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudyTasksService {
-  constructor(private storage: Storage) {}
+  constructor(
+    private storageService: StorageService,
+    private loadingService: LoadingService
+  ) {}
 
   /**
    * Creates a list of tasks (e.g. surveys, interventions) based on their
@@ -14,7 +17,7 @@ export class StudyTasksService {
    *
    * @param studyObject A JSON object that contains all data about a study
    */
-  generateStudyTasks(studyObject: Study) {
+  async generateStudyTasks(studyObject: Study) {
     // allocate the participant to a study condition
     const min = 1;
     const max: number = studyObject.properties.conditions.length;
@@ -142,9 +145,15 @@ export class StudyTasksService {
       return dateA.getTime() - dateB.getTime();
     });
 
+    console.log('generateStudyTasks... ');
     // save tasks and condition to storage
-    this.storage.set('condition', condition);
-    this.storage.set('study-tasks', study_tasks);
+    this.storageService.set('condition', condition);
+    console.log('length of study-tasks: ', study_tasks.length);
+    // show loading bar
+    this.loadingService.isCaching = false;
+    this.loadingService.present('Loading...');
+    await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
+    this.loadingService.dismiss();
 
     return study_tasks;
   }
@@ -153,21 +162,21 @@ export class StudyTasksService {
    * Returns all the tasks that have been created for a study
    */
   async getAllTasks(): Promise<Task[]> {
-    const tasks = await this.storage.get('study-tasks');
-    return tasks;
+    const tasks: any = await this.storageService.get('study-tasks');
+    return JSON.parse(tasks);
   }
 
   /**
    * Gets the tasks that are currently available for the user to complete
    */
   async getTaskDisplayList(): Promise<Task[]> {
-    const study_tasks = await this.storage.get('study-tasks');
+    const storage_tasks: any = await this.storageService.get('study-tasks');
+    const study_tasks: Task[] = JSON.parse(storage_tasks);
     let tasks_to_display = [];
     const sticky_tasks = [];
     const time_tasks = [];
     let last_header = '';
     for (const task of study_tasks) {
-      console.log(task);
       // check if task has a pre_req
       const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
       const alertTime = new Date(Date.parse(task.time));

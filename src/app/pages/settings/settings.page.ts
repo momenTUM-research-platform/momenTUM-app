@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
 import { NavController, AlertController } from '@ionic/angular';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-settings',
@@ -39,11 +39,10 @@ export class SettingsPage {
   };
 
   constructor(
-    private storage: Storage,
+    private storage: StorageService,
     private navController: NavController,
     private alertController: AlertController,
-    private iab: InAppBrowser,
-    private notificsationsService: NotificationsService,
+    private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
     private surveyDataService: SurveyDataService
   ) {
@@ -62,9 +61,8 @@ export class SettingsPage {
     ]).then((values) => {
       // check if user is currently enrolled in study
       // to show/hide additional options
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       if (studyObject !== null) {
-        console.log('I found a study!');
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
       } else {
@@ -72,24 +70,27 @@ export class SettingsPage {
       }
 
       // get the uuid from storage to display in the list
-      this.uuid = values[1];
+      this.uuid = values[1].toString();
 
       // get the status of the notifications
-      const notificationsEnabled = values[2];
+      const notificationsEnabled = values[2] as unknown as boolean;
       if (notificationsEnabled === null) {
         this.notificationsEnabled = false;
       } else {
         this.notificationsEnabled = notificationsEnabled;
       }
 
-      // log the user visiting this tab
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'settings',
-        event: 'entry',
-        module_index: -1,
-      });
+      console.log('isEnrolled: ', this.isEnrolled);
+      if (this.isEnrolled) {
+        // log the user visiting this tab
+        this.surveyDataService.logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'settings',
+          event: 'entry',
+          module_index: -1,
+        });
+      }
     });
   }
 
@@ -136,16 +137,16 @@ export class SettingsPage {
                 this.surveyDataService.uploadPendingData('pending-data')
               )
               .then(
-                () => this.storage.remove('current-study')
+                () => this.storage.removeItem('current-study')
                 // then remove all the pending study tasks from storage
               )
               .then(
-                () => this.storage.remove('study-tasks')
+                () => this.storage.removeItem('study-tasks')
                 // then cancel all remaining notifications and navigate to home
               )
               .then(() => {
                 // cancel all notifications
-                this.notificsationsService.cancelAllNotifications();
+                this.notificationsService.cancelAll();
                 // navigate to the home tab
                 this.navController.navigateRoot('/');
               });
@@ -164,7 +165,7 @@ export class SettingsPage {
     // update the notifications flag
     this.storage.set('notifications-enabled', this.notificationsEnabled);
     // set the next 30 notifications (cancels all notifications before setting them if enabled)
-    this.notificsationsService.setNext30Notifications();
+    this.notificationsService.setNext30Notifications();
   }
 
   /**
@@ -173,8 +174,12 @@ export class SettingsPage {
    * @param support_url The current study's support website URL
    */
   openSupportURL(support_url: string) {
-    //window.location.href = support_url;
-    const browser = this.iab.create(support_url, '_system');
+    Browser.open({ url: support_url, windowName: '_system' }).catch((e) => {
+      console.log(
+        'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
+          e
+      );
+    });
   }
 
   /**
