@@ -443,6 +443,7 @@ export class HomePage implements OnInit {
             this.loadingService.isCaching = true;
             this.loadingService.present(this.translations.msg_caching);
           });
+          console.log("Caching now");
           this.surveyCacheService.cacheAllMedia(this.study);
         }
         // setup the study task objects

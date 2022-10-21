@@ -1,75 +1,80 @@
-import { TestBed } from '@angular/core/testing';
+// @ts-nocheck
 
+import { TestBed } from '@angular/core/testing';
 import { StudyTasksService } from './study-tasks.service';
-import { Storage } from '@ionic/storage-angular';
-import { expect } from '@jest/globals';
+import { Study, Task } from 'src/app/models/types';
+import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
+import { StorageService } from '../storage/storage.service';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;
-  let angularStorageSpy: jasmine.SpyObj<Storage>;
+  let StorageServiceSpy: jasmine.SpyObj<StorageService>;
 
   beforeEach(() => {
-    const spyStorage = jasmine.createSpyObj('Storage', [
-      'create',
-      'get',
+    const storageSpy = jasmine.createSpyObj('StorageServiceeSpy', [
+      'init',
       'set',
+      'get',
     ]);
     TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: Storage,
-          useValue: spyStorage,
-        },
-      ],
+      providers: [{ provide: StorageService, useValue: storageSpy }],
     }).compileComponents();
     service = TestBed.inject(StudyTasksService);
-    angularStorageSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
+
+    // Jasmine Implmentation
+    // Inject both the service-to-test and its (spy) dependency
+    StorageServiceSpy = TestBed.inject(
+      StorageService
+    ) as jasmine.SpyObj<StorageService>;
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  // it('should generate study tasks', async () => {
-  //   const study: Study = JSON.parse(JSON.stringify(study_object));
-  //   const stubValue = study;
-  //   // returns a study task and also stores it in the storage
-  //   const response: object[] = await service.generateStudyTasks(study);
+  it('should generate study tasks', async () => {
+    await StorageServiceSpy.init();
+    const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
+    const tasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
 
-  //   //angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
+    // returns a study task and also stores it in the storage
+    const response: Task[] = await service.generateStudyTasks(study);
 
-  //   expect(response[0])
-  //     .withContext('response was same as stubValue')
-  //     .toEqual(jasmine.objectContaining(study_task_list[0]));
-  // });
+    //jasmine.objectContaining()
+    expect(response.length)
+      .withContext('response length was same as tasks')
+      .toEqual(tasks.length);
+  });
 
-  // it('should get all tasks from storage', async () => {
-  //   const stubValue: Task[] = JSON.parse(JSON.stringify( study_task_list)) ;
+  // For testing JSONs jasmine.objectContaining(
 
-  //   angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
-  //   const response: Task[] = await service.getAllTasks();
+  it('should get all tasks from storage', async () => {
+    const stubValue: string = JSON.stringify(study_tasks.tasks);
+    // Making the return value of the get function call to be stubValue
+    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    const response: Task[] = await service.getAllTasks();
 
-  //   expect(angularStorageSpy.get.calls.count())
-  //     .withContext('spy method was called once')
-  //     .toBe(1);
+    expect(StorageServiceSpy.get.calls.count())
+      .withContext('spy method was called once')
+      .toBe(1);
 
-  //   expect(response)
-  //     .withContext('response was same as stub Value')
-  //     .toBe(stubValue);
-  // });
+    expect(response)
+      .withContext('response was same as stubValue')
+      .toEqual(JSON.parse(stubValue));
+  });
 
-  // it('should get tasks display list from storage', async () => {
+  it('should get tasks display list from storage', async () => {
+    const stubValue: string = JSON.stringify(study_tasks.tasks);
+    // Making the return value of the get function call to be stubValue
+    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    const response: Task[] = await service.getTaskDisplayList();
+    expect(StorageServiceSpy.get.calls.count())
+      .withContext('spy method was called once')
+      .toBe(1);
 
-  //   await angularStorageSpy.get.and.returnValue(Promise.resolve(study_task_list));
-
-  //   const response: any = await service.getTaskDisplayList();
-
-  //   expect(angularStorageSpy.get.calls.count())
-  //     .withContext('spy method was called once')
-  //     .toBe(1);
-
-  //   expect(response)
-  //     .withContext('response was same as study_object')
-  //     .toEqual(study_object.modules[0].unlock_after);
-  // });
+    // As of Oct 11, 2022, there are 6 tasks to be displayed
+    expect(response.length)
+      .withContext('There are 3 different types, so with headers, 6 items are to be displayed')
+      .toBe(6);
+  });
 });

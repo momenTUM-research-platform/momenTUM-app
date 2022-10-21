@@ -31,7 +31,6 @@ export class SurveyDataService {
         headers: {},
         connectTimeout: 60000,
       };
-
       // Now a get request
       Http
         .get(options)
@@ -63,7 +62,6 @@ export class SurveyDataService {
    */
   async getFromLocalStorage(key: string): Promise<any> {
     const data = await this.storage.get(key);
-    console.log('Data from storage is: ' + data);
     return data;
   }
 

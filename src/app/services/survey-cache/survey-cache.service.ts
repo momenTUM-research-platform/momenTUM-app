@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import {
-  FileTransfer,
-  FileTransferObject,
-} from '@ionic-native/file-transfer/ngx';
 import { LoadingService } from '../loading/loading-service.service';
-import { File, FileEntry } from '@ionic-native/file/ngx';
+import { File } from '@ionic-native/file/ngx';
+import {
+  FileDownload,
+  FileDownloadResponse,
+} from 'capacitor-plugin-filedownload';
+import { Filesystem } from '@capacitor/filesystem';
 import { Media, Study } from '../../models/types';
 import { StorageService } from '../storage/storage.service';
 
@@ -22,7 +23,6 @@ export class SurveyCacheService {
   mediaDownloadedCount = 0;
 
   constructor(
-    private fileTransfer: FileTransfer,
     private file: File,
     private storage: StorageService,
     private loadingService: LoadingService
@@ -35,22 +35,18 @@ export class SurveyCacheService {
    */
   async downloadFile(url: string): Promise<string> {
     try {
-      const transfer: FileTransferObject = this.fileTransfer.create();
-
       // get the fileName from the URL
       const urlSplit = url.split('/');
       const fileName = urlSplit[urlSplit.length - 1];
-      console.log('fileName: ' + fileName);
-      const file: FileEntry = await transfer.download(
-        url,
-        this.file.dataDirectory + fileName,
-        true
-      );
-      console.log('file: ' + file);
-      return file.toURL();
+      console.log('Downloaded with URL: ', url);
+      const file: FileDownloadResponse = await FileDownload.download({
+        uri: url,
+        fileName: this.file.dataDirectory + fileName,
+      });
+      console.log('Downloaded file correctly with path: ', file.path);
+      return file.path;
     } catch (error) {
-      console.log('error: ' + error);
-      return '';
+      throw error;
     }
   }
 
@@ -64,15 +60,18 @@ export class SurveyCacheService {
     // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
-    console.log("Study object is: ", study);
     // get urls from media elements
     for (const module of study.modules) {
-      for (const section of module.sections) {
-        const mediaQuestions = section.questions.filter(
-          (question): question is Media => question.type === 'media'
-        );
-        for (const question of mediaQuestions) {
-          this.mediaToCache[question.id] = question.src;
+      // Must check if the sections exist,
+      // they don't for pvt modules
+      if (module.sections) {
+        for (const section of module.sections) {
+          const mediaQuestions = section.questions.filter(
+            (question): question is Media => question.type === 'media'
+          );
+          for (const question of mediaQuestions) {
+            this.mediaToCache[question.id] = question.src;
+          }
         }
       }
     }
@@ -85,24 +84,30 @@ export class SurveyCacheService {
    *
    * @param study The study protocol
    */
-  cacheAllMedia(study: Study) {
+  async cacheAllMedia(study: Study) {
     this.mediaCount = 0;
     this.mediaDownloadedCount = 0;
     // map media question ids to their urls
     this.getMediaURLs(study);
-    this.downloadAllMedia();
+    await this.downloadAllMedia();
   }
 
   /**
    * Downloads all of the media items from the remote URLs
    */
-  downloadAllMedia() {
+  async downloadAllMedia() {
     // download all media items
     const keys = Object.keys(this.mediaToCache);
     for (const key of keys) {
-      this.downloadFile(this.mediaToCache[key]).then((entryURL) => {
-        this.localMediaURLs[key] =
-          this.win.Ionic.WebView.convertFileSrc(entryURL);
+      await this.downloadFile(this.mediaToCache[key]).then((entryURL) => {
+        if (
+          this.win !== undefined &&
+          this.win.Ionic !== undefined &&
+          this.win.Ionic.WebView !== undefined
+        ) {
+          this.localMediaURLs[key] =
+            this.win.Ionic.WebView.convertFileSrc(entryURL);
+        }
         this.mediaDownloadedCount = this.mediaDownloadedCount + 1;
         this.checkIfFinished();
       });
@@ -131,26 +136,30 @@ export class SurveyCacheService {
 
         // update the other media items to the corresponding local URL
         // get urls from media elements
-        console.log("Study object is: ", studyObject);
         for (const module of studyObject.modules) {
+          if (module.sections) {
+            for (const section of module.sections) {
+              // Must check if the sections exist,
+              // they don't for pvt modules
 
-          for (const section of module.sections) {
+              const mediaQuestions = section.questions.filter(
+                (question): question is Media => question.type === 'media'
+              );
 
-            const mediaQuestions = section.questions.filter(
-              (question): question is Media => question.type === 'media'
-            );
-
-            for (const question of mediaQuestions) {
-              if (question.id in this.localMediaURLs) {
-                question.src = this.localMediaURLs[question.id];
-              }
-              if (question.subtype === 'video') {
-                // @ts-ignore
-                question.thumb = this.localMediaURLs.banner;
+              for (const question of mediaQuestions) {
+                if (question.id in this.localMediaURLs) {
+                  question.src = this.localMediaURLs[question.id];
+                }
+                if (question.subtype === 'video') {
+                  // @ts-ignore
+                  question.thumb = this.localMediaURLs.banner;
+                }
               }
             }
           }
         }
+
+
 
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));

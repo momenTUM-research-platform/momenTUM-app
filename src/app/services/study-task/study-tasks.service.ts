@@ -149,7 +149,6 @@ export class StudyTasksService {
     console.log('generateStudyTasks... ');
     // save tasks and condition to storage
     this.storageService.set('condition', condition);
-    console.log('length of study-tasks: ', study_tasks.length);
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present('Loading...');

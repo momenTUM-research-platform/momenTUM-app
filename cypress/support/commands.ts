@@ -55,7 +55,7 @@ Cypress.Commands.add('clearIonicStorage', async () => {
 Cypress.Commands.add('createAndStoreStudy', () => {
   const uniqueId =
     Date.now().toString(36) + Math.random().toString(36).substring(2);
-  cy.fixture('study-tasks.json').then(async (studyData) => {
+  cy.fixture('study_tasks.json').then(async (studyData) => {
     store = await storage.create();
 
     await store.set('enrolment-date', new Date());

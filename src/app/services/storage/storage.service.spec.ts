@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { TestBed } from '@angular/core/testing';
 import { Storage } from '@ionic/storage-angular';
 import { StorageService } from './storage.service';
