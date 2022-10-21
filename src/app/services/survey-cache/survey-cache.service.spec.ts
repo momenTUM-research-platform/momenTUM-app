@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File, FileEntry } from '@ionic-native/file/ngx';
 import { LoadingService } from '../loading/loading-service.service';
 import { StorageService } from '../storage/storage.service';
@@ -12,7 +11,6 @@ describe('StudyCacheService', () => {
   let service: SurveyCacheService;
   let StorageServiceSpy: jasmine.SpyObj<StorageService>;
   let file: File;
-  let fileTransfer: FileTransfer;
 
   beforeEach(async () => {
     const storageSpy = jasmine.createSpyObj('StorageServiceeSpy', [
@@ -24,7 +22,6 @@ describe('StudyCacheService', () => {
       providers: [
         SurveyCacheService,
         File,
-        FileTransfer,
         LoadingService,
         { provide: StorageService, useValue: storageSpy },
       ],
@@ -32,7 +29,6 @@ describe('StudyCacheService', () => {
 
     service = TestBed.inject(SurveyCacheService);
     file = TestBed.inject(File);
-    fileTransfer = TestBed.inject(FileTransfer);
     StorageServiceSpy = TestBed.inject(
       StorageService
     ) as jasmine.SpyObj<StorageService>;

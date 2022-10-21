@@ -1,7 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
-import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { RouterTestingModule } from '@angular/router/testing';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
@@ -53,7 +52,6 @@ describe('HomePage', () => {
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
         Storage,
-        FileTransfer,
         File,
       ],
     }).compileComponents();
