@@ -12,18 +12,18 @@ describe('PvtPage', () => {
   let fixture: ComponentFixture<PvtPage>;
   let angularStorageSpy: jasmine.SpyObj<Storage>;
   beforeEach(() => {
-    const spyStorage = jasmine.createSpyObj('Storage', ['create', 'get', 'set']);
+    const spyStorage = jasmine.createSpyObj('Storage', [
+      'create',
+      'get',
+      'set',
+    ]);
     TestBed.configureTestingModule({
-      declarations: [ PvtPage ],
-      imports: [
-        RouterTestingModule,
-        IonicModule.forRoot(),
-
-      ],
+      declarations: [PvtPage],
+      imports: [RouterTestingModule, IonicModule.forRoot()],
       providers: [
         {
           provide: Storage,
-          useValue: spyStorage
+          useValue: spyStorage,
         },
 
         HttpClient,

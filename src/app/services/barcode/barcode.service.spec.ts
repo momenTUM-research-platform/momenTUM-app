@@ -13,6 +13,4 @@ describe('BarcodeService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
-
-
 });

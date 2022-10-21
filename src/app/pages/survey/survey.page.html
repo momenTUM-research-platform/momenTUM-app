@@ -1,21 +1,22 @@
 <ion-header>
-  <ion-toolbar  mode="md">
-    <ion-buttons slot="start"  mode="md">
-      <!--<ion-back-button (click)="back()"></ion-back-button>-->
-
+  <ion-toolbar mode="md">
+    <ion-buttons slot="start" mode="md">
       <ion-item class="light-blue-toolbar" lines="none">
-        <ion-button style="height: 35px;" size="medium" color="secondary" (click)="back()">
+        <ion-button
+          style="height: 35px"
+          size="medium"
+          color="secondary"
+          (click)="back()"
+        >
           <ion-icon slot="icon-only" name="arrow-back">Home</ion-icon>
         </ion-button>
         <span class="text">{{this.current_section_name}}</span>
       </ion-item>
     </ion-buttons>
 
-    <ion-item slot="end" class="light-blue-toolbar" lines="none"  mode="md">
+    <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
       <span class="text">{{this.current_section}}/{{this.num_sections}}</span>
     </ion-item>
-
-
   </ion-toolbar>
 </ion-header>
 
@@ -244,7 +245,7 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <div *ngIf="question.modal === true">
+                <div *ngIf="question.modal">
                   <ion-item class="mult-select" lines="none">
                     <ion-label style="display: none"></ion-label>
                     <ion-select
@@ -284,10 +285,9 @@
             </ion-row>
             <ion-row class="ion-row-items">
               <ion-col>
-                <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
-                <div *ngIf="question.modal == false">
-                  <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
-                  <ion-radio-group *ngIf="question.radio == true"
+                <div *ngIf="!question.modal">
+                  <ion-radio-group
+                    *ngIf="question.radio"
                     (ionChange)="setAnswer(question)"
                     [(ngModel)]="question.model"
                   >
@@ -306,8 +306,7 @@
                       ></ion-radio>
                     </ion-item>
                   </ion-radio-group>
-                  <!-- eslint-disable-next-line @angular-eslint/template/eqeqeq -->
-                  <div radio-group *ngIf="question.radio == false">
+                  <div radio-group *ngIf="!question.radio">
                     <ion-item
                       *ngFor="let option of question.optionsChecked"
                       lines="none"
@@ -353,10 +352,10 @@
                 <ion-datetime
                   color="blue"
                   locale="de-DE"
-                  *ngIf="question.subtype === 'datetime'"
+                  *ngIf="question.subtype === 'date-time'"
                   style="font-size: small"
                   [(ngModel)]="question.model"
-                  displayFormat="DDDD MMM DD, YYYY, hh:mm a"
+                  presentation="datetime"
                   (ionChange)="setAnswer(question)"
                 ></ion-datetime>
               </ion-col>
@@ -369,7 +368,7 @@
                   *ngIf="question.subtype === 'date'"
                   style="font-size: small"
                   [(ngModel)]="question.model"
-                  displayFormat="DDDD MMM DD, YYYY"
+                  presentation="date"
                   (ionChange)="setAnswer(question)"
                 ></ion-datetime>
               </ion-col>
@@ -382,7 +381,7 @@
                   *ngIf="question.subtype === 'time'"
                   style="font-size: small"
                   [(ngModel)]="question.model"
-                  displayFormat="hh:mm a"
+                  presentation="time"
                   (ionChange)="setAnswer(question)"
                 ></ion-datetime>
               </ion-col>

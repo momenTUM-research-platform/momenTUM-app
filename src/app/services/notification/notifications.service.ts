@@ -10,7 +10,6 @@ import {
   ListChannelsResult,
   ActionPerformed,
 } from '@capacitor/local-notifications';
-import { Task } from 'src/app/models/types';
 import { StorageService } from '../storage/storage.service';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 
@@ -140,7 +139,7 @@ export class NotificationsService {
   /**
    * Get a list of pending notifications.
    */
-   async getPending(): Promise<LocalNotificationSchema[]> {
+  async getPending(): Promise<LocalNotificationSchema[]> {
     const pendingList: PendingLocalNotificationSchema[] = await (
       await LocalNotifications.getPending()
     ).notifications;
@@ -155,14 +154,14 @@ export class NotificationsService {
    * Request permissions for notifications
    */
   async requestPermissions() {
-    const status: string =  (await LocalNotifications.checkPermissions()).display;
-    console.log("Status is: " + status);
-    if( status.endsWith('granted')){
+    const status: string = (await LocalNotifications.checkPermissions())
+      .display;
+    console.log('Status is: ' + status);
+    if (status.endsWith('granted')) {
       // Do nothing
-    }else{
+    } else {
       await LocalNotifications.requestPermissions();
     }
-
   }
 
   /**
@@ -176,10 +175,8 @@ export class NotificationsService {
     );
 
     if (notificationsEnabled) {
-      const storage_tasks: any =  await this.storage.get('study-tasks');
-      const tasks: Task[] = JSON.parse(
-        storage_tasks
-      );
+      const storage_tasks: any = await this.storage.get('study-tasks');
+      const tasks: Task[] = JSON.parse(storage_tasks);
       if (tasks !== null) {
         let alertCount = 0;
         for (const task of tasks) {

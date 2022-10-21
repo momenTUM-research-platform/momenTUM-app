@@ -49,7 +49,6 @@ describe('TabsPage', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     service = TestBed.inject(TranslateConfigService);
-
   }));
 
   it('should create TabsPage', () => {

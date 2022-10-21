@@ -109,7 +109,10 @@ export class ProgressPage {
         this.enrolledInStudy = true;
 
         // calculate the study day
-        this.studyDay = this.diffDays(new Date(enrolmentDate.toString()), new Date());
+        this.studyDay = this.diffDays(
+          new Date(enrolmentDate.toString()),
+          new Date()
+        );
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -196,7 +199,7 @@ export class ProgressPage {
 
               // if the task had any data to graph, push it
               if (task_data.length > 0) {
-                console.log("Graph object: %j", graphObj);
+                console.log('Graph object: %j', graphObj);
                 this.graphs.push(graphObj);
               }
             }

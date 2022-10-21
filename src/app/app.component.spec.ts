@@ -21,10 +21,7 @@ describe('AppComponent', () => {
       declarations: [AppComponent],
       imports: [AppRoutingModule, HttpClientTestingModule],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
-      providers: [
-        { provide: Platform, useValue: platformSpy },
-        Storage,
-      ],
+      providers: [{ provide: Platform, useValue: platformSpy }, Storage],
     }).compileComponents();
   }));
 
@@ -41,5 +38,4 @@ describe('AppComponent', () => {
   });
 
   // TODO: add more tests!
-
 });

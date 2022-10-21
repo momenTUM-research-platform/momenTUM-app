@@ -14,8 +14,8 @@ import { NgChartsModule } from 'ng2-charts';
     IonicModule,
     NgChartsModule,
     TranslateModule.forChild(),
-    ProgressPageRoutingModule
+    ProgressPageRoutingModule,
   ],
-  declarations: [ProgressPage]
+  declarations: [ProgressPage],
 })
 export class ProgressPageModule {}

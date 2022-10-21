@@ -35,7 +35,7 @@ export class StorageService {
     return await this.nStorage.clear();
   }
 
-  async keys(){
+  async keys() {
     return await this.nStorage.keys();
   }
 }

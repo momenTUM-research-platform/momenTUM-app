@@ -63,10 +63,8 @@ export class SettingsPage {
       // to show/hide additional options
       const studyObject: any = values[0];
       if (studyObject !== null) {
-
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
-        console.log('I found a study!');
       } else {
         this.isEnrolled = false;
       }
@@ -82,7 +80,7 @@ export class SettingsPage {
         this.notificationsEnabled = notificationsEnabled;
       }
 
-      console.log("isEnrolled: ", this.isEnrolled);
+      console.log('isEnrolled: ', this.isEnrolled);
       if (this.isEnrolled) {
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -176,8 +174,11 @@ export class SettingsPage {
    * @param support_url The current study's support website URL
    */
   openSupportURL(support_url: string) {
-    Browser.open({url: support_url, windowName: '_system'}).catch((e) => {
-      console.log('ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' + e)
+    Browser.open({ url: support_url, windowName: '_system' }).catch((e) => {
+      console.log(
+        'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
+          e
+      );
     });
   }
 
