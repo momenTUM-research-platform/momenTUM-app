@@ -4,7 +4,6 @@ import {
   HttpClientTestingModule,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Study } from 'src/app/models/types';
 import { SurveyDataService } from './survey-data.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
