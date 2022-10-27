@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 import { SurveyPage } from './survey.page';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;
@@ -24,10 +25,12 @@ describe('SurveyPage', () => {
       declarations: [SurveyPage],
       imports: [IonicModule.forRoot(), RouterTestingModule],
       providers: [
+
         {
           provide: Storage,
           useValue: spyStorage,
         },
+        BarcodeService,
         HttpClient,
         HttpHandler,
       ],

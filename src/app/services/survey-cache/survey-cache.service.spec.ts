@@ -6,8 +6,9 @@ import { LoadingService } from '../loading/loading-service.service';
 import { StorageService } from '../storage/storage.service';
 import { SurveyCacheService } from './survey-cache.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
-describe('StudyCacheService', () => {
+describe('SurveryCacheService', () => {
   let service: SurveyCacheService;
   let StorageServiceSpy: jasmine.SpyObj<StorageService>;
   let file: File;
@@ -23,6 +24,7 @@ describe('StudyCacheService', () => {
         SurveyCacheService,
         File,
         LoadingService,
+        BarcodeService,
         { provide: StorageService, useValue: storageSpy },
       ],
     });

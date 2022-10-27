@@ -13,6 +13,8 @@ import {
 } from '@ngx-translate/core';
 import { LanguageLoader } from '../../app.module';
 
+import { BarcodeService } from '../../services/barcode/barcode.service';
+
 describe('ProgressPage', () => {
   let component: ProgressPage;
   let fixture: ComponentFixture<ProgressPage>;
@@ -33,15 +35,18 @@ describe('ProgressPage', () => {
       ],
       providers: [
         { provide: USE_DEFAULT_LANG, useValue: true },
+
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
+        BarcodeService,
         HttpClient,
         Storage,
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProgressPage);
+
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

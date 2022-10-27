@@ -12,6 +12,7 @@ import {
   USE_STORE,
 } from '@ngx-translate/core';
 import { LanguageLoader } from '../app.module';
+import { BarcodeService } from '../services/barcode/barcode.service';
 import { TranslateConfigService } from '../translate-config.service';
 import { TabsPage } from './tabs.page';
 
@@ -40,6 +41,7 @@ describe('TabsPage', () => {
         { provide: USE_STORE, useValue: true },
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
+        BarcodeService,
         HttpClient,
         ChildrenOutletContexts,
       ],

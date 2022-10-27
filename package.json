@@ -42,6 +42,7 @@
     "@ngx-translate/http-loader": "^7.0.0",
     "capacitor-plugin-filedownload": "^1.0.3",
     "ionic-native": "^2.9.0",
+    "jasmine-auto-spies": "^6.9.9",
     "moment": "^2.29.4",
     "nanoid": "^4.0.0",
     "ng2-charts": "^4.0.0",

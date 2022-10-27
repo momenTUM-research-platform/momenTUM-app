@@ -22,6 +22,7 @@ import {
 } from '@angular/common/http';
 
 import { HomePage } from './home.page';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
 describe('HomePage', () => {
   let component: HomePage;
@@ -49,6 +50,7 @@ describe('HomePage', () => {
         }),
       ],
       providers: [
+        BarcodeService,
         { provide: SurveyDataService, useValue: surveySpy },
         { provide: USE_DEFAULT_LANG, useValue: true },
         { provide: USE_STORE, useValue: true },
@@ -64,6 +66,10 @@ describe('HomePage', () => {
     fixture.detectChanges();
     // Jasmine Implmentation
     // Inject both the service-to-test and its (spy) dependency
+    SurveyDataServiceSpy = TestBed.inject(
+      SurveyDataService
+    ) as jasmine.SpyObj<SurveyDataService>;
+
     SurveyDataServiceSpy = TestBed.inject(
       SurveyDataService
     ) as jasmine.SpyObj<SurveyDataService>;

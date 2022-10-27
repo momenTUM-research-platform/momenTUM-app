@@ -13,4 +13,20 @@ describe('BarcodeService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  // it('expect to call start scan', () => {
+  //   expect(service.startScan()).toBeTruthy();
+  // });
+
+  // it('expect to call prepare for barcode scanner', () => {
+  //   expect(service.prepare()).toBeTruthy();
+  // });
+
+  // it('expect to call ask users before scan', () => {
+  //   expect(service.askUser()).toBeTruthy();
+  // });
+
+  // it('expect to check premission if they are granted for barcode', () => {
+  //   expect(service.didUserGrantPermission()).toBeTruthy();
+  // });
 });
