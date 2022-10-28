@@ -111,9 +111,7 @@ export class BarcodeService {
 
   askUser(): void {
     this.prepare();
-
     const c = confirm('Do you want to scan a barcode?');
-
     if (c) {
       this.startScan();
     } else {
