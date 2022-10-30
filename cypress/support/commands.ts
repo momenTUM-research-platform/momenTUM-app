@@ -31,7 +31,7 @@ declare global {
     interface Chainable {
       clearIonicStorage(): Chainable<void>;
       createAndStoreStudy(): void;
-
+      createStudyForNow(): void;
       // login(email: string, password: string): Chainable<void>
       // drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
       // dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
@@ -42,6 +42,7 @@ declare global {
 
 // cypress/support/commands.js
 import { Storage } from '@ionic/storage';
+import { Task } from 'src/app/models/types';
 
 const storage = new Storage();
 let store: Storage;
@@ -64,3 +65,22 @@ Cypress.Commands.add('createAndStoreStudy', () => {
     await store.set('study-tasks', JSON.stringify(studyData.tasks));
   });
 });
+
+Cypress.Commands.add('createStudyForNow', () => {
+  const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+  cy.fixture('study_tasks.json').then(async (studyData) => {
+    store = await storage.create();
+    const study = JSON.parse(JSON.stringify(studyData.study));
+    const tasks: Task[] = JSON.parse(JSON.stringify(studyData.tasks));
+    console.log('Tasks are: ',tasks.length );
+    for (let i = 0; i < tasks.length; i++) {
+      tasks[i].time = (new Date(new Date().getTime() + (i+1) * 1000)).toString();
+    }
+
+    await store.set('enrolment-date', new Date());
+    await store.set('uuid', uniqueId);
+    await store.set('current-study', JSON.stringify(study));
+    await store.set('study-tasks', JSON.stringify(tasks));
+  });
+});
+

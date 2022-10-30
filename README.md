@@ -162,6 +162,10 @@ For testing, run the following command.
 
     ng test
 
+For a code-coverage report:
+
+    ng test --no-watch --code-coverage
+
 ## End-to-end testing
 
 Cypress is used for E2E-Testing, which simulates a user interacting with the app. To run, start the app in the browser and then start cypress. A new cypress window will open.
@@ -170,3 +174,4 @@ Cypress is used for E2E-Testing, which simulates a user interacting with the app
 ionic serve
 npm run cypress
 ```
+

@@ -20,7 +20,7 @@ describe('BarcodeService', () => {
       done();
     });
   });
-  
+
   it('expect to check premission if they are granted for barcode', (done) => {
     service.didUserGrantPermission().catch((message) => {
       expect(message.toString()).toBe("Error: Not implemented on web.");
