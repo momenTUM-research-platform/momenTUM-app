@@ -137,7 +137,6 @@ export class SurveyPage implements OnInit {
         this.tasks = tasks;
 
         for (let i = 0; i < this.tasks.length; i++) {
-          console.log('Tasks are ', this.tasks[0]);
           if (this.task_id === String(this.tasks[i].task_id)) {
             this.module_name = this.tasks[i].name;
             this.module_index = this.tasks[i].index;
