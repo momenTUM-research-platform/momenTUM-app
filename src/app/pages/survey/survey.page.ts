@@ -92,7 +92,7 @@ export class SurveyPage implements OnInit {
    * Triggered when the survey page is first opened
    * Initialises the survey and displays it on the screen
    */
-  ngOnInit() {
+   ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
     StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
@@ -124,16 +124,17 @@ export class SurveyPage implements OnInit {
 
     // the id of the task to be displayed
     this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
-
     Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
-    ]).then((values) => {
+    ]).then(async (values) => {
       const studyObject: any = values[0];
       const uuid = values[1];
 
+
       // get the task object for this task
       this.studyTasksService.getAllTasks().then((tasks) => {
+
         this.tasks = tasks;
 
         for (let i = 0; i < this.tasks.length; i++) {
@@ -271,7 +272,7 @@ export class SurveyPage implements OnInit {
           event: 'entry',
           module_index: this.module_index,
         });
-      });
+      }).catch(() => {});
     });
   }
 
@@ -289,6 +290,7 @@ export class SurveyPage implements OnInit {
         this.submit_text = 'Next';
       });
     } else {
+
       // save an exit log
       this.surveyDataService.logPageVisitToServer({
         timestamp: moment().format(),
@@ -296,7 +298,7 @@ export class SurveyPage implements OnInit {
         page: 'survey',
         event: 'exit',
         module_index: this.module_index,
-      });
+      }).catch(() => {});
       // nav back to the home screen
       this.navController.navigateRoot('/');
     }
