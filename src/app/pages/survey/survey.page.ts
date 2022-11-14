@@ -407,7 +407,7 @@ export class SurveyPage implements OnInit {
    * @param question The question that has been answered
    */
   changeCheckStatus(option: Option, question: Question) {
-    console.log('Changing the status of: ', option.text);
+
     // get question responses and split
     let responses: string[] = [];
 

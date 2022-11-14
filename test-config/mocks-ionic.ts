@@ -37,3 +37,9 @@ export class NavMock {
     return;
   }
 }
+
+export class BrowserMock{
+  public open(url: string | any[]): void {
+    return;
+  }
+}
