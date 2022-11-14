@@ -136,9 +136,39 @@ describe('SurveyPage', () => {
     }
   });
 
+  it('should set up question variables', async () => {
+    const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
+    const current_section = 1;
+    // Define the tasks, study and uuid to test with
+    const stubValueStudy: string = JSON.stringify(study_tasks.study);
+
+    const uniqueId =
+      Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+    // Set the task, study and uuid in the storage
+    await StorageServiceSpy.get.and.returnValue(
+      Promise.resolve(JSON.stringify(stubValueStudy))
+    );
+    await StorageServiceSpy.get.and.returnValue(Promise.resolve(uniqueId));
+    await StorageServiceSpy.get.and.returnValue(
+      Promise.resolve(JSON.stringify(stubValueTasks))
+    );
+    fixture.detectChanges();
+    fixture
+      .whenStable()
+      .then(() => {
+        component.setupQuestionVariables(uniqueId);
+        expect(component.tasks.length).toEqual(stubValueTasks.length);
+        expect(component.survey).toBe(
+          stubStudy.modules[stubValueTasks[0].index]
+        );
+
+      })
+      .catch(() => {});
+  });
+
   /**
    * To be tested
-   * back()
    * setupQuestionVariables(uuid: string)
    * setAnswer(question: Question)
    * changeCheckStatus(option: Option, question: Question)
