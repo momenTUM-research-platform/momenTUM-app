@@ -62,6 +62,7 @@ declare interface Module {
       | Multi
       | External
       | Media
+      | Files
     )[];
   }[];
   id: string;
@@ -80,7 +81,8 @@ interface Question {
     | 'slider'
     | 'media'
     | 'yesno'
-    | 'external';
+    | 'external'
+    | 'file';
   required: boolean;
   rand_group?: string;
   noToggle?: boolean;
@@ -140,6 +142,12 @@ interface Media extends Question {
 interface External extends Question {
   type: 'external';
   src: string;
+}
+
+interface Files extends Question {
+  type: 'file';
+  src: string;
+  file_name: string;
 }
 
 interface Task {

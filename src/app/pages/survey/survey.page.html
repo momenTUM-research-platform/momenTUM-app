@@ -100,7 +100,7 @@
 
       <!-- video/audio/image type -->
       <div
-        style="width: 100%; padding-right: 6px !important; "
+        style="width: 100%; padding-right: 6px !important"
         item-content
         *ngIf="question.type === 'media'"
         class="light-blue-card-div"
@@ -439,30 +439,76 @@
 
       <!-- external -->
       <div
-        class="external-container"
-        style="width: 100%"
         item-content
         *ngIf="question.type === 'external'"
+        class="light-blue-card-div"
       >
-        <iframe frameborder="0" scrolling="no" [src]="question.src"></iframe>
+        <div
+          class="external-container"
+          style="width: 100%"
+          item-content
+          *ngIf="question.type === 'external'"
+        >
+          <ion-item class="light-blue-card-bg" lines="none"
+            ><ion-grid>
+              <ion-row class="ion-row-items">
+                <ion-col>
+                  <span class="text">
+                    <p
+                      [class.showError]="!question.hideError"
+                      [innerHTML]="question.text"
+                    ></p>
+                  </span>
+                </ion-col>
+              </ion-row>
+              <ion-row class="ion-row-items">
+                <ion-col>
+                  <iframe
+                    frameborder="0"
+                    scrolling="no"
+                    [src]="question.src"
+                  ></iframe>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-item>
+        </div>
       </div>
 
       <!-- file -->
-      <div style="width: 100%" item-content *ngIf="question.type === 'file'">
-        <p
-          [class.showError]="!question.hideError"
-          [innerHTML]="question.text"
-        ></p>
-
-        <ion-button
-          color="primary"
-          fill="outline"
-          (click)="openExternalFile(question.src)"
-        >
-          <ion-icon slot="start" name="attach"></ion-icon>
-          {{question.file_name}}
-        </ion-button>
-        <br /><br />
+      <div
+        item-content
+        *ngIf="question.type === 'file'"
+        class="light-blue-card-div"
+      >
+        <div style="width: 100%" item-content *ngIf="question.type === 'file'">
+          <ion-item class="light-blue-card-bg" lines="none"
+            ><ion-grid>
+              <ion-row class="ion-row-items">
+                <ion-col>
+                  <span class="text">
+                    <p
+                      [class.showError]="!question.hideError"
+                      [innerHTML]="question.text"
+                    ></p>
+                  </span>
+                </ion-col>
+              </ion-row>
+              <ion-row class="ion-row-items">
+                <ion-col>
+                  <ion-segment-button
+                    value="Open file"
+                    layout="icon-start"
+                    (click)="openExternalFile(question.src)"
+                  >
+                    <ion-label>{{question.file_name}}</ion-label>
+                    <ion-icon size="small" name="open-outline"></ion-icon>
+                  </ion-segment-button>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-item>
+        </div>
       </div>
     </ion-item>
     <!--submit button-->

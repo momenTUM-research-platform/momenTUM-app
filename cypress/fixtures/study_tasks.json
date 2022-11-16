@@ -168,6 +168,27 @@
                 "subtype": "date"
               },
               {
+                "id": "external-72jsdths",
+                "type": "external",
+                "text": "This is an external question.",
+                "required": true,
+                "hide_id": "",
+                "hide_value": "",
+                "hide_if": true,
+                "src": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Farberware-Minute-Timer-White.jpg"
+              },
+              {
+                "id": "file-72jsdths",
+                "type": "file",
+                "text": "This is an file question.",
+                "required": true,
+                "hide_id": "",
+                "hide_value": "",
+                "hide_if": true,
+                "file_name": "filename",
+                "src": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Farberware-Minute-Timer-White.jpg"
+              },
+              {
                 "id": "multi-q8bohlar",
                 "type": "multi",
                 "text": "This is a multiple choice type with branching demo.",

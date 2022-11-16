@@ -1,3 +1,5 @@
+import { OpenOptions } from "@capacitor/browser";
+
 export class NavMock {
   public pop(): any {
     return new Promise(function(resolve: Function): void {
@@ -39,7 +41,20 @@ export class NavMock {
 }
 
 export class BrowserMock{
-  public open(url: string | any[]): void {
+  public open(options: OpenOptions): Promise<void>{
     return;
   }
 }
+
+export const Storage = {
+  async get(data: { key: string }): Promise<{ value: string | undefined }> {
+    return { value: undefined };
+  },
+
+  async set(data: { key: string; value: string }): Promise<void> {},
+  async clear(): Promise<void> {},
+};
+
+export class ToastMock {
+  public async create(options: any): Promise<void> {};
+};

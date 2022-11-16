@@ -5,7 +5,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
-import { Browser } from '@capacitor/browser';
+import { Browser, OpenOptions } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 
@@ -446,7 +446,9 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    Browser.open({ url, windowName: '_system' }).catch((e) => {
+    //{ url, windowName: '_system' }
+    Browser.open({ url, windowName: '_system' })
+    .catch((e) => {
       console.log(
         'ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e
       );
@@ -620,7 +622,7 @@ export class SurveyPage implements OnInit {
       ],
     });
 
-    toast.present();
+    toast.present().catch(() => {});
   }
 
   /**

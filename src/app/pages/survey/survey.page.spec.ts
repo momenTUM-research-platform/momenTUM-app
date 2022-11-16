@@ -2,7 +2,12 @@
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { IonicModule, NavController } from '@ionic/angular';
+import {
+  IonicModule,
+  NavController,
+  ToastController,
+  ToastOptions,
+} from '@ionic/angular';
 import { SurveyPage } from './survey.page';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
@@ -10,9 +15,14 @@ import { BarcodeService } from '../../services/barcode/barcode.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { BrowserMock, NavMock } from '../../../../test-config/mocks-ionic';
+import {
+  BrowserMock,
+  NavMock,
+  ToastMock,
+} from '../../../../test-config/mocks-ionic';
 import moment from 'moment';
-import { Browser } from '@capacitor/browser';
+import { Browser, BrowserPlugin, OpenOptions } from '@capacitor/browser';
+import { BrowserModule } from '@angular/platform-browser';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;
@@ -20,6 +30,7 @@ describe('SurveyPage', () => {
   let StorageServiceSpy: jasmine.SpyObj<Storage>;
   const stubValueTasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
   let navControllerSpy: jasmine.SpyObj<NavController>;
+  //let toastControllerSpy: jasmine.SpyObj<ToastController>;
   let routeStub;
 
   beforeEach(() => {
@@ -37,6 +48,10 @@ describe('SurveyPage', () => {
       'set',
     ]);
 
+    // const spyToast = jasmine.createSpyObj('ToastController', [
+    //   'create',
+    // ]);
+
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
       imports: [IonicModule.forRoot(), RouterTestingModule],
@@ -46,10 +61,13 @@ describe('SurveyPage', () => {
           useValue: spyStorage,
         },
         { provide: ActivatedRoute, useValue: routeStub },
-        { provide: Browser, useClass: BrowserMock },
         {
           provide: NavController,
           useClass: NavMock,
+        },
+        {
+          provide: ToastController,
+          useClass: ToastMock,
         },
         HttpClient,
         HttpHandler,
@@ -57,6 +75,9 @@ describe('SurveyPage', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(SurveyPage);
+    // toastControllerSpy = TestBed.inject(
+    //   ToastController
+    // ) as jasmine.SpyObj<ToastController>;
     StorageServiceSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
     navControllerSpy = TestBed.inject(
       NavController
@@ -231,7 +252,7 @@ describe('SurveyPage', () => {
     expect(question.hideError).toBe(true);
   });
 
-  it('should set answers', async () => {
+  it('should change Check Status', async () => {
     const question: Question = {
       id: 'id',
       text: 'Title',
@@ -253,22 +274,94 @@ describe('SurveyPage', () => {
     expect(question.hideError).toBe(true);
   });
 
-  it('should open External File', async () => {
-    spyOn(Browser, 'open');
-    const url = 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Farberware-Minute-Timer-White.jpg';
-    component.openExternalFile(
-      url
-    );
-    fixture.detectChanges();
-    expect(Browser.open).toHaveBeenCalledTimes(1);
+  it('should toggle dynamic questions', async () => {
+    const question: any = {
+      id: 'multi-q8bohlar',
+      type: 'multi',
+      text: 'This is a multiple choice type with branching demo.',
+      required: true,
+      hide_id: '',
+      hide_value: '',
+      hide_if: true,
+      modal: false,
+      radio: true,
+      shuffle: true,
+      options: ['apple', 'orange', 'banana'],
+      model: 0,
+      response: 'banana;',
+      hideError: false,
+      noToggle: false,
+    } as Question;
+
+    const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
+
+    // Set up the component servey
+    component.survey = await stubStudy.modules[stubValueTasks[2].index];
+
+    // Check assignment
+    expect(component.survey).toBe(stubStudy.modules[stubValueTasks[2].index]);
+
+    // Check if it was true first or undefined
+    const q_before = component.survey.sections[0].questions.filter(
+      (x) => 'hide_id' in x && x.hide_id === question.id
+    )[0];
+    if ('hideSwitch' in q_before) {
+      expect(q_before.hideSwitch).not.toBeDefined();
+    }
+
+    // call method
+    component.toggleDynamicQuestions(question);
+
+    // Check if the hideSwitch changed in the component
+
+    const q_after = component.survey.sections[0].questions.filter(
+      (x) => 'hide_id' in x && x.hide_id === question.id
+    )[0];
+    expect(q_after.hideSwitch).toBe(false);
+  });
+
+  it('should test toast', async () => {
+    const toastCtr = fixture.debugElement.injector.get(ToastController);
+
+    const toastOptions: ToastOptions = {
+      message: 'mockToast',
+      position: 'top',
+      keyboardClose: true,
+      color: 'danger',
+      buttons: [
+        {
+          text: 'Dismiss',
+          role: 'cancel',
+          handler: () => {},
+        },
+      ],
+    };
+    const mockToast = await toastCtr.create(toastOptions);
+
+    spyOn(toastCtr, 'create').and.returnValue(Promise.resolve(mockToast));
+
+    component.showToast('mockToast', 'top');
+
+    // Confirm they are different
+    expect(toastCtr.create).toHaveBeenCalled();
+  });
+
+  it('should shuffle an array', async () => {
+    const getFirstItemTaskId = stubValueTasks[0].task_id;
+
+    expect(getFirstItemTaskId).toBe(stubValueTasks[0].task_id);
+
+    // Call the shuffle method now
+    const result = component.shuffle(stubValueTasks);
+
+    // Confirm they are different
+    expect(result[0].task_id).not.toBe(getFirstItemTaskId);
   });
 
   /**
    * To be tested
-   * openExternalFile(url: string)
-   * toggleDynamicQuestions(question: Question)
+   *
    * submit()
    * showToast(message: string, position?: 'top' | 'bottom' | 'middle')
-   * shuffle<T>(array: T[])
    */
 });
