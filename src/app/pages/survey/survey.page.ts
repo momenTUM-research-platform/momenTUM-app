@@ -92,7 +92,7 @@ export class SurveyPage implements OnInit {
    * Triggered when the survey page is first opened
    * Initialises the survey and displays it on the screen
    */
-   ngOnInit() {
+  ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
     StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
@@ -131,148 +131,149 @@ export class SurveyPage implements OnInit {
       const studyObject: any = values[0];
       const uuid = values[1];
 
-
       // get the task object for this task
-      this.studyTasksService.getAllTasks().then((tasks) => {
+      this.studyTasksService
+        .getAllTasks()
+        .then((tasks) => {
+          this.tasks = tasks;
 
-        this.tasks = tasks;
-
-        for (let i = 0; i < this.tasks.length; i++) {
-          if (this.task_id === String(this.tasks[i].task_id)) {
-            this.module_name = this.tasks[i].name;
-            this.module_index = this.tasks[i].index;
-            this.task_index = i;
-            break;
-          }
-        }
-
-        // check if this task is valid
-        this.studyTasksService.getTaskDisplayList().then((t) => {
-          let taskAvailable = false;
-          for (const task of t) {
-            if (String(task.task_id) === this.task_id) {
-              taskAvailable = true;
+          for (let i = 0; i < this.tasks.length; i++) {
+            if (this.task_id === String(this.tasks[i].task_id)) {
+              this.module_name = this.tasks[i].name;
+              this.module_index = this.tasks[i].index;
+              this.task_index = i;
               break;
             }
           }
-          if (!taskAvailable) {
-            this.showToast(
-              'This task had a time limit and is no longer available.',
-              'bottom'
-            );
-            this.navController.navigateRoot('/');
+
+          // check if this task is valid
+          this.studyTasksService.getTaskDisplayList().then((t) => {
+            let taskAvailable = false;
+            for (const task of t) {
+              if (String(task.task_id) === this.task_id) {
+                taskAvailable = true;
+                break;
+              }
+            }
+            if (!taskAvailable) {
+              this.showToast(
+                'This task had a time limit and is no longer available.',
+                'bottom'
+              );
+              this.navController.navigateRoot('/');
+            }
+          });
+
+          // extract the JSON from the study object
+          this.study = JSON.parse(studyObject);
+
+          // get the correct module
+          this.survey = this.study.modules[this.module_index];
+
+          // shuffle modules if required
+          if (this.survey.shuffle) {
+            this.survey.sections = this.shuffle(this.survey.sections);
           }
-        });
 
-        // extract the JSON from the study object
-        this.study = JSON.parse(studyObject);
-
-        // get the correct module
-        this.survey = this.study.modules[this.module_index];
-
-        // shuffle modules if required
-        if (this.survey.shuffle) {
-          this.survey.sections = this.shuffle(this.survey.sections);
-        }
-
-        // shuffle questions if required
-        for (const section of this.survey.sections) {
-          if (section.shuffle) {
-            section.questions = this.shuffle(section.questions);
+          // shuffle questions if required
+          for (const section of this.survey.sections) {
+            if (section.shuffle) {
+              section.questions = this.shuffle(section.questions);
+            }
           }
-        }
 
-        // get the name of the current section
-        this.num_sections = this.survey.sections.length;
-        this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
+          // get the name of the current section
+          this.num_sections = this.survey.sections.length;
+          this.current_section_name =
+            this.survey.sections[this.current_section - 1].name;
 
-        // get the user ID and then set up question variables
-        // initialise all of the questions to be displayed
-        this.setupQuestionVariables(uuid.toString());
+          // get the user ID and then set up question variables
+          // initialise all of the questions to be displayed
+          this.setupQuestionVariables(uuid.toString());
 
-        // set the submit text as appropriate
-        if (this.current_section < this.num_sections) {
-          this.submit_text = 'Next';
-        } else {
-          this.submit_text = this.survey.submit_text;
-        }
+          // set the submit text as appropriate
+          if (this.current_section < this.num_sections) {
+            this.submit_text = 'Next';
+          } else {
+            this.submit_text = this.survey.submit_text;
+          }
 
-        // set the current section of questions
-        this.questions =
-          this.survey.sections[this.current_section - 1].questions;
+          // set the current section of questions
+          this.questions =
+            this.survey.sections[this.current_section - 1].questions;
 
-        // toggle rand_group questions
-        // figure out which ones are grouped together, randomly show one and set its response value to 1
-        const randomGroups: { [rand_group: string]: string[] } = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (question.rand_group) {
-              // set a flag to indicate that this question shouldn't reappear via branching logic
-              question.noToggle = true;
+          // toggle rand_group questions
+          // figure out which ones are grouped together, randomly show one and set its response value to 1
+          const randomGroups: { [rand_group: string]: string[] } = {};
+          for (const section of this.survey.sections) {
+            for (const question of section.questions) {
+              if (question.rand_group) {
+                // set a flag to indicate that this question shouldn't reappear via branching logic
+                question.noToggle = true;
 
-              // categorise questions by rand_group
-              if (!(question.rand_group in randomGroups)) {
-                randomGroups[question.rand_group] = [];
-                randomGroups[question.rand_group].push(question.id);
-              } else {
-                randomGroups[question.rand_group].push(question.id);
+                // categorise questions by rand_group
+                if (!(question.rand_group in randomGroups)) {
+                  randomGroups[question.rand_group] = [];
+                  randomGroups[question.rand_group].push(question.id);
+                } else {
+                  randomGroups[question.rand_group].push(question.id);
+                }
               }
             }
           }
-        }
 
-        // from each rand_group, select a random item to show
-        const showThese = [];
-        for (const key in randomGroups) {
-          if (randomGroups.hasOwnProperty(key)) {
-            // select a random value from each array and add it to the "showThese array"
-            showThese.push(
-              randomGroups[key][
-                Math.floor(Math.random() * randomGroups[key].length)
-              ]
-            );
-          }
-        }
-
-        // iterate back through and show the ones that have been randomly calculated
-        // while removing the branching attributes from those that are hidden
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (showThese.includes(question.id)) {
-              question.noToggle = false;
-              question.response = 1;
-              // hide any questions from the rand_group that were not made visible
-              // and remove any branching logic attributes
-              // ### How to do this in TS?
-            } else if (question.noToggle) {
-              question.hideSwitch = false;
-              // @ts-ignore
-              delete question.hide_id;
-              // @ts-ignore
-              delete question.hide_value;
-              // @ts-ignore
-              delete question.hide_if;
+          // from each rand_group, select a random item to show
+          const showThese = [];
+          for (const key in randomGroups) {
+            if (randomGroups.hasOwnProperty(key)) {
+              // select a random value from each array and add it to the "showThese array"
+              showThese.push(
+                randomGroups[key][
+                  Math.floor(Math.random() * randomGroups[key].length)
+                ]
+              );
             }
           }
-        }
 
-        // toggle dynamic question setup
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            this.toggleDynamicQuestions(question);
+          // iterate back through and show the ones that have been randomly calculated
+          // while removing the branching attributes from those that are hidden
+          for (const section of this.survey.sections) {
+            for (const question of section.questions) {
+              if (showThese.includes(question.id)) {
+                question.noToggle = false;
+                question.response = 1;
+                // hide any questions from the rand_group that were not made visible
+                // and remove any branching logic attributes
+                // ### How to do this in TS?
+              } else if (question.noToggle) {
+                question.hideSwitch = false;
+                // @ts-ignore
+                delete question.hide_id;
+                // @ts-ignore
+                delete question.hide_value;
+                // @ts-ignore
+                delete question.hide_if;
+              }
+            }
           }
-        }
 
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'survey',
-          event: 'entry',
-          module_index: this.module_index,
-        });
-      }).catch(() => {});
+          // toggle dynamic question setup
+          for (const section of this.survey.sections) {
+            for (const question of section.questions) {
+              this.toggleDynamicQuestions(question);
+            }
+          }
+
+          // log the user visiting this tab
+          this.surveyDataService.logPageVisitToServer({
+            timestamp: moment().format(),
+            milliseconds: moment().valueOf(),
+            page: 'survey',
+            event: 'entry',
+            module_index: this.module_index,
+          });
+        })
+        .catch(() => {});
     });
   }
 
@@ -290,15 +291,16 @@ export class SurveyPage implements OnInit {
         this.submit_text = 'Next';
       });
     } else {
-
       // save an exit log
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'survey',
-        event: 'exit',
-        module_index: this.module_index,
-      }).catch(() => {});
+      this.surveyDataService
+        .logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'survey',
+          event: 'exit',
+          module_index: this.module_index,
+        })
+        .catch(() => {});
       // nav back to the home screen
       this.navController.navigateRoot('/');
     }
@@ -310,76 +312,78 @@ export class SurveyPage implements OnInit {
    */
   setupQuestionVariables(uuid: string) {
     // for all relevant questions add an empty response variable
-    for (const section of this.survey.sections) {
-      for (const question of section.questions) {
-        // for all question types that can be responded to, set default values
-        question.response = '';
-        question.model = '';
-        question.hideError = true;
-        question.hideSwitch = true;
+    if (this.survey.sections) {
+      for (const section of this.survey.sections) {
+        for (const question of section.questions) {
+          // for all question types that can be responded to, set default values
+          question.response = '';
+          question.model = '';
+          question.hideError = true;
+          question.hideSwitch = true;
 
-        // for datetime questions, default to the current date/time
-        if (question.type === 'datetime') {
-          // placeholder for dates
-          question.model = moment().format();
+          // for datetime questions, default to the current date/time
+          if (question.type === 'datetime') {
+            // placeholder for dates
+            question.model = moment().format();
 
-          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
-        } else if (
-          question.type === 'media' &&
-          (question.subtype === 'audio' || question.subtype === 'video')
-        ) {
-          // @ts-ignore
-          question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            question.src
-          );
-          if (question.subtype === 'video') {
+            // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
+          } else if (
+            question.type === 'media' &&
+            (question.subtype === 'audio' || question.subtype === 'video')
+          ) {
             // @ts-ignore
-            question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.thumb
+            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              question.src
             );
-          }
+            if (question.subtype === 'video') {
+              // @ts-ignore
+              question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
+                question.thumb
+              );
+            }
 
-          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
-        } else if (question.type === 'external') {
-          question.src = question.src + '?uuid=' + uuid;
-          // @ts-ignore
-          question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            question.src
-          );
+            // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
+          } else if (question.type === 'external') {
+            question.src = question.src + '?uuid=' + uuid;
+            // @ts-ignore
+            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              question.src
+            );
 
-          // for slider questions, set the default value to be halfway between min and max
-        } else if (question.type === 'slider') {
-          // get min and max
-          const min = question.min;
-          const max = question.max;
+            // for slider questions, set the default value to be halfway between min and max
+          } else if (question.type === 'slider') {
+            // get min and max
+            const min = question.min;
+            const max = question.max;
 
-          // set the default value of the slider to the middle value
-          const model = min + (max - min) / 2;
-          question.model = model;
+            // set the default value of the slider to the middle value
+            const model = min + (max - min) / 2;
+            question.model = model;
 
-          // a starting value must also be set for the slider to work properly
-          question.value = model;
+            // a starting value must also be set for the slider to work properly
+            question.value = model;
 
-          // for checkbox items, the response is set to an empty array
-        } else if (question.type === 'multi') {
-          // set up checked tracking for checkbox questions types
-          const tempOptions: Option[] = [];
-          for (const option of question.options) {
-            tempOptions.push({
-              text: option,
-              checked: false,
-            });
-          }
-          question.optionsChecked = tempOptions;
+            // for checkbox items, the response is set to an empty array
+          } else if (question.type === 'multi') {
+            // set up checked tracking for checkbox questions types
+            const tempOptions: Option[] = [];
+            for (const option of question.options) {
+              tempOptions.push({
+                text: option,
+                checked: false,
+              });
+            }
+            question.optionsChecked = tempOptions;
 
-          // counterbalance the choices if necessary
-          if (question.shuffle) {
-            question.optionsChecked = this.shuffle(question.optionsChecked);
-          }
+            // counterbalance the choices if necessary
+            if (question.shuffle) {
+              question.optionsChecked = this.shuffle(question.optionsChecked);
+            }
 
-          // set the empty response to an array for checkbox questions
-          if (!question.radio) {
-            question.response = [];
+            // set the empty response to an array for checkbox questions
+            if (!question.radio) {
+              question.response = [];
+            }
           }
         }
       }
@@ -407,7 +411,6 @@ export class SurveyPage implements OnInit {
    * @param question The question that has been answered
    */
   changeCheckStatus(option: Option, question: Question) {
-
     // get question responses and split
     let responses: string[] = [];
 
@@ -447,8 +450,7 @@ export class SurveyPage implements OnInit {
    */
   openExternalFile(url: string) {
     //{ url, windowName: '_system' }
-    Browser.open({ url, windowName: '_system' })
-    .catch((e) => {
+    Browser.open({ url, windowName: '_system' }).catch((e) => {
       console.log(
         'ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e
       );
@@ -559,14 +561,16 @@ export class SurveyPage implements OnInit {
         this.tasks[this.task_index].responses = responses;
 
         // attempt to post surveyResponse to server
-        this.surveyDataService.sendSurveyDataToServer({
-          module_index: this.module_index,
-          module_name: this.module_name,
-          responses,
-          response_time,
-          response_time_in_ms: response_time_ms,
-          alert_time: this.tasks[this.task_index].alert_time || '',
-        });
+        this.surveyDataService
+          .sendSurveyDataToServer({
+            module_index: this.module_index,
+            module_name: this.module_name,
+            responses,
+            response_time,
+            response_time_in_ms: response_time_ms,
+            alert_time: this.tasks[this.task_index].alert_time || '',
+          })
+          .catch(() => {});
 
         // write tasks back to storage
         this.storage.set('study-tasks', JSON.stringify(this.tasks)).then(() => {
@@ -622,7 +626,7 @@ export class SurveyPage implements OnInit {
       ],
     });
 
-    toast.present().catch(() => {});
+    toast?.present().catch(() => {});
   }
 
   /**

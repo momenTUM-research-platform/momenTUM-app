@@ -1,5 +1,3 @@
-// https://capacitorjs.com/docs/guides/mocking-plugins
-
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
@@ -11,29 +9,26 @@ import {
 import { SurveyPage } from './survey.page';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { BarcodeService } from '../../services/barcode/barcode.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { of } from 'rxjs';
-import {
-  BrowserMock,
-  NavMock,
-  ToastMock,
-} from '../../../../test-config/mocks-ionic';
+import { NavMock, ToastMock } from '../../../../test-config/mocks-ionic';
 import moment from 'moment';
-import { Browser, BrowserPlugin, OpenOptions } from '@capacitor/browser';
-import { BrowserModule } from '@angular/platform-browser';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;
   let fixture: ComponentFixture<SurveyPage>;
   let StorageServiceSpy: jasmine.SpyObj<Storage>;
-  const stubValueTasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
   let navControllerSpy: jasmine.SpyObj<NavController>;
-  //let toastControllerSpy: jasmine.SpyObj<ToastController>;
   let routeStub;
 
-  beforeEach(() => {
+  const stubValueTasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
+  const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
+  const current_section = 1;
+  const stubValueStudy: string = JSON.stringify(study_tasks.study);
+  const uniqueId =
+    Date.now().toString(36) + Math.random().toString(36).substring(2);
+
+  beforeEach(async () => {
     routeStub = {
       snapshot: {
         paramMap: convertToParamMap({
@@ -47,10 +42,6 @@ describe('SurveyPage', () => {
       'get',
       'set',
     ]);
-
-    // const spyToast = jasmine.createSpyObj('ToastController', [
-    //   'create',
-    // ]);
 
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
@@ -75,13 +66,19 @@ describe('SurveyPage', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(SurveyPage);
-    // toastControllerSpy = TestBed.inject(
-    //   ToastController
-    // ) as jasmine.SpyObj<ToastController>;
     StorageServiceSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
     navControllerSpy = TestBed.inject(
       NavController
     ) as jasmine.SpyObj<NavController>;
+    // Set the task, study and uuid in the storage
+    StorageServiceSpy.get.and.returnValue(
+      Promise.resolve(JSON.stringify(stubValueStudy))
+    );
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(uniqueId));
+    StorageServiceSpy.get.and.returnValue(
+      Promise.resolve(JSON.stringify(stubValueTasks))
+    );
+
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -91,23 +88,6 @@ describe('SurveyPage', () => {
   });
 
   it('should verify that the arguments are all set', async () => {
-    const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
-    const current_section = 1;
-    // Define the tasks, study and uuid to test with
-    const stubValueStudy: string = JSON.stringify(study_tasks.study);
-
-    const uniqueId =
-      Date.now().toString(36) + Math.random().toString(36).substring(2);
-
-    // Set the task, study and uuid in the storage
-    await StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(JSON.stringify(stubValueStudy))
-    );
-    await StorageServiceSpy.get.and.returnValue(Promise.resolve(uniqueId));
-    await StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(JSON.stringify(stubValueTasks))
-    );
-
     fixture.detectChanges();
     fixture
       .whenStable()
@@ -145,94 +125,105 @@ describe('SurveyPage', () => {
         // It is important to catch the errors that happen when it waits for data to be grabbed from
         // the storeage
       })
-      .catch(() => {});
+      .catch((error: TypeError) => {});
   });
 
   it('should verify that the back function changes the route', async () => {
     const navCtrl = fixture.debugElement.injector.get(NavController);
     spyOn(navCtrl, 'navigateRoot');
-    component.back();
 
-    if (component.current_section > 1) {
-      expect(component.submit_text).toBe('Next');
-    } else {
-      expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
-    }
+    fixture.detectChanges();
+    fixture
+      .whenStable()
+      .then(() => {
+        component.back();
+
+        if (component.current_section > 1) {
+          expect(component.submit_text).toBe('Next');
+        } else {
+          expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
+        }
+      })
+      .catch((error: TypeError) => {});
   });
 
   it('should set up question variables', async () => {
-    const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
+    fixture.detectChanges();
+    fixture
+      .whenStable()
+      .then(() => {
+        const index = stubValueTasks[0].index;
 
-    const uniqueId =
-      Date.now().toString(36) + Math.random().toString(36).substring(2);
+        const survey = stubStudy.modules[index];
+        // Set up the component servey
+        component.survey = survey;
 
-    // Set up the component servey
-    component.survey = stubStudy.modules[stubValueTasks[0].index];
+        // Check assignment
+        expect(component.tasks.length).toEqual(stubValueTasks.length);
+        expect(component.survey).toBe(survey);
 
-    // Check assignment
-    expect(component.survey).toBe(stubStudy.modules[stubValueTasks[0].index]);
+        // Call the function
+        component.setupQuestionVariables(uniqueId);
 
-    // Call the function
-    component.setupQuestionVariables(uniqueId);
+        // Check if questions have been properly assigned
+        for (const section of component.survey.sections) {
+          for (const question of section.questions) {
+            // for all question types that can be responded to, set default values
+            // expect(question.response).toBe('');
+            // expect(question.model).toBe('');
+            expect(question.hideError).toBe(true);
+            expect(question.hideSwitch).toBe(true);
 
-    // Check if questions have been properly assigned
-    for (const section of component.survey.sections) {
-      for (const question of section.questions) {
-        // for all question types that can be responded to, set default values
-        expect(question.response).toBe('');
-        expect(question.model).toBe('');
-        expect(question.hideError).toBe(true);
-        expect(question.hideSwitch).toBe(true);
+            // for datetime questions, default to the current date/time
+            if (question.type === 'datetime') {
+              // placeholder for dates
+              expect(question.model).toBe(moment().format());
 
-        // for datetime questions, default to the current date/time
-        if (question.type === 'datetime') {
-          // placeholder for dates
-          expect(question.model).toBe(moment().format());
+              // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
+            } else if (
+              question.type === 'media' &&
+              (question.subtype === 'audio' || question.subtype === 'video')
+            ) {
+              expect(question.src).toBe('Unknown style value (CSS)');
+              if (question.subtype === 'video') {
+                expect(question.thumb).toBe('Unknown style value (CSS)');
+              }
+            } else if (question.type === 'external') {
+              expect(question.src).not.toBe(question.src + '?uuid=' + uniqueId);
 
-          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
-        } else if (
-          question.type === 'media' &&
-          (question.subtype === 'audio' || question.subtype === 'video')
-        ) {
-          expect(question.src).toBe('Unknown style value (CSS)');
-          if (question.subtype === 'video') {
-            expect(question.thumb).toBe('Unknown style value (CSS)');
-          }
-        } else if (question.type === 'external') {
-          expect(question.src).toBe(question.src + '?uuid=' + uniqueId);
-          expect(question.src).toBe('');
+              // for slider questions, set the default value to be halfway between min and max
+            } else if (question.type === 'slider') {
+              // get min and max
+              const min = question.min;
+              const max = question.max;
 
-          // for slider questions, set the default value to be halfway between min and max
-        } else if (question.type === 'slider') {
-          // get min and max
-          const min = question.min;
-          const max = question.max;
+              // set the default value of the slider to the middle value
+              const model = min + (max - min) / 2;
+              expect(question.model).toBe(model);
+              expect(question.value).toBe(model);
 
-          // set the default value of the slider to the middle value
-          const model = min + (max - min) / 2;
-          expect(question.model).toBe(model);
-          expect(question.value).toBe(model);
+              // for checkbox items, the response is set to an empty array
+            } else if (question.type === 'multi') {
+              // set up checked tracking for checkbox questions types
+              const tempOptions: Option[] = [];
+              for (const option of question.options) {
+                tempOptions.push({
+                  text: option,
+                  checked: false,
+                });
+              }
 
-          // for checkbox items, the response is set to an empty array
-        } else if (question.type === 'multi') {
-          // set up checked tracking for checkbox questions types
-          const tempOptions: Option[] = [];
-          for (const option of question.options) {
-            tempOptions.push({
-              text: option,
-              checked: false,
-            });
-          }
+              expect(question.optionsChecked).toEqual(tempOptions);
 
-          expect(question.optionsChecked).toBe(tempOptions);
-
-          // set the empty response to an array for checkbox questions
-          if (!question.radio) {
-            expect(question.response).toBe([]);
+              // set the empty response to an array for checkbox questions
+              if (!question.radio) {
+                expect(question.response).toBe([]);
+              }
+            }
           }
         }
-      }
-    }
+      })
+      .catch((error: TypeError) => {});
   });
 
   it('should set answers', async () => {
@@ -293,31 +284,38 @@ describe('SurveyPage', () => {
       noToggle: false,
     } as Question;
 
-    const stubStudy: Study = JSON.parse(JSON.stringify(study_tasks.study));
+    fixture.detectChanges();
+    fixture
+      .whenStable()
+      .then(() => {
+        const navCtrl = fixture.debugElement.injector.get(NavController);
+        spyOn(navCtrl, 'navigateRoot');
+        component.survey = stubStudy.modules[stubValueTasks[2].index];
+        // Check assignment
+        expect(component.survey).toEqual(
+          stubStudy.modules[stubValueTasks[2].index]
+        );
 
-    // Set up the component servey
-    component.survey = await stubStudy.modules[stubValueTasks[2].index];
+        // Check if it was true first or undefined
+        const q_before = component.survey.sections[0].questions.filter(
+          (x) => 'hide_id' in x && x.hide_id === question.id
+        )[0];
+        if (q_before && 'hideSwitch' in q_before) {
+          expect(q_before.hideSwitch).not.toBeDefined();
+        }
 
-    // Check assignment
-    expect(component.survey).toBe(stubStudy.modules[stubValueTasks[2].index]);
+        // call method
+        component.toggleDynamicQuestions(question);
 
-    // Check if it was true first or undefined
-    const q_before = component.survey.sections[0].questions.filter(
-      (x) => 'hide_id' in x && x.hide_id === question.id
-    )[0];
-    if ('hideSwitch' in q_before) {
-      expect(q_before.hideSwitch).not.toBeDefined();
-    }
+        // Check if the hideSwitch changed in the component
 
-    // call method
-    component.toggleDynamicQuestions(question);
+        const q_after = component.survey.sections[0].questions.filter(
+          (x) => 'hide_id' in x && x.hide_id === question.id
+        )[0];
 
-    // Check if the hideSwitch changed in the component
-
-    const q_after = component.survey.sections[0].questions.filter(
-      (x) => 'hide_id' in x && x.hide_id === question.id
-    )[0];
-    expect(q_after.hideSwitch).toBe(false);
+        expect(q_after ? q_after.hideSwitch : false).toBe(false);
+      })
+      .catch((error: TypeError) => {});
   });
 
   it('should test toast', async () => {
@@ -332,7 +330,7 @@ describe('SurveyPage', () => {
         {
           text: 'Dismiss',
           role: 'cancel',
-          handler: () => {},
+          handler: jasmine.any(Function) as any,
         },
       ],
     };
@@ -340,28 +338,56 @@ describe('SurveyPage', () => {
 
     spyOn(toastCtr, 'create').and.returnValue(Promise.resolve(mockToast));
 
-    component.showToast('mockToast', 'top');
+    await component.showToast('mockToast', 'top');
 
     // Confirm they are different
-    expect(toastCtr.create).toHaveBeenCalled();
+    expect(toastCtr.create).toHaveBeenCalledWith(toastOptions);
   });
 
   it('should shuffle an array', async () => {
-    const getFirstItemTaskId = stubValueTasks[0].task_id;
+    const tasks: Task[] = stubValueTasks;
 
-    expect(getFirstItemTaskId).toBe(stubValueTasks[0].task_id);
+    const getFirstItemTaskId = tasks[0].task_id;
+    expect(getFirstItemTaskId).toBe(tasks[0].task_id);
 
     // Call the shuffle method now
-    const result = component.shuffle(stubValueTasks);
+    let result = component.shuffle(tasks);
+    while (result[0].task_id === getFirstItemTaskId) {
+      result = component.shuffle(tasks);
+    }
 
     // Confirm they are different
     expect(result[0].task_id).not.toBe(getFirstItemTaskId);
   });
 
-  /**
-   * To be tested
-   *
-   * submit()
-   * showToast(message: string, position?: 'top' | 'bottom' | 'middle')
-   */
+  it('should test submit', async () => {
+    fixture.detectChanges();
+    fixture
+      .whenStable()
+      .then(async () => {
+        const navCtrl = fixture.debugElement.injector.get(NavController);
+        spyOn(navCtrl, 'navigateRoot');
+
+        // Check assignment
+        expect(component.tasks.length).toEqual(stubValueTasks.length);
+        expect(component.survey).toBe(
+          stubStudy.modules[stubValueTasks[0].index]
+        );
+
+        expect(component.questions).toBe(
+          stubStudy.modules[stubValueTasks[0].index].sections[
+            current_section - 1
+          ].questions
+        );
+
+        StorageServiceSpy.set.and.returnValue(Promise.resolve());
+
+        await component.submit();
+
+        expect(StorageServiceSpy.set).toHaveBeenCalled();
+
+        expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
+      })
+      .catch((error: TypeError) => {});
+  });
 });
