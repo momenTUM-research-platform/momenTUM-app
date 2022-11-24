@@ -92,7 +92,7 @@ export class SurveyPage implements OnInit {
    * Triggered when the survey page is first opened
    * Initialises the survey and displays it on the screen
    */
-  ngOnInit() {
+  async ngOnInit() {
     // set statusBar to visible on Android
     // this.statusBar.styleLightContent();
     StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
@@ -124,87 +124,91 @@ export class SurveyPage implements OnInit {
 
     // the id of the task to be displayed
     this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
+
     Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then(async (values) => {
+      console.log('THE TASKS ARE: ');
       const studyObject: any = values[0];
       const uuid = values[1];
-
       // get the task object for this task
-      this.studyTasksService
-        .getAllTasks()
-        .then((tasks) => {
-          this.tasks = tasks;
 
-          for (let i = 0; i < this.tasks.length; i++) {
-            if (this.task_id === String(this.tasks[i].task_id)) {
-              this.module_name = this.tasks[i].name;
-              this.module_index = this.tasks[i].index;
-              this.task_index = i;
+      await this.studyTasksService.getAllTasks().then((tasks) => {
+        this.tasks = tasks;
+        console.log('THE TASKS ARE: ', this.tasks.length);
+
+        for (let i = 0; i < this.tasks.length; i++) {
+          if (this.task_id === String(this.tasks[i].task_id)) {
+            this.module_name = this.tasks[i].name;
+            this.module_index = this.tasks[i].index;
+            this.task_index = i;
+            break;
+          }
+        }
+
+        // check if this task is valid
+        this.studyTasksService.getTaskDisplayList().then((t) => {
+          let taskAvailable = false;
+          for (const task of t) {
+            if (String(task.task_id) === this.task_id) {
+              taskAvailable = true;
               break;
             }
           }
-
-          // check if this task is valid
-          this.studyTasksService.getTaskDisplayList().then((t) => {
-            let taskAvailable = false;
-            for (const task of t) {
-              if (String(task.task_id) === this.task_id) {
-                taskAvailable = true;
-                break;
-              }
-            }
-            if (!taskAvailable) {
-              this.showToast(
-                'This task had a time limit and is no longer available.',
-                'bottom'
-              );
-              this.navController.navigateRoot('/');
-            }
-          });
-
-          // extract the JSON from the study object
-          this.study = JSON.parse(studyObject);
-
-          // get the correct module
-          this.survey = this.study.modules[this.module_index];
-
-          // shuffle modules if required
-          if (this.survey.shuffle) {
-            this.survey.sections = this.shuffle(this.survey.sections);
+          if (!taskAvailable) {
+            this.showToast(
+              'This task had a time limit and is no longer available.',
+              'bottom'
+            );
+            this.navController.navigateRoot('/');
           }
+        });
 
-          // shuffle questions if required
+        // extract the JSON from the study object
+        this.study = JSON.parse(studyObject);
+
+        // get the correct module
+        this.survey = this.study.modules[this.module_index];
+
+        // shuffle modules if required
+        if (this.survey.shuffle) {
+          this.survey.sections = this.shuffle(this.survey.sections);
+        }
+
+        // shuffle questions if required
+        if (this.survey.sections !== undefined) {
           for (const section of this.survey.sections) {
             if (section.shuffle) {
               section.questions = this.shuffle(section.questions);
             }
           }
+        }
 
-          // get the name of the current section
-          this.num_sections = this.survey.sections.length;
-          this.current_section_name =
-            this.survey.sections[this.current_section - 1].name;
+        // get the name of the current section
+        this.num_sections = this.survey.sections.length;
+        this.current_section_name =
+          this.survey.sections[this.current_section - 1].name;
 
-          // get the user ID and then set up question variables
-          // initialise all of the questions to be displayed
-          this.setupQuestionVariables(uuid.toString());
+        // get the user ID and then set up question variables
+        // initialise all of the questions to be displayed
+        this.setupQuestionVariables(uuid.toString());
 
-          // set the submit text as appropriate
-          if (this.current_section < this.num_sections) {
-            this.submit_text = 'Next';
-          } else {
-            this.submit_text = this.survey.submit_text;
-          }
+        // set the submit text as appropriate
+        if (this.current_section < this.num_sections) {
+          this.submit_text = 'Next';
+        } else {
+          this.submit_text = this.survey.submit_text;
+        }
 
-          // set the current section of questions
-          this.questions =
-            this.survey.sections[this.current_section - 1].questions;
+        // set the current section of questions
+        this.questions =
+          this.survey.sections[this.current_section - 1].questions;
 
-          // toggle rand_group questions
-          // figure out which ones are grouped together, randomly show one and set its response value to 1
-          const randomGroups: { [rand_group: string]: string[] } = {};
+        // toggle rand_group questions
+        // figure out which ones are grouped together, randomly show one and set its response value to 1
+        const randomGroups: { [rand_group: string]: string[] } = {};
+        if (this.survey.sections !== undefined) {
           for (const section of this.survey.sections) {
             for (const question of section.questions) {
               if (question.rand_group) {
@@ -221,61 +225,66 @@ export class SurveyPage implements OnInit {
               }
             }
           }
+        }
 
-          // from each rand_group, select a random item to show
-          const showThese = [];
-          for (const key in randomGroups) {
-            if (randomGroups.hasOwnProperty(key)) {
-              // select a random value from each array and add it to the "showThese array"
-              showThese.push(
-                randomGroups[key][
-                  Math.floor(Math.random() * randomGroups[key].length)
-                ]
-              );
+        // from each rand_group, select a random item to show
+        const showThese = [];
+        for (const key in randomGroups) {
+          if (randomGroups.hasOwnProperty(key)) {
+            // select a random value from each array and add it to the "showThese array"
+            showThese.push(
+              randomGroups[key][
+                Math.floor(Math.random() * randomGroups[key].length)
+              ]
+            );
+          }
+        }
+
+        // iterate back through and show the ones that have been randomly calculated
+        // while removing the branching attributes from those that are hidden
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
+            if (showThese.includes(question.id)) {
+              question.noToggle = false;
+              question.response = 1;
+              // hide any questions from the rand_group that were not made visible
+              // and remove any branching logic attributes
+              // ### How to do this in TS?
+            } else if (question.noToggle) {
+              question.hideSwitch = false;
+              // @ts-ignore
+              delete question.hide_id;
+              // @ts-ignore
+              delete question.hide_value;
+              // @ts-ignore
+              delete question.hide_if;
             }
           }
+        }
 
-          // iterate back through and show the ones that have been randomly calculated
-          // while removing the branching attributes from those that are hidden
-          for (const section of this.survey.sections) {
-            for (const question of section.questions) {
-              if (showThese.includes(question.id)) {
-                question.noToggle = false;
-                question.response = 1;
-                // hide any questions from the rand_group that were not made visible
-                // and remove any branching logic attributes
-                // ### How to do this in TS?
-              } else if (question.noToggle) {
-                question.hideSwitch = false;
-                // @ts-ignore
-                delete question.hide_id;
-                // @ts-ignore
-                delete question.hide_value;
-                // @ts-ignore
-                delete question.hide_if;
-              }
-            }
+        // toggle dynamic question setup
+        for (const section of this.survey.sections) {
+          for (const question of section.questions) {
+            this.toggleDynamicQuestions(question);
           }
+        }
 
-          // toggle dynamic question setup
-          for (const section of this.survey.sections) {
-            for (const question of section.questions) {
-              this.toggleDynamicQuestions(question);
-            }
-          }
-
-          // log the user visiting this tab
-          this.surveyDataService.logPageVisitToServer({
-            timestamp: moment().format(),
-            milliseconds: moment().valueOf(),
-            page: 'survey',
-            event: 'entry',
-            module_index: this.module_index,
-          });
-        })
-        .catch(() => {});
+        // log the user visiting this tab
+        this.surveyDataService.logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'survey',
+          event: 'entry',
+          module_index: this.module_index,
+        });
+      });
     });
   }
+
+  /**
+   * Called on ngOnInIt to set the variabled of the task
+   *
+   */
 
   /**
    * Handles the back button behaviour
@@ -518,7 +527,7 @@ export class SurveyPage implements OnInit {
    * Triggered whenever the submit button is called
    * Checks if all required questions have been answered and then moves to the next section/saves the response
    */
-  submit() {
+  async submit() {
     let errorCount = 0;
     for (const question of this.questions) {
       if (
@@ -537,8 +546,9 @@ export class SurveyPage implements OnInit {
       // if user on last page and there are no errors, fine to submit
       if (this.current_section === this.num_sections) {
         // add the alert time to the response
+
         this.tasks[this.task_index].alert_time = moment(
-          this.tasks[this.task_index].time
+          new Date(this.tasks[this.task_index].time).toISOString()
         ).format();
 
         // get a timestmap of submission time in both readable and ms format
@@ -573,17 +583,20 @@ export class SurveyPage implements OnInit {
           .catch(() => {});
 
         // write tasks back to storage
-        this.storage.set('study-tasks', JSON.stringify(this.tasks)).then(() => {
-          // save an exit log
-          this.surveyDataService.logPageVisitToServer({
-            timestamp: moment().format(),
-            milliseconds: moment().valueOf(),
-            page: 'survey',
-            event: 'submit',
-            module_index: this.module_index,
+        await this.storage
+          .set('study-tasks', JSON.stringify(this.tasks))
+          .then(async () => {
+            // save an exit log
+            this.surveyDataService.logPageVisitToServer({
+              timestamp: moment().format(),
+              milliseconds: moment().valueOf(),
+              page: 'survey',
+              event: 'submit',
+              module_index: this.module_index,
+            });
+            this.navController.navigateRoot('/');
+            console.log('I AM HERE');
           });
-          this.navController.navigateRoot('/');
-        });
       } else {
         this.ngZone.run(() => {
           this.current_section++;

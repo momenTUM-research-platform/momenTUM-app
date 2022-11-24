@@ -150,7 +150,11 @@ export class SurveyDataService {
           const json = JSON.stringify(object);
           this.storage.set(logUuid, json);
         }
+      }).catch((error)=>{
+        console.log('Error in attempt http post: ', error || '');
       });
+    }).catch((error)=>{
+      console.log('Error in log Page Visit To Server: ', error.message || '');
     });
   }
 

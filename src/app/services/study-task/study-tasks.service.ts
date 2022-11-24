@@ -162,7 +162,8 @@ export class StudyTasksService {
    */
   async getAllTasks(): Promise<Task[]> {
     const tasks: any = await this.storageService.get('study-tasks');
-    return JSON.parse(tasks);
+    const task_list: Task[] = JSON.parse(tasks);
+    return task_list;
   }
 
   /**

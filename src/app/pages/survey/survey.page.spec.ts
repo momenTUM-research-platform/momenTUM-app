@@ -1,4 +1,10 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+  waitForAsync,
+} from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import {
   IonicModule,
@@ -8,16 +14,24 @@ import {
 } from '@ionic/angular';
 import { SurveyPage } from './survey.page';
 import { Storage } from '@ionic/storage-angular';
-import { HttpClient, HttpHandler } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpClientModule,
+  HttpHandler,
+} from '@angular/common/http';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { NavMock, ToastMock } from '../../../../test-config/mocks-ionic';
 import moment from 'moment';
+import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StorageService } from '../../services/storage/storage.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;
   let fixture: ComponentFixture<SurveyPage>;
-  let StorageServiceSpy: jasmine.SpyObj<Storage>;
+  //let StorageServiceSpy: jasmine.SpyObj<StorageService>;
   let navControllerSpy: jasmine.SpyObj<NavController>;
   let routeStub;
 
@@ -45,12 +59,8 @@ describe('SurveyPage', () => {
 
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
-      imports: [IonicModule.forRoot(), RouterTestingModule],
+      imports: [IonicModule.forRoot(), RouterTestingModule, HttpClientModule],
       providers: [
-        {
-          provide: Storage,
-          useValue: spyStorage,
-        },
         { provide: ActivatedRoute, useValue: routeStub },
         {
           provide: NavController,
@@ -60,48 +70,68 @@ describe('SurveyPage', () => {
           provide: ToastController,
           useClass: ToastMock,
         },
-        HttpClient,
-        HttpHandler,
+        Storage,
       ],
+      teardown: { destroyAfterEach: false },
     }).compileComponents();
 
     fixture = TestBed.createComponent(SurveyPage);
-    StorageServiceSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
+    // StorageServiceSpy = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>;
     navControllerSpy = TestBed.inject(
       NavController
     ) as jasmine.SpyObj<NavController>;
-    // Set the task, study and uuid in the storage
-    StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(JSON.stringify(stubValueStudy))
-    );
-    StorageServiceSpy.get.and.returnValue(Promise.resolve(uniqueId));
-    StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(JSON.stringify(stubValueTasks))
-    );
-
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
-
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should verify that the arguments are all set', async () => {
-    fixture.detectChanges();
-    fixture
-      .whenStable()
-      .then(() => {
+  describe('initialzation', async () => {
+    beforeEach(async () => {
+      const studyTaskService =
+        fixture.debugElement.injector.get(StudyTasksService);
+      const storageServiceCtrl =
+        fixture.debugElement.injector.get(StorageService);
+      const surveyDataService =
+        fixture.debugElement.injector.get(SurveyDataService);
+      spyOn(surveyDataService, 'logPageVisitToServer').and.returnValue(
+        Promise.resolve()
+      );
+      spyOn(studyTaskService, 'getAllTasks').and.returnValue(
+        Promise.resolve(stubValueTasks)
+      );
+      spyOn(storageServiceCtrl, 'get').and.callFake((param) => {
+        if (param === 'current-study') {
+          return Promise.resolve(stubValueStudy);
+        }
+        if (param === 'uuid') {
+          return Promise.resolve(uniqueId);
+        }
+        if (param === 'study-tasks') {
+          return Promise.resolve(JSON.stringify(stubValueTasks));
+        }
+        return null;
+      });
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('should verify that the arguments are all set', async () => {
+      fixture.whenStable().then(() => {
+        // wait for async getTasks
+        fixture.detectChanges(); // update view with Tasks
+
         expect(component.task_id).toBe(String(stubValueTasks[0].task_id));
         expect(component.tasks.length).toEqual(stubValueTasks.length);
         expect(component.module_name).toBe(String(stubValueTasks[0].name));
         expect(component.module_index).toEqual(stubValueTasks[0].index);
         expect(component.task_index).toEqual(0);
+
         expect(component.study.properties.study_id).toBe(
           stubStudy.properties.study_id
         );
-        expect(component.survey).toBe(
-          stubStudy.modules[stubValueTasks[0].index]
+        expect(component.survey.id).toEqual(
+          stubStudy.modules[stubValueTasks[0].index].id
         );
         expect(component.num_sections).toEqual(
           stubStudy.modules[stubValueTasks[0].index].sections.length
@@ -112,46 +142,55 @@ describe('SurveyPage', () => {
             current_section - 1
           ].name
         );
-        expect(component.submit_text).toBe(
-          'Submit' ||
-            'Next' ||
-            stubStudy.modules[stubValueTasks[0].index].submit_text
-        );
-        expect(component.questions).toBe(
+        expect(
+          component.submit_text === 'Submit' ||
+            component.submit_text === 'Next' ||
+            component.submit_text ===
+              stubStudy.modules[stubValueTasks[0].index].submit_text
+        ).toBeTruthy();
+
+        expect(component.questions[0].id).toEqual(
           stubStudy.modules[stubValueTasks[0].index].sections[
             current_section - 1
-          ].questions
+          ].questions[0].id
         );
-        // It is important to catch the errors that happen when it waits for data to be grabbed from
-        // the storeage
-      })
-      .catch((error: TypeError) => {});
-  });
+      });
+    });
 
-  it('should verify that the back function changes the route', async () => {
-    const navCtrl = fixture.debugElement.injector.get(NavController);
-    spyOn(navCtrl, 'navigateRoot');
+    it('should test submit', (done) => {
+      const navCtrl = fixture.debugElement.injector.get(NavController);
+      const storageServiceCtrl =
+        fixture.debugElement.injector.get(StorageService);
+      spyOn(navCtrl, 'navigateRoot');
 
-    fixture.detectChanges();
-    fixture
-      .whenStable()
-      .then(() => {
-        component.back();
+      const spy = spyOn(storageServiceCtrl, 'set').and.returnValue(
+        Promise.resolve()
+      );
 
-        if (component.current_section > 1) {
-          expect(component.submit_text).toBe('Next');
-        } else {
+      fixture.whenStable().then(async () => {
+        // Check assignment
+        fixture.detectChanges();
+        expect(component.tasks.length).toEqual(stubValueTasks.length);
+        expect(component.survey.id).toEqual(
+          stubStudy.modules[stubValueTasks[0].index].id
+        );
+
+        expect(component.questions[0].id).toBe(
+          stubStudy.modules[stubValueTasks[0].index].sections[
+            current_section - 1
+          ].questions[0].id
+        );
+        await component.submit();
+        spy.calls.mostRecent().returnValue.then(() => {
+          expect(storageServiceCtrl.set).toHaveBeenCalled();
           expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
-        }
-      })
-      .catch((error: TypeError) => {});
-  });
-
-  it('should set up question variables', async () => {
-    fixture.detectChanges();
-    fixture
-      .whenStable()
-      .then(() => {
+          done();
+        });
+      });
+    });
+    it('should set up question variables', async () => {
+      fixture.whenStable().then(() => {
+        fixture.detectChanges();
         const index = stubValueTasks[0].index;
 
         const survey = stubStudy.modules[index];
@@ -222,8 +261,77 @@ describe('SurveyPage', () => {
             }
           }
         }
-      })
-      .catch((error: TypeError) => {});
+      });
+    });
+
+    it('should toggle dynamic questions', async () => {
+      const question: any = {
+        id: 'multi-q8bohlar',
+        type: 'multi',
+        text: 'This is a multiple choice type with branching demo.',
+        required: true,
+        hide_id: '',
+        hide_value: '',
+        hide_if: true,
+        modal: false,
+        radio: true,
+        shuffle: true,
+        options: ['apple', 'orange', 'banana'],
+        model: 0,
+        response: 'banana;',
+        hideError: false,
+        noToggle: false,
+      } as Question;
+
+      fixture.whenStable().then(() => {
+        fixture.detectChanges();
+        const navCtrl = fixture.debugElement.injector.get(NavController);
+        spyOn(navCtrl, 'navigateRoot');
+        component.survey = stubStudy.modules[stubValueTasks[2].index];
+        // Check assignment
+        expect(component.survey).toEqual(
+          stubStudy.modules[stubValueTasks[2].index]
+        );
+
+        // Check if it was true first or undefined
+        const q_before = component.survey.sections[0].questions.filter(
+          (x) => 'hide_id' in x && x.hide_id === question.id
+        )[0];
+        if (q_before && 'hideSwitch' in q_before) {
+          expect(q_before.hideSwitch).not.toBeDefined();
+        }
+
+        // call method
+        component.toggleDynamicQuestions(question);
+
+        // Check if the hideSwitch changed in the component
+
+        const q_after = component.survey.sections[0].questions.filter(
+          (x) => 'hide_id' in x && x.hide_id === question.id
+        )[0];
+
+        expect(q_after ? q_after.hideSwitch : false).toBe(false);
+      });
+    });
+
+    it('should verify that the back function changes the route', async () => {
+      const navCtrl = fixture.debugElement.injector.get(NavController);
+      spyOn(navCtrl, 'navigateRoot');
+
+      fixture.detectChanges();
+      fixture
+        .whenStable()
+        .then(() => {
+          component.back();
+
+          if (component.current_section > 1) {
+            expect(component.submit_text).toBe('Next');
+          } else {
+            expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
+          }
+        })
+        .catch((error: TypeError) => {});
+    });
   });
 
   it('should set answers', async () => {
@@ -263,59 +371,6 @@ describe('SurveyPage', () => {
     component.changeCheckStatus(option, question);
     expect(question.response).toBe('Apple;Mango;');
     expect(question.hideError).toBe(true);
-  });
-
-  it('should toggle dynamic questions', async () => {
-    const question: any = {
-      id: 'multi-q8bohlar',
-      type: 'multi',
-      text: 'This is a multiple choice type with branching demo.',
-      required: true,
-      hide_id: '',
-      hide_value: '',
-      hide_if: true,
-      modal: false,
-      radio: true,
-      shuffle: true,
-      options: ['apple', 'orange', 'banana'],
-      model: 0,
-      response: 'banana;',
-      hideError: false,
-      noToggle: false,
-    } as Question;
-
-    fixture.detectChanges();
-    fixture
-      .whenStable()
-      .then(() => {
-        const navCtrl = fixture.debugElement.injector.get(NavController);
-        spyOn(navCtrl, 'navigateRoot');
-        component.survey = stubStudy.modules[stubValueTasks[2].index];
-        // Check assignment
-        expect(component.survey).toEqual(
-          stubStudy.modules[stubValueTasks[2].index]
-        );
-
-        // Check if it was true first or undefined
-        const q_before = component.survey.sections[0].questions.filter(
-          (x) => 'hide_id' in x && x.hide_id === question.id
-        )[0];
-        if (q_before && 'hideSwitch' in q_before) {
-          expect(q_before.hideSwitch).not.toBeDefined();
-        }
-
-        // call method
-        component.toggleDynamicQuestions(question);
-
-        // Check if the hideSwitch changed in the component
-
-        const q_after = component.survey.sections[0].questions.filter(
-          (x) => 'hide_id' in x && x.hide_id === question.id
-        )[0];
-
-        expect(q_after ? q_after.hideSwitch : false).toBe(false);
-      })
-      .catch((error: TypeError) => {});
   });
 
   it('should test toast', async () => {
@@ -358,36 +413,5 @@ describe('SurveyPage', () => {
 
     // Confirm they are different
     expect(result[0].task_id).not.toBe(getFirstItemTaskId);
-  });
-
-  it('should test submit', async () => {
-    fixture.detectChanges();
-    fixture
-      .whenStable()
-      .then(async () => {
-        const navCtrl = fixture.debugElement.injector.get(NavController);
-        spyOn(navCtrl, 'navigateRoot');
-
-        // Check assignment
-        expect(component.tasks.length).toEqual(stubValueTasks.length);
-        expect(component.survey).toBe(
-          stubStudy.modules[stubValueTasks[0].index]
-        );
-
-        expect(component.questions).toBe(
-          stubStudy.modules[stubValueTasks[0].index].sections[
-            current_section - 1
-          ].questions
-        );
-
-        StorageServiceSpy.set.and.returnValue(Promise.resolve());
-
-        await component.submit();
-
-        expect(StorageServiceSpy.set).toHaveBeenCalled();
-
-        expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
-      })
-      .catch((error: TypeError) => {});
   });
 });

@@ -1,4 +1,5 @@
 import { OpenOptions } from "@capacitor/browser";
+import study_tasks from '../cypress/fixtures/study_tasks.json';
 
 export class NavMock {
   public pop(): any {
@@ -58,3 +59,17 @@ export const Storage = {
 export class ToastMock {
   public async create(options: any): Promise<void> {};
 };
+
+export class StudyTaskServiceMock{
+  private data: Task[];
+
+  getAllTasks() {
+    const todos = JSON.parse(JSON.stringify(study_tasks.tasks));
+    this.data = todos;
+    return this;
+  }
+
+  then(callback) {
+    callback(this.data);
+  }
+}
