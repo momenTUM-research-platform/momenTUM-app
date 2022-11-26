@@ -352,10 +352,9 @@
                 <ion-datetime
                   color="blue"
                   locale="de-DE"
-                  *ngIf="question.subtype === 'date-time'"
+                  *ngIf="question.subtype === 'datetime'"
                   style="font-size: small"
                   [(ngModel)]="question.model"
-                  presentation="datetime"
                   (ionChange)="setAnswer(question)"
                 ></ion-datetime>
               </ion-col>
