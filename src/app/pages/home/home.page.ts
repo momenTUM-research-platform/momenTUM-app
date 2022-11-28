@@ -80,30 +80,6 @@ export class HomePage implements OnInit {
     private translate: TranslateService
   ) {}
 
-  toggleTheme() {
-    if (ChangeTheme.getTheme() === 'light') {
-      StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
-      });
-      StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
-      });
-      document.querySelector('ion-icon').setAttribute('name', 'sunny');
-      this.tum_image = 'assets/imgs/tum-light.png';
-      ChangeTheme.setTheme(true);
-    } else {
-      StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
-      });
-      StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
-      });
-      document.querySelector('ion-icon').setAttribute('name', 'moon');
-      this.tum_image = 'assets/imgs/tum-icon.png';
-      ChangeTheme.setTheme(false);
-    }
-  }
-
   ngOnInit() {
     // Initialize theme, toggle icon, and StatusBar accordingly
     ChangeTheme.initializeTheme();
@@ -165,23 +141,26 @@ export class HomePage implements OnInit {
     this.notificationsService.requestPermissions();
 
     this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading);
+    this.loadingService.present(this.translations.label_loading).catch((e) => {
+      console.log('Loading service present error: ' + e);
+    });
 
     this.hideEnrolOptions = true;
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
+
     try {
       await this.storageService.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
       await this.storageService.init();
     }
+
     Promise.all([this.storageService.get('current-study')]).then((values) => {
       const studyObject: any = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
-
         this.study = JSON.parse(studyObject);
 
         // log the user visiting this tab
@@ -246,6 +225,29 @@ export class HomePage implements OnInit {
     }
   }
 
+  async toggleTheme() {
+    if (ChangeTheme.getTheme() === 'light') {
+      await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
+        console.log('StatusBar.setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
+      });
+      document.querySelector('ion-icon').setAttribute('name', 'sunny');
+      this.tum_image = 'assets/imgs/tum-light.png';
+      ChangeTheme.setTheme(true);
+    } else {
+      await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
+        console.log('StatusBar.setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
+      });
+      document.querySelector('ion-icon').setAttribute('name', 'moon');
+      this.tum_image = 'assets/imgs/tum-icon.png';
+      ChangeTheme.setTheme(false);
+    }
+  }
   /**
    * Attempt to download a study from the URL scanned/entered by a user
    *
@@ -441,7 +443,7 @@ export class HomePage implements OnInit {
             this.loadingService.isCaching = true;
             this.loadingService.present(this.translations.msg_caching);
           });
-          console.log("Caching now");
+          console.log('Caching now');
           this.surveyCacheService.cacheAllMedia(this.study);
         }
         // setup the study task objects
@@ -471,7 +473,7 @@ export class HomePage implements OnInit {
       this.task_list = tasks;
 
       for (const task of this.task_list) {
-        task.moment = moment(task.time).fromNow();
+        task.moment = moment(new Date(task.time)).fromNow();
       }
 
       // show the study tasks

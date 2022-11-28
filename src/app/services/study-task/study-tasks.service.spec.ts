@@ -67,6 +67,7 @@ describe('StudyTasksService', () => {
 
   it('should get tasks display list from storage', async () => {
     const stubValue: string = JSON.stringify(study_tasks.tasks);
+    const stubDisplayValue: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks_display));
     // Making the return value of the get function call to be stubValue
     await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
     const response: Task[] = await service.getTaskDisplayList();
@@ -78,5 +79,8 @@ describe('StudyTasksService', () => {
     expect(response.length)
       .withContext('There are 3 different types, so with headers, 6 items are to be displayed')
       .toBe(6);
+    expect(response)
+      .withContext('Expected to be mostly the same values')
+      .toEqual(stubDisplayValue);
   });
 });

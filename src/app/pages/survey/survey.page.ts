@@ -129,14 +129,12 @@ export class SurveyPage implements OnInit {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then(async (values) => {
-      console.log('THE TASKS ARE: ');
       const studyObject: any = values[0];
       const uuid = values[1];
       // get the task object for this task
 
       await this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
-        console.log('THE TASKS ARE: ', this.tasks.length);
 
         for (let i = 0; i < this.tasks.length; i++) {
           if (this.task_id === String(this.tasks[i].task_id)) {
@@ -595,7 +593,7 @@ export class SurveyPage implements OnInit {
               module_index: this.module_index,
             });
             this.navController.navigateRoot('/');
-            console.log('I AM HERE');
+
           });
       } else {
         this.ngZone.run(() => {

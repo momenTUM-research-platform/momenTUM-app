@@ -318,5 +318,64 @@
       "locale": "Thu, October 13, 2022 at 12:10 AM",
       "completed": false
     }
+  ],
+  "tasks_display": [
+    {
+      "uuid": "dee87a08-8616-453a-9a6e-9e8f8ea9c942",
+      "index": 2,
+      "task_id": 103,
+      "name": "Elements",
+      "type": "checkmark-circle-outline",
+      "hidden": false,
+      "unlock_after": [],
+      "sticky": true,
+      "sticky_label": "here are surveys",
+      "alert_title": "Elements Demo",
+      "alert_message": "Tap to open app",
+      "timeout": true,
+      "timeout_after": 30,
+      "time": "Thu Oct 13 2022 00:10:00 GMT+0200 (Central European Summer Time)",
+      "locale": "Thu, October 13, 2022 at 12:10 AM",
+      "completed": false
+    },
+    { "type": "header", "label": "here are surveys" },
+    {
+      "uuid": "dee87a08-8616-453a-9a6e-9e8f8ea9c942",
+      "index": 1,
+      "task_id": 102,
+      "name": "testpvtmod",
+      "type": "alarm-outline",
+      "hidden": false,
+      "unlock_after": [],
+      "sticky": true,
+      "sticky_label": "here are pvt's",
+      "alert_title": "Elements Demo",
+      "alert_message": "Tap to open app",
+      "timeout": false,
+      "timeout_after": 0,
+      "time": "Thu Oct 13 2022 00:01:00 GMT+0200 (Central European Summer Time)",
+      "locale": "Thu, October 13, 2022 at 12:01 AM",
+      "completed": false
+    },
+    { "type": "header", "label": "here are pvt's" },
+    {
+      "uuid": "3fb09fcd-4fca-4074-a395-34d65ee5a521",
+      "index": 0,
+      "task_id": 101,
+      "name": "Welcome",
+      "type": "bulb-outline",
+      "hidden": false,
+      "unlock_after": [],
+      "sticky": true,
+      "sticky_label": "Start here",
+      "alert_title": "Welcome to the study",
+      "alert_message": "Tap to open the app",
+      "timeout": false,
+      "timeout_after": 0,
+      "time": "Thu Oct 13 2022 00:01:00 GMT+0200 (Central European Summer Time)",
+      "locale": "Thu, October 13, 2022 at 12:01 AM",
+      "completed": false
+    },
+    { "type": "header", "label": "Start here" }
   ]
 }
