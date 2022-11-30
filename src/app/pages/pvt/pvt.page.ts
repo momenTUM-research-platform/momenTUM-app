@@ -106,7 +106,7 @@ export class PvtPage implements OnInit {
    *
    * @param from the number (in seconds) deciding the start of the countdown.
    * */
-  private async countdown(from: number) {
+  public async countdown(from: number) {
     this.state = 'countdown';
     this.counter = from;
     while (this.counter > 0) {
@@ -118,7 +118,7 @@ export class PvtPage implements OnInit {
   /**
    * Conducts the RTT (reaction time test).
    * */
-  private async RTT() {
+  public async RTT() {
     let trialCount = 1;
     while (trialCount <= this.trials && !this.exited) {
       // reset variables
@@ -155,7 +155,7 @@ export class PvtPage implements OnInit {
    * - the user didn't exit the game
    * - the timer didn't reach a bigger value than the timeToTimeout constant defined in the study file.
    * */
-  private async runTimer() {
+  public async runTimer() {
     this.timer = 0;
     const start = Date.now();
     do {
@@ -171,7 +171,7 @@ export class PvtPage implements OnInit {
    * - reacted too late.
    * - reacted correctly.
    * */
-  private async handleResult() {
+  public async handleResult() {
     if (this.exited) {
       return;
     } else if (this.timer === -1) {
@@ -192,7 +192,7 @@ export class PvtPage implements OnInit {
   /**
    * Conducts a fake RTT for the instruction page.
    * */
-  private async instructionRTT() {
+  public async instructionRTT() {
     while (this.state === 'instructions') {
       this.instructionTimer = undefined;
       await this.sleep(this.min + Math.random() * (this.max - this.min));
@@ -204,7 +204,7 @@ export class PvtPage implements OnInit {
   /**
    * Starts the fake timer and ends it after a random amount of time, between 250 and 350 ms
    * */
-  private async runInstructionTimer() {
+  public async runInstructionTimer() {
     this.instructionTimer = 0;
     const runTime = 250 + Math.random() * 100;
     const start = Date.now();
@@ -217,7 +217,7 @@ export class PvtPage implements OnInit {
   /**
    * Defines all Input variables, which are defined in the study.
    * */
-  private async setUpVariables() {
+  public async setUpVariables() {
     const task_id = this.route.snapshot.paramMap.get('task_id');
     await this.getModule(task_id).then((module) => {
       this.trials = module.trials;
@@ -237,7 +237,7 @@ export class PvtPage implements OnInit {
    * @param task_id the task_id of a task of this module.
    * @returns A Promise with the correct module from the local storage.
    * */
-  private async getModule(task_id: string | null): Promise<any> {
+  public async getModule(task_id: string | null): Promise<any> {
     return this.studyTasksService
       .getAllTasks()
       .then((tasks) => {
@@ -265,7 +265,7 @@ export class PvtPage implements OnInit {
    * Logs the pvt submit to the server.
    * Navigates back home.
    * */
-  private async submit() {
+  public async submit() {
     const responseTime = moment().format();
     const responseTimeInMs = moment().valueOf();
 
@@ -298,7 +298,7 @@ export class PvtPage implements OnInit {
    * @param ms number of milliseconds that the function waits
    * @returns a promise
    * */
-  private sleep(ms: number) {
+  public sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -309,7 +309,7 @@ export class PvtPage implements OnInit {
    * @param max maximum number that can be generated.
    * @returns a uniformly distributed random number between the parameters.
    * */
-  private getUniformRand(min: number, max: number): number {
+  public getUniformRand(min: number, max: number): number {
     return min + Math.random() * (max - min);
   }
 }

@@ -144,6 +144,7 @@ describe('HomePage', () => {
     let spyGetTaskDisplayList;
     let spyCacheAllMedia;
     let spyGenerateStudyTasks;
+    let spyGetRemoteData;
 
     beforeEach(async () => {
       const stubValueStudy: string = await JSON.stringify(study_tasks.study);
@@ -186,6 +187,10 @@ describe('HomePage', () => {
         surveyDataService,
         'logPageVisitToServer'
       ).and.returnValue(Promise.resolve());
+      spyGetRemoteData = spyOn(
+        surveyDataService,
+        'getRemoteData'
+      ).and.returnValue(Promise.resolve(JSON.parse(stubValueStudy)));
       spyrequestPermissions = spyOn(
         notificationService,
         'requestPermissions'
@@ -269,19 +274,19 @@ describe('HomePage', () => {
       );
       // Check assignment
       const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
-
       await component.attemptToDownloadStudy(localURL, false, false);
-
+      await fixture.whenStable();
       expect(component.isEnrolledInStudy).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
+      expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyLoadingServiceDismiss).toHaveBeenCalledTimes(1);
       expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
       expect(component.study).toEqual(stubValueStudy);
       expect(spyGenerateStudyTasks).toHaveBeenCalledTimes(1);
       expect(spySetNext30Notifications).toHaveBeenCalledTimes(1);
-      // expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
+      expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
     });
 
     it('should call attempt To Enroll in a study', async () => {
@@ -309,6 +314,51 @@ describe('HomePage', () => {
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyUploadPendingData).toHaveBeenCalledTimes(2);
     });
+    it('should call attempt to enter URL', async () => {
+      const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
+      const stubValueStudy: Study = JSON.parse(
+        JSON.stringify(study_tasks.study)
+      );
+      const mockAlertController = fixture.debugElement.injector.get(
+        AlertController
+      ) as any as MockAlertController;
+      const alertSpy = jasmine.createSpyObj(MockAlert, ['present']);
+      const alertControllerStub = spyOn(
+        mockAlertController,
+        'create'
+      ).and.returnValue(Promise.resolve(alertSpy));
+
+      await component.enterURL();
+      expect(alertControllerStub).toHaveBeenCalledTimes(1);
+      expect(alertSpy.present).toHaveBeenCalledTimes(1);
+      const [alertArg] = alertControllerStub.calls.mostRecent().args;
+      alertArg.buttons[1].handler(localURL);
+      await fixture.whenStable();
+      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.hideEnrolOptions).toBe(true);
+      expect(spyStorageSet).toHaveBeenCalledTimes(2);
+      expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
+      expect(component.study).toEqual(stubValueStudy);
+    });
+    it('should call attempt to enter Study ID', async () => {
+      const ID = '3ZDOGRH';
+      const mockAlertController = fixture.debugElement.injector.get(
+        AlertController
+      ) as any as MockAlertController;
+      const alertSpy = jasmine.createSpyObj(MockAlert, ['present']);
+      const alertControllerStub = spyOn(
+        mockAlertController,
+        'create'
+      ).and.returnValue(Promise.resolve(alertSpy));
+      await component.enterStudyID();
+      await fixture.whenStable();
+      expect(alertControllerStub).toHaveBeenCalledTimes(1);
+      expect(alertSpy.present).toHaveBeenCalledTimes(1);
+      const [alertArg] = alertControllerStub.calls.first().args;
+      alertArg.buttons[1].handler(ID);
+      expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
+    });
     it('should call load Study Details', async () => {
       await component.loadStudyDetails();
       expect(component.isEnrolledInStudy).toBe(true);
@@ -324,35 +374,6 @@ describe('HomePage', () => {
     expect(spyStartScan).toHaveBeenCalledTimes(1);
   });
 
-  it('should call attempt to enter URL', async () => {
-    const mockAlertController = fixture.debugElement.injector.get(
-      AlertController
-    ) as any as MockAlertController;
-    const alert = jasmine.createSpyObj(MockAlert, ['present']);
-
-    const alertControllerStub = spyOn(
-      mockAlertController,
-      'create'
-    ).and.returnValue(Promise.resolve(alert));
-
-    await component.enterURL();
-    expect(alertControllerStub).toHaveBeenCalledTimes(1);
-    expect(alert.present).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call attempt to enter Study ID', async () => {
-    const mockAlertController = fixture.debugElement.injector.get(
-      AlertController
-    ) as any as MockAlertController;
-    const alert = jasmine.createSpyObj(MockAlert, ['present']);
-    const alertControllerStub = spyOn(
-      mockAlertController,
-      'create'
-    ).and.returnValue(Promise.resolve(alert));
-    await component.enterURL();
-    expect(alertControllerStub).toHaveBeenCalledTimes(1);
-    expect(alert.present).toHaveBeenCalledTimes(1);
-  });
 
   it('should call attempt display enrol error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(
@@ -366,6 +387,8 @@ describe('HomePage', () => {
     await component.displayEnrolError(true, true, true, true);
     expect(alertControllerStub).toHaveBeenCalledTimes(1);
     expect(alert.present).toHaveBeenCalledTimes(1);
+    const [alertArg] = alertControllerStub.calls.mostRecent().args;
+    expect(alertArg.header).toBe('Oops...');
   });
   it('should call attempt to display barcode error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(
@@ -395,9 +418,7 @@ describe('HomePage', () => {
   });
 
   it('should call attempt to sort Task List', async () => {
-    const stubValueTask: Task[] = JSON.parse(
-      JSON.stringify(study_tasks.tasks)
-    );
+    const stubValueTask: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
 
     component.task_list = stubValueTask;
     expect(component.task_list).toEqual(stubValueTask);

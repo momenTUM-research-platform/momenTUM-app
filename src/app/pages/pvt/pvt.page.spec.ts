@@ -41,10 +41,24 @@ describe('PvtPage', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  it('should get Module', () => {
+
+  });
 });
 /**
-  * getModule
-  * submit
-  * sleep
-  * getUniformRand
+ * ngOnInit
+ * start
+ * exit
+ * navHome
+ * countdown
+ * RTT
+ * runTimer
+ * handleResult
+ * instructionRTT
+ * runInstructionTimer
+ * setUpVariables
+ * getModule
+ * submit
+ * sleep
+ * getUniformRand
  */
