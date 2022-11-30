@@ -1,4 +1,4 @@
-import { IonicModule, IonIcon } from '@ionic/angular';
+import { IonicModule, IonIcon, AlertController } from '@ionic/angular';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file/ngx';
@@ -31,23 +31,27 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { EmptyError } from 'rxjs';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { SurveyCacheService } from 'src/app/services/survey-cache/survey-cache.service';
+import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('HomePage', () => {
   let component: HomePage;
   let fixture: ComponentFixture<HomePage>;
+  let statusBarSpy: jasmine.SpyObj<StatusBarPlugin>;
 
   beforeEach(waitForAsync(() => {
-    const statusBarSpy = jasmine.createSpyObj<StatusBarPlugin>('StatusBar', [
+    statusBarSpy = jasmine.createSpyObj<StatusBarPlugin>('StatusBar', [
       'setStyle',
       'setBackgroundColor',
     ]);
 
     TestBed.configureTestingModule({
       declarations: [HomePage],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       imports: [
         HttpClientTestingModule,
         RouterTestingModule,
-        IonicModule.forRoot(),
         HttpClientModule,
         TranslateModule.forRoot({
           loader: {
@@ -56,9 +60,13 @@ describe('HomePage', () => {
             deps: [HttpClient],
           },
         }),
+        IonicModule.forRoot({
+          _testing: true,
+        }),
       ],
       providers: [
         BarcodeService,
+        { provide: AlertController, useValue: new MockAlertController() },
         { provide: StatusBar, useValue: statusBarSpy },
         { provide: USE_DEFAULT_LANG, useValue: true },
         { provide: USE_STORE, useValue: true },
@@ -79,7 +87,7 @@ describe('HomePage', () => {
   });
 
   it('should toggle theme and change status bar', async () => {
-    const statusBarSpy = jasmine.createSpyObj<StatusBarPlugin>('StatusBar', [
+    statusBarSpy = jasmine.createSpyObj<StatusBarPlugin>('StatusBar', [
       'setStyle',
       'setBackgroundColor',
     ]);
@@ -122,20 +130,27 @@ describe('HomePage', () => {
       expect(ChangeTheme.preferenceColor).toBeDefined();
     });
   });
-  describe('ionViewWillEnter testing', async () => {
+
+  describe('Testing functions', async () => {
     let spyStorageGet;
     let spyStorageSet;
     let spyStorageInit;
-    let spyLoadingService;
+    let spyLoadingServicePresent;
+    let spyLoadingServiceDismiss;
     let spylogPageVisitToServer;
     let spyrequestPermissions;
     let spySetNext30Notifications;
     let spyUploadPendingData;
     let spyGetTaskDisplayList;
+    let spyCacheAllMedia;
+    let spyGenerateStudyTasks;
 
     beforeEach(async () => {
       const stubValueStudy: string = await JSON.stringify(study_tasks.study);
       const stubValue: string = JSON.stringify(study_tasks.tasks_display);
+      const stubValueTask: Task[] = JSON.parse(
+        JSON.stringify(study_tasks.tasks)
+      );
       const uniqueId =
         Date.now().toString(36) + Math.random().toString(36).substring(2);
       const studyTaskServiceCtrl =
@@ -144,6 +159,8 @@ describe('HomePage', () => {
         fixture.debugElement.injector.get(StorageService);
       const surveyDataService =
         fixture.debugElement.injector.get(SurveyDataService);
+      const surveyCacheService =
+        fixture.debugElement.injector.get(SurveyCacheService);
       const notificationService =
         fixture.debugElement.injector.get(NotificationsService);
       const loadCtrl = fixture.debugElement.injector.get(LoadingService);
@@ -153,8 +170,18 @@ describe('HomePage', () => {
         'getTaskDisplayList'
       ).and.returnValue(Promise.resolve(JSON.parse(stubValue)));
 
-      spyLoadingService = spyOn(loadCtrl, 'present').and.callThrough();
+      spyGenerateStudyTasks = spyOn(
+        studyTaskServiceCtrl,
+        'generateStudyTasks'
+      ).and.returnValue(Promise.resolve(stubValueTask));
 
+      spyCacheAllMedia = spyOn(
+        surveyCacheService,
+        'cacheAllMedia'
+      ).and.callThrough();
+
+      spyLoadingServicePresent = spyOn(loadCtrl, 'present').and.callThrough();
+      spyLoadingServiceDismiss = spyOn(loadCtrl, 'dismiss').and.callThrough();
       spylogPageVisitToServer = spyOn(
         surveyDataService,
         'logPageVisitToServer'
@@ -180,9 +207,21 @@ describe('HomePage', () => {
         return null;
       });
 
-      spyStorageSet = spyOn(storageServiceCtrl, 'set').and.returnValue(
-        Promise.resolve()
-      );
+      spyStorageSet = spyOn(storageServiceCtrl, 'set').and.callFake((param) => {
+        if (param === 'condition') {
+          return Promise.resolve();
+        }
+        if (param === 'study-tasks') {
+          return Promise.resolve();
+        }
+        if (param === 'current-study') {
+          return Promise.resolve();
+        }
+        if (param === 'enrolment-date') {
+          return Promise.resolve();
+        }
+        return null;
+      });
 
       spyStorageInit = spyOn(storageServiceCtrl, 'init').and.callThrough();
 
@@ -197,6 +236,12 @@ describe('HomePage', () => {
         if (param === 'uuid-set') {
           return Promise.resolve(false);
         }
+        if (param === 'notifications-enabled') {
+          return Promise.resolve(false);
+        }
+        if (param === 'study-tasks') {
+          return Promise.resolve(JSON.stringify(stubValueTask));
+        }
 
         return null;
       });
@@ -207,31 +252,162 @@ describe('HomePage', () => {
       await component.ionViewWillEnter();
       expect(component.darkMode).toBeDefined();
       expect(spyrequestPermissions).toHaveBeenCalledTimes(1);
-      expect(spyLoadingService).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
       expect(component.hideEnrolOptions).toBe(true);
       expect(component.isEnrolledInStudy).toBe(false);
       expect(spyStorageGet).toHaveBeenCalledTimes(3);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
       expect(spySetNext30Notifications).toHaveBeenCalledTimes(1);
+      expect(spyUploadPendingData).toHaveBeenCalledTimes(2);
       expect(spyStorageSet).toHaveBeenCalledTimes(3);
+    });
+
+    it('should call attempt To Download Study', async () => {
+      const stubValueStudy: Study = JSON.parse(
+        JSON.stringify(study_tasks.study)
+      );
+      // Check assignment
+      const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
+
+      await component.attemptToDownloadStudy(localURL, false, false);
+
+      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.hideEnrolOptions).toBe(true);
+      expect(spyStorageSet).toHaveBeenCalledTimes(2);
+      expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServiceDismiss).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
+      expect(component.study).toEqual(stubValueStudy);
+      expect(spyGenerateStudyTasks).toHaveBeenCalledTimes(1);
+      expect(spySetNext30Notifications).toHaveBeenCalledTimes(1);
+      // expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call attempt To Enroll in a study', async () => {
+      const stubValueStudy: Study = JSON.parse(
+        JSON.stringify(study_tasks.study)
+      );
+      await component.enrolInStudy(stubValueStudy);
+      await fixture.whenStable();
+      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.hideEnrolOptions).toBe(true);
+      expect(component.study).toEqual(stubValueStudy);
+      expect(spyStorageSet).toHaveBeenCalledTimes(2);
+      expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServiceDismiss).toHaveBeenCalledTimes(1);
+      expect(spyCacheAllMedia).toHaveBeenCalledTimes(1);
+      expect(spyGenerateStudyTasks).toHaveBeenCalledTimes(1);
+      expect(spySetNext30Notifications).toHaveBeenCalledTimes(1);
+      //expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
+    });
+    it('should call ionViewWillLeave', async () => {
+      // Check assignment
+      component.isEnrolledInStudy = true;
+      expect(component.isEnrolledInStudy).toBe(true);
+      await component.ionViewWillLeave();
+      expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
+      expect(spyUploadPendingData).toHaveBeenCalledTimes(2);
+    });
+    it('should call load Study Details', async () => {
+      await component.loadStudyDetails();
+      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.hideEnrolOptions).toBe(true);
+      expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
     });
   });
 
+  it('should call attempt To scan barcode', async () => {
+    const barcodeService = fixture.debugElement.injector.get(BarcodeService);
+    const spyStartScan = spyOn(barcodeService, 'startScan').and.callThrough();
+    await component.scanBarcode();
+    expect(spyStartScan).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call attempt to enter URL', async () => {
+    const mockAlertController = fixture.debugElement.injector.get(
+      AlertController
+    ) as any as MockAlertController;
+    const alert = jasmine.createSpyObj(MockAlert, ['present']);
+
+    const alertControllerStub = spyOn(
+      mockAlertController,
+      'create'
+    ).and.returnValue(Promise.resolve(alert));
+
+    await component.enterURL();
+    expect(alertControllerStub).toHaveBeenCalledTimes(1);
+    expect(alert.present).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call attempt to enter Study ID', async () => {
+    const mockAlertController = fixture.debugElement.injector.get(
+      AlertController
+    ) as any as MockAlertController;
+    const alert = jasmine.createSpyObj(MockAlert, ['present']);
+    const alertControllerStub = spyOn(
+      mockAlertController,
+      'create'
+    ).and.returnValue(Promise.resolve(alert));
+    await component.enterURL();
+    expect(alertControllerStub).toHaveBeenCalledTimes(1);
+    expect(alert.present).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call attempt display enrol error', async () => {
+    const mockAlertController = fixture.debugElement.injector.get(
+      AlertController
+    ) as any as MockAlertController;
+    const alert = jasmine.createSpyObj(MockAlert, ['present']);
+    const alertControllerStub = spyOn(
+      mockAlertController,
+      'create'
+    ).and.returnValue(Promise.resolve(alert));
+    await component.displayEnrolError(true, true, true, true);
+    expect(alertControllerStub).toHaveBeenCalledTimes(1);
+    expect(alert.present).toHaveBeenCalledTimes(1);
+  });
+  it('should call attempt to display barcode error', async () => {
+    const mockAlertController = fixture.debugElement.injector.get(
+      AlertController
+    ) as any as MockAlertController;
+
+    const alert = {
+      header: 'Permission Required',
+      cssClass: 'alertStyle',
+      message:
+        'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
+      buttons: ['Dismiss'],
+    } as MockAlert;
+
+    const alertSpy = jasmine.createSpyObj(MockAlert, ['present']);
+    const alertControllerStub = spyOn(
+      mockAlertController,
+      'create'
+    ).and.returnValue(Promise.resolve(alertSpy));
+
+    await component.displayBarcodeError();
+    expect(alertControllerStub).toHaveBeenCalledTimes(1);
+    expect(alertControllerStub).toHaveBeenCalledWith(alert);
+    expect(alertSpy.present).toHaveBeenCalledTimes(1);
+    const [alertArg] = alertControllerStub.calls.mostRecent().args;
+    expect(alertArg.header).toBe(alert.header);
+  });
+
+  it('should call attempt to sort Task List', async () => {
+    const stubValueTask: Task[] = JSON.parse(
+      JSON.stringify(study_tasks.tasks)
+    );
+
+    component.task_list = stubValueTask;
+    expect(component.task_list).toEqual(stubValueTask);
+    component.sortTasksList();
+    expect(component.task_list[0].index).toEqual(stubValueTask[0].index);
+  });
+
   /**
-   * ngOnInit()
-   * async ionViewWillEnter()
-   * ionViewWillLeave()
-   * async attemptToDownloadStudy(
-   * async scanBarcode()
-   * async enterURL()
-   * async enterStudyID()
-   * async enrolInStudy(study: Study)
-   * async loadStudyDetails()
-   * async displayEnrolError(
-   * async displayBarcodeError()
-   * sortTasksList()
    * doRefresh(refresher: RefresherCustomEvent)
+   * End-to-End testing
    *
    */
 

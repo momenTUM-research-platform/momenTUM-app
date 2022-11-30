@@ -1,15 +1,16 @@
-import { OpenOptions } from "@capacitor/browser";
+import { OpenOptions } from '@capacitor/browser';
+import { AlertButton, AlertInput } from '@ionic/angular';
 import study_tasks from '../cypress/fixtures/study_tasks.json';
 
 export class NavMock {
   public pop(): any {
-    return new Promise(function(resolve: Function): void {
+    return new Promise(function (resolve: Function): void {
       resolve();
     });
   }
 
   public push(): any {
-    return new Promise(function(resolve: Function): void {
+    return new Promise(function (resolve: Function): void {
       resolve();
     });
   }
@@ -41,8 +42,8 @@ export class NavMock {
   }
 }
 
-export class BrowserMock{
-  public open(options: OpenOptions): Promise<void>{
+export class BrowserMock {
+  public open(options: OpenOptions): Promise<void> {
     return;
   }
 }
@@ -57,19 +58,57 @@ export const Storage = {
 };
 
 export class ToastMock {
-  public async create(options: any): Promise<void> {};
-};
+  public async create(options: any): Promise<void> {}
+}
 
-export class StudyTaskServiceMock{
-  private data: Task[];
+export class MockAlert {
+  header?: string;
+  subHeader?: string;
+  message?: string;
+  cssClass?: string | string[];
+  inputs?: AlertInput[];
+  buttons?: (AlertButton | string)[];
+  backdropDismiss?: boolean;
+  translucent?: boolean;
+  animated?: boolean;
+  keyboardClose?: boolean;
+  id?: string;
+  response: string;
 
-  getAllTasks() {
-    const todos = JSON.parse(JSON.stringify(study_tasks.tasks));
-    this.data = todos;
-    return this;
+  constructor(props: any) {
+    Object.assign(this, props);
   }
 
-  then(callback) {
-    callback(this.data);
+  present() {
+    return Promise.resolve();
+  }
+
+  setRespose(response: string) {
+    this.response = response;
+  }
+
+  dismiss() {
+    return Promise.resolve();
+  }
+}
+
+export class MockAlertController {
+  public created: MockAlert[];
+
+  constructor() {
+    this.created = [];
+  }
+
+  create(props: any): Promise<any> {
+    const toRet = new MockAlert(props);
+    this.created.push(toRet);
+    return Promise.resolve(toRet);
+  }
+
+  getLast() {
+    if (!this.created.length) {
+      return null;
+    }
+    return this.created[this.created.length - 1];
   }
 }

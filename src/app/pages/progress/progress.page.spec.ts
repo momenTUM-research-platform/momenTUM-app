@@ -55,3 +55,8 @@ describe('ProgressPage', () => {
     expect(component).toBeTruthy();
   });
 });
+/**
+ * ionViewWillEnter
+ * diffDays
+ * ionViewWillLeave
+ */

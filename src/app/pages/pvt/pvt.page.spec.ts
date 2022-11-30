@@ -42,3 +42,9 @@ describe('PvtPage', () => {
     expect(component).toBeTruthy();
   });
 });
+/**
+  * getModule
+  * submit
+  * sleep
+  * getUniformRand
+ */

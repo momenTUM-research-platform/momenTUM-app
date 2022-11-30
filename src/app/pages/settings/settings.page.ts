@@ -61,7 +61,8 @@ export class SettingsPage {
     ]).then((values) => {
       // check if user is currently enrolled in study
       // to show/hide additional options
-      const studyObject: any = values[0];
+      const studyObject: string = values[0];
+
       if (studyObject !== null) {
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
@@ -79,8 +80,6 @@ export class SettingsPage {
       } else {
         this.notificationsEnabled = notificationsEnabled;
       }
-
-      console.log('isEnrolled: ', this.isEnrolled);
       if (this.isEnrolled) {
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({

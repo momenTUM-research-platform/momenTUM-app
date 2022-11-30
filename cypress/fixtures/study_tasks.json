@@ -7,11 +7,11 @@
       "instructions": "This is a demo study showing all the modules",
       "post_url": "http://localhost:3001/api/surveys/study_for_ios",
       "empty_msg": "this is the 'empty message'",
-      "banner_url": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Farberware-Minute-Timer-White.jpg",
-      "support_url": "www.wikipedia.com",
-      "support_email": "blenassefa00@gmail.com",
+      "banner_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/440px-Image_created_with_a_mobile_phone.png",
+      "support_url": "https://www.wikipedia.com",
+      "support_email": "test@momentum.com",
       "conditions": [],
-      "cache": false,
+      "cache": true,
       "ethics": "This study was approved by Blen",
       "pls": "https://getschema.app/pls-file-link.pdf"
     },
@@ -158,16 +158,6 @@
                 "subtype": "short"
               },
               {
-                "id": "datetime-79ygddzl",
-                "type": "datetime",
-                "text": "This is a date input type (date only).",
-                "required": true,
-                "hide_id": "",
-                "hide_value": "",
-                "hide_if": true,
-                "subtype": "date"
-              },
-              {
                 "id": "external-72jsdths",
                 "type": "external",
                 "text": "This is an external question.",
@@ -187,6 +177,16 @@
                 "hide_if": true,
                 "file_name": "filename",
                 "src": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Farberware-Minute-Timer-White.jpg"
+              },
+              {
+                "id": "datetime-79ygddzl",
+                "type": "datetime",
+                "text": "This is a date input type (date only).",
+                "required": true,
+                "hide_id": "",
+                "hide_value": "",
+                "hide_if": true,
+                "subtype": "date"
               },
               {
                 "id": "multi-q8bohlar",

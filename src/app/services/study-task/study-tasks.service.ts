@@ -153,7 +153,7 @@ export class StudyTasksService {
     this.loadingService.present('Loading...');
     await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
     this.loadingService.dismiss();
-
+    console.log('generateStudyTasks... ');
     return study_tasks;
   }
 

@@ -335,6 +335,7 @@ export class HomePage implements OnInit {
           // Added this condition
           this.loadingService.dismiss();
         }
+
         this.displayBarcodeError();
       });
   }
@@ -450,15 +451,9 @@ export class HomePage implements OnInit {
         const tasks = this.study
           ? await this.studyTasksService.generateStudyTasks(this.study)
           : [];
-
-        console.log('Length of tasks is: ', tasks.length);
-        console.log('Type of tasks is: ', typeof tasks);
-
         // setup the notifications
-        this.notificationsService.setNext30Notifications();
-
-        this.loadStudyDetails();
-        const studyTasks = await this.storageService.get('study-tasks');
+        await this.notificationsService.setNext30Notifications();
+        await this.loadStudyDetails();
       });
   }
 
@@ -466,9 +461,6 @@ export class HomePage implements OnInit {
    * Loads the details of the current study, including overdue tasks
    */
   async loadStudyDetails() {
-    //const tassk = await this.storageService.get('study-tasks');
-    //console.log("Just checking: ", tassk);
-    //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
@@ -595,7 +587,7 @@ export class HomePage implements OnInit {
    * Displays a message when camera permission is not allowed
    */
   async displayBarcodeError() {
-    const alert = await this.alertController.create({
+    const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'Permission Required',
       cssClass: 'alertStyle',
       message: this.translations.msg_camera,
@@ -615,7 +607,6 @@ export class HomePage implements OnInit {
    * Refreshes the list of tasks
    */
   doRefresh(refresher: RefresherCustomEvent) {
-    // What i
     if (!this.loadingService.isLoading) {
       this.ionViewWillEnter();
     }
