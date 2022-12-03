@@ -205,7 +205,6 @@ export class HomePage implements OnInit {
       } else {
         this.hideEnrolOptions = false;
         if (this.loadingService) {
-          // Added this condition
           this.loadingService.dismiss();
         }
       }
@@ -292,7 +291,6 @@ export class HomePage implements OnInit {
     } catch (e: any) {
       console.log('Enrolling exception: ' + e);
       if (this.loadingService) {
-        // Added this condition
         this.loadingService.dismiss();
       }
       switch (e.name) {
@@ -330,7 +328,6 @@ export class HomePage implements OnInit {
       })
       .catch((err) => {
         if (!this.loadingService.isLoading) {
-          // Added this condition
           this.loadingService.dismiss();
         }
         this.displayBarcodeError();
@@ -484,7 +481,6 @@ export class HomePage implements OnInit {
       if (!this.loadingService.isCaching) {
         setTimeout(() => {
           if (this.loadingService) {
-            // Added this condition
             this.loadingService.dismiss();
           }
         }, 1000);

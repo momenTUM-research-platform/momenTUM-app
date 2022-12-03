@@ -40,7 +40,6 @@ export class LoadingService {
     this.isCaching = false;
     const loader = await this.loadingController.getTop();
     if (loader) {
-      // Added this condition
       return loader.dismiss();
     } else {
       return;

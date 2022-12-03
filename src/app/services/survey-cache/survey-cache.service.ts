@@ -157,7 +157,6 @@ export class SurveyCacheService {
 
       // dismiss the loading spinner
       if (this.loadingService) {
-        // Added this condition
         this.loadingService.dismiss();
       }
     });

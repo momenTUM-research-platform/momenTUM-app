@@ -19,12 +19,9 @@ export class StudyTasksService {
    */
   async generateStudyTasks(studyObject: Study) {
     // allocate the participant to a study condition
-    const min = 1;
-    const max: number = studyObject.properties.conditions.length;
-    const condition_index: number =
-      Math.floor(Math.random() * (max - min + 1)) + min - 1;
-    const condition: string =
-      studyObject.properties.conditions[condition_index];
+    const max = studyObject.properties.conditions.length;
+    const condition_index = Math.floor(Math.random() * max);
+    const condition = studyObject.properties.conditions[condition_index];
 
     const study_tasks: Task[] = new Array();
 
