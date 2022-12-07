@@ -51,12 +51,6 @@ describe('SurveyPage', () => {
       },
     };
 
-    const spyStorage = jasmine.createSpyObj('Storage', [
-      'create',
-      'get',
-      'set',
-    ]);
-
     TestBed.configureTestingModule({
       declarations: [SurveyPage],
       imports: [IonicModule.forRoot(), RouterTestingModule, HttpClientModule],
@@ -87,6 +81,9 @@ describe('SurveyPage', () => {
   });
 
   describe('initialzation', async () => {
+    let spylogPageVisitToServer;
+    let spygetAllTasks;
+    let spyget;
     beforeEach(async () => {
       const studyTaskService =
         fixture.debugElement.injector.get(StudyTasksService);
@@ -94,13 +91,14 @@ describe('SurveyPage', () => {
         fixture.debugElement.injector.get(StorageService);
       const surveyDataService =
         fixture.debugElement.injector.get(SurveyDataService);
-      spyOn(surveyDataService, 'logPageVisitToServer').and.returnValue(
-        Promise.resolve()
-      );
-      spyOn(studyTaskService, 'getAllTasks').and.returnValue(
+      spylogPageVisitToServer = spyOn(
+        surveyDataService,
+        'logPageVisitToServer'
+      ).and.returnValue(Promise.resolve());
+      spygetAllTasks = spyOn(studyTaskService, 'getAllTasks').and.returnValue(
         Promise.resolve(stubValueTasks)
       );
-      spyOn(storageServiceCtrl, 'get').and.callFake((param) => {
+      spyget = spyOn(storageServiceCtrl, 'get').and.callFake((param) => {
         if (param === 'current-study') {
           return Promise.resolve(stubValueStudy);
         }

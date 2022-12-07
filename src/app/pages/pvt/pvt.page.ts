@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-pvt',
@@ -41,7 +42,7 @@ export class PvtPage implements OnInit {
 
   constructor(
     private surveyDataService: SurveyDataService,
-    private router: Router,
+    private navController: NavController,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
     private storageService: StorageService
@@ -98,7 +99,7 @@ export class PvtPage implements OnInit {
    * Navigates to the homepage of the app.
    * */
   async navHome() {
-    return this.router.navigate(['/']);
+    return this.navController.navigateRoot('/');
   }
 
   /**
@@ -245,8 +246,7 @@ export class PvtPage implements OnInit {
         for (const task of tasks) {
           if (task_id === String(task.task_id)) {
             this.moduleIndex = task.index;
-            this.alertTime = moment(task.time).format();
-            console.log('this is the task index: ' + taskIndex);
+            this.alertTime = moment(new Date(task.time)).format();
             this.taskIndex = taskIndex;
             break;
           }

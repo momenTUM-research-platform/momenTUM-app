@@ -282,7 +282,7 @@ describe('HomePage', () => {
       expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyLoadingServiceDismiss).toHaveBeenCalledTimes(1);
-      expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
+      expect(spyLoadingServicePresent).toHaveBeenCalled();
       expect(component.study).toEqual(stubValueStudy);
       expect(spyGenerateStudyTasks).toHaveBeenCalledTimes(1);
       expect(spySetNext30Notifications).toHaveBeenCalledTimes(1);

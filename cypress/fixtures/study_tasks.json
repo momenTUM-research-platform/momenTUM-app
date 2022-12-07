@@ -6,8 +6,8 @@
       "created_by": "Blen Assefa",
       "instructions": "This is a demo study showing all the modules",
       "post_url": "http://localhost:3001/api/surveys/study_for_ios",
-      "empty_msg": "this is the 'empty message'",
       "banner_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/440px-Image_created_with_a_mobile_phone.png",
+      "empty_msg": "this is the 'empty message'",
       "support_url": "https://www.wikipedia.com",
       "support_email": "test@momentum.com",
       "conditions": [],
@@ -24,12 +24,7 @@
           "title": "Welcome to the study",
           "message": "Tap to open the app",
           "duration": 1,
-          "times": [
-            {
-              "hours": 0,
-              "minutes": 1
-            }
-          ],
+          "times": [{ "hours": 0, "minutes": 1 }],
           "random": false,
           "random_interval": 30,
           "sticky": true,
@@ -38,9 +33,7 @@
           "timeout_after": 0,
           "start_offset": 0
         },
-        "graph": {
-          "display": false
-        },
+        "graph": { "display": false },
         "sections": [
           {
             "name": "Welcome",
@@ -68,12 +61,7 @@
           "title": "Elements Demo",
           "message": "Tap to open app",
           "duration": 1,
-          "times": [
-            {
-              "hours": 0,
-              "minutes": 1
-            }
-          ],
+          "times": [{ "hours": 0, "minutes": 1 }],
           "random": false,
           "random_interval": 0,
           "sticky": true,
@@ -112,12 +100,7 @@
           "title": "Elements Demo",
           "message": "Tap to open app",
           "duration": 1,
-          "times": [
-            {
-              "hours": 0,
-              "minutes": 1
-            }
-          ],
+          "times": [{ "hours": 0, "minutes": 1 }],
           "random": true,
           "random_interval": 30,
           "sticky": true,
@@ -161,7 +144,7 @@
                 "id": "external-72jsdths",
                 "type": "external",
                 "text": "This is an external question.",
-                "required": true,
+                "required": false,
                 "hide_id": "",
                 "hide_value": "",
                 "hide_if": true,
@@ -171,7 +154,7 @@
                 "id": "file-72jsdths",
                 "type": "file",
                 "text": "This is an file question.",
-                "required": true,
+                "required": false,
                 "hide_id": "",
                 "hide_value": "",
                 "hide_if": true,
@@ -377,5 +360,66 @@
       "completed": false
     },
     { "type": "header", "label": "Start here" }
-  ]
+  ],
+  "graph_object": {
+    "data": [
+      {
+        "data": [6],
+        "label": "Slider Graph"
+      }
+    ],
+    "labels": ["Dec 7th, 6:14pm"],
+    "options": {
+      "responsive": true,
+      "maintainAspectRatio": true,
+      "scales": {
+        "xAxes": [
+          {
+            "ticks": {
+              "fontSize": 6
+            },
+            "barThickness": 20
+          }
+        ],
+        "yAxes": [
+          {
+            "ticks": {
+              "fontSize": 8,
+              "beginAtZero": true
+            }
+          }
+        ]
+      }
+    },
+    "colors": [
+      {
+        "backgroundColor": "rgba(4,153,139,0.6)",
+        "borderColor": "rgba(148,159,177,1)",
+        "pointBackgroundColor": "rgba(148,159,177,1)",
+        "pointBorderColor": "#fff",
+        "pointHoverBackgroundColor": "#fff",
+        "pointHoverBorderColor": "rgba(148,159,177,0.8)"
+      },
+      {
+        "backgroundColor": "rgba(77,83,96,0.2)",
+        "borderColor": "rgba(77,83,96,1)",
+        "pointBackgroundColor": "rgba(77,83,96,1)",
+        "pointBorderColor": "#fff",
+        "pointHoverBackgroundColor": "#fff",
+        "pointHoverBorderColor": "rgba(77,83,96,1)"
+      },
+      {
+        "backgroundColor": "rgba(148,159,177,0.2)",
+        "borderColor": "rgba(148,159,177,1)",
+        "pointBackgroundColor": "rgba(148,159,177,1)",
+        "pointBorderColor": "#fff",
+        "pointHoverBackgroundColor": "#fff",
+        "pointHoverBorderColor": "rgba(148,159,177,0.8)"
+      }
+    ],
+    "legend": "Slider Graph",
+    "type": "bar",
+    "blurb": "This graph displays the values from the slider element as a bar graph, displaying the past 7 responses.",
+    "header": "Elements"
+  }
 }
