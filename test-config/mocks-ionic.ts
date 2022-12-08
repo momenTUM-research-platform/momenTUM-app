@@ -1,18 +1,18 @@
 import { OpenOptions } from '@capacitor/browser';
-import { AlertButton, AlertInput } from '@ionic/angular';
-import study_tasks from '../cypress/fixtures/study_tasks.json';
+import {
+  AlertButton,
+  AlertInput,
+  RefresherCustomEvent,
+  RefresherEventDetail,
+} from '@ionic/angular';
 
 export class NavMock {
   public pop(): any {
-    return new Promise(function (resolve: Function): void {
-      resolve();
-    });
+    return Promise.resolve();
   }
 
   public push(): any {
-    return new Promise(function (resolve: Function): void {
-      resolve();
-    });
+    return Promise.resolve();
   }
 
   public getActive(): any {
@@ -110,5 +110,57 @@ export class MockAlertController {
       return null;
     }
     return this.created[this.created.length - 1];
+  }
+}
+
+export class MockRefresher implements RefresherCustomEvent {
+  public bubbles: boolean;
+  public cancelBubble: boolean;
+  public cancelable: boolean;
+  public composed: boolean;
+  public currentTarget: EventTarget;
+  public defaultPrevented: boolean;
+  public eventPhase: number;
+  public isTrusted: boolean;
+  public returnValue: boolean;
+  public srcElement: EventTarget;
+  public timeStamp: number;
+  public type: string;
+  public AT_TARGET: number;
+  public BUBBLING_PHASE: number;
+  public CAPTURING_PHASE: number;
+  public NONE: number;
+
+  detail: RefresherEventDetail = {
+    complete: () => {},
+  };
+  target: HTMLIonRefresherElement;
+
+  constructor(target: HTMLIonRefresherElement) {
+    this.target = target;
+  }
+  initCustomEvent(
+    type: string,
+    bubbles?: boolean,
+    cancelable?: boolean,
+    detail?: any
+  ): void {
+    throw new Error('Method not implemented.');
+  }
+
+  composedPath(): EventTarget[] {
+    throw new Error('Method not implemented.');
+  }
+  initEvent(type: string, bubbles?: boolean, cancelable?: boolean): void {
+    throw new Error('Method not implemented.');
+  }
+  preventDefault(): void {
+    throw new Error('Method not implemented.');
+  }
+  stopImmediatePropagation(): void {
+    throw new Error('Method not implemented.');
+  }
+  stopPropagation(): void {
+    throw new Error('Method not implemented.');
   }
 }

@@ -8,6 +8,7 @@ import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser, OpenOptions } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-survey',
@@ -456,12 +457,16 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    //{ url, windowName: '_system' }
-    Browser.open({ url, windowName: '_system' }).catch((e) => {
-      console.log(
-        'ERROR in promise caught: survey.page.ts: Browser.open() threw: + ' + e
-      );
-    });
+    if (Capacitor.isNativePlatform()) {
+      Browser.open({ url, windowName: '_system' }).catch((e) => {
+        console.log(
+          'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
+            e
+        );
+      });
+    } else {
+      window.open(url, '_blank');
+    }
   }
 
   toggleDynamicQuestions(question: Question) {
@@ -593,7 +598,6 @@ export class SurveyPage implements OnInit {
               module_index: this.module_index,
             });
             this.navController.navigateRoot('/');
-
           });
       } else {
         this.ngZone.run(() => {

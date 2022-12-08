@@ -19,14 +19,21 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { NotificationsService } from 'src/app/services/notification/notifications.service';
-import { Browser, BrowserPlugin } from '@capacitor/browser';
+import { Browser, OpenOptions } from '@capacitor/browser';
 import { BrowserMock } from '../../../../test-config/mocks-ionic';
+import { PluginListenerHandle } from '@capacitor/core';
 
 describe('SettingsPage', () => {
   let component: SettingsPage;
   let fixture: ComponentFixture<SettingsPage>;
+  let browserSpy: jasmine.SpyObj<typeof Browser>;
 
   beforeEach(() => {
+    browserSpy = jasmine.createSpyObj('Browser', ['open']);
+
+    // Set up the spy to return null whenever it's called
+    browserSpy.open.and.callFake(() => null);
+
     TestBed.configureTestingModule({
       declarations: [SettingsPage],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -47,12 +54,11 @@ describe('SettingsPage', () => {
         { provide: USE_EXTEND, useValue: true },
         { provide: DEFAULT_LANGUAGE, useValue: 'en' },
         { provide: AlertController, useValue: new MockAlertController() },
-        { provide: Browser, useClass: BrowserMock },
+        { provide: Browser, useValue: browserSpy },
         Storage,
         UrlSerializer,
       ],
     }).compileComponents();
-
     fixture = TestBed.createComponent(SettingsPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -200,20 +206,7 @@ describe('SettingsPage', () => {
     });
   });
 
-  // it('should open Support URL', async () => {
-  //   const browserObj = jasmine.createSpyObj(BrowserMock, ['open']);
-  //   const url = 'https://www.wikipedia.com';
-  //   component.openSupportURL(url);
-  //   expect(browserObj.open).toHaveBeenCalledTimes(1);
-  // });
 
-  // it('should open Support Email', async () => {
-  //   const support_email = 'test@momentum.com';
-  //   const study_name = 'study_name';
-  //   const href = 'http://localhost:9876/context.html';
-  //   component.openSupportEmail(support_email, study_name);
-  //   expect(window.location.href).toBe(href);
-  // });
 });
 
 /**

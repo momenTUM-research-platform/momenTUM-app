@@ -55,6 +55,7 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
   });
 
+
   it('should test ngOnInIt', async () => {
     const barcodeService = fixture.debugElement.injector.get(BarcodeService);
     const platformService = fixture.debugElement.injector.get(Platform);

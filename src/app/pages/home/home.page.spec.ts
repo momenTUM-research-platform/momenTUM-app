@@ -1,4 +1,5 @@
-import { IonicModule, IonIcon, AlertController } from '@ionic/angular';
+import { IonicModule, IonIcon, AlertController} from '@ionic/angular';
+import { RefresherCustomEvent } from '@ionic/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file/ngx';
@@ -34,6 +35,7 @@ import { StudyTasksService } from '../../services/study-task/study-tasks.service
 import { SurveyCacheService } from 'src/app/services/survey-cache/survey-cache.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { MockRefresher } from '../../../../test-config/mocks-ionic';
 
 describe('HomePage', () => {
   let component: HomePage;
@@ -426,29 +428,22 @@ describe('HomePage', () => {
     expect(component.task_list[0].index).toEqual(stubValueTask[0].index);
   });
 
-  /**
-   * doRefresh(refresher: RefresherCustomEvent)
-   * End-to-End testing
-   *
-   */
+  it('should call ionViewWillEnter and complete the refresher after a delay', done => {
+    const myRefresherElement = jasmine.createSpyObj<HTMLIonRefresherElement>(
+      'HTMLIonRefresherElement',
+      ['complete']
+    );
+    const refresher = new MockRefresher(myRefresherElement);
+    spyOn(component, 'ionViewWillEnter');
 
-  // Jasmine Implmentation
-  // it('another Jasmine waitForAsync should log page visit to server', waitForAsync(() => {
-  //   const data = {
-  //     timestamp: moment().format(),
-  //     milliseconds: moment().valueOf(),
-  //     page: 'home',
-  //     event: 'enrol',
-  //     module_index: -1
-  //   };
+    component.doRefresh(refresher);
+    expect(component.ionViewWillEnter).toHaveBeenCalled();
 
-  //   // Service and Function
-  //   SurveyDataServiceSpy.logPageVisitToServer.and.returnValue(Promise.resolve());
-  //   component.isEnrolledInStudy = true;
-  //   component.ionViewWillLeave();
+    setTimeout(() => {
+      expect(refresher.target.complete).toHaveBeenCalled();
+      done();
+    }, 250);
+  });
 
-  //   fixture.whenStable().then(() => {
-  //     expect(component.data).toBe(data);
-  //   });
-  // }));
+
 });

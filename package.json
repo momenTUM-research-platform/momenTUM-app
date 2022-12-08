@@ -40,6 +40,7 @@
     "@jest/globals": "^29.1.2",
     "@ngx-translate/core": "^14.0.0",
     "@ngx-translate/http-loader": "^7.0.0",
+    "capacitor-email-composer": "^1.2.1",
     "capacitor-plugin-filedownload": "^1.0.3",
     "cypress-wait-until": "^1.7.2",
     "ionic-native": "^2.9.0",
