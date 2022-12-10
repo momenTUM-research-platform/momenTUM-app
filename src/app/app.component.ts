@@ -81,7 +81,7 @@ export class AppComponent implements OnInit {
   async initializeApp() {
     this.platform.ready().then(async () => {
       await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
-        console.log('StatusBar.setOverlaysWebView(): ' + e);
+        console.log('StatusBar error with setOverlaysWebView(): ' + e);
       });
       SplashScreen.hide();
     });

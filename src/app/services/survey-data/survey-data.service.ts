@@ -36,7 +36,7 @@ export class SurveyDataService {
           resolve(data.data);
         })
         .catch((error) => {
-          console.log('[From Get Remote Data] Error message: ' + error);
+          console.log('Error in getting remote data: ' + error);
           reject(error);
         });
     });
@@ -213,14 +213,12 @@ export class SurveyDataService {
       this.httpClient.post(postURL, bodyData).subscribe({
         next: (v) => {
           resolve(v);
-          console.log('Notice Survey: ' + v);
         },
         error: (e) => {
           console.log('Error in attempt http post: ', e || '');
           resolve(false);
         },
         complete: () => {
-          console.log('Complete');
           resolve(true);
         },
       });

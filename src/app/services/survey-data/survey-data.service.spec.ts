@@ -13,25 +13,35 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { BarcodeService } from '../barcode/barcode.service';
+import { StudyTasksService } from '../study-task/study-tasks.service';
+import { UuidService } from '../uuid/uuid.service';
 
 describe('SurveyDataService', () => {
   let service: SurveyDataService;
   let httpClientSpy: Spy<HttpClient>;
   let httpTestingController: HttpTestingController;
   let StorageServiceSpy: jasmine.SpyObj<StorageService>;
+  let studyTaskServiceSpy: jasmine.SpyObj<StudyTasksService>;
+  let uuidServiceSpy: jasmine.SpyObj<UuidService>;
 
   beforeEach(() => {
-    const storageSpy = jasmine.createSpyObj('StorageServiceeSpy', [
+    const storageSpy = jasmine.createSpyObj('StorageService', [
       'init',
       'set',
       'get',
       'keys',
     ]);
+    const studyTaskSpy = jasmine.createSpyObj('StudyTasksService', [
+      'getAllTasks',
+    ]);
+    const uuidSpy = jasmine.createSpyObj('UuidService', ['generateUUID']);
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, HttpClientModule],
       providers: [
         BarcodeService,
         { provide: StorageService, useValue: storageSpy },
+        { provide: UuidService, useValue: uuidSpy },
+        { provide: StudyTasksService, useValue: studyTaskSpy },
         { provide: HttpClient, useValue: createSpyFromClass(HttpClient) },
       ],
     });
@@ -40,7 +50,10 @@ describe('SurveyDataService', () => {
     StorageServiceSpy = TestBed.inject(
       StorageService
     ) as jasmine.SpyObj<StorageService>;
-
+    studyTaskServiceSpy = TestBed.inject(
+      StudyTasksService
+    ) as jasmine.SpyObj<StudyTasksService>;
+    uuidServiceSpy = TestBed.inject(UuidService) as jasmine.SpyObj<UuidService>;
     httpClientSpy = TestBed.inject<any>(HttpClient);
   });
 
@@ -63,15 +76,18 @@ describe('SurveyDataService', () => {
   });
 
   it('should save to local storage and get it', async () => {
-    const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
     const data = 'Data';
-    await StorageServiceSpy.init();
+    StorageServiceSpy.set.and.callThrough();
     await service.saveToLocalStorage('Test', data);
+    expect(StorageServiceSpy.set).toHaveBeenCalledTimes(1);
+  });
+
+  it('should save to local storage and get it', async () => {
+    const data = 'Data';
     StorageServiceSpy.get.and.returnValue(Promise.resolve(data));
     const value: any = await service.getFromLocalStorage('Test');
-    expect(data)
-      .withContext('Making sure we have the same count')
-      .toEqual(value);
+    expect(StorageServiceSpy.get).toHaveBeenCalledTimes(1);
+    expect(value).toBe(data);
   });
 
   it('should attempt to http post', async () => {
@@ -91,18 +107,24 @@ describe('SurveyDataService', () => {
 
   it('should send survery data to the server', async () => {
     const stubValueTasks: string = JSON.stringify(study_tasks.tasks);
-    const stubValueuuid: string = JSON.stringify('study_tasks.uuid');
     const stubValueStudy: string = JSON.stringify(study_tasks.study);
+    const uniqueId =
+      Date.now().toString(36) + Math.random().toString(36).substring(2);
     const bodyData = new FormData();
+    studyTaskServiceSpy.getAllTasks.and.returnValue(
+      Promise.resolve(JSON.parse(stubValueTasks))
+    );
     httpClientSpy.post.and.nextWith(bodyData);
-    // Making the return value of the get function call to be stubValue
-    await StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(stubValueTasks)
-    );
-    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValueuuid));
-    await StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(stubValueStudy)
-    );
+    uuidServiceSpy.generateUUID.and.returnValue(uniqueId);
+    StorageServiceSpy.get.and.callFake((param) => {
+      if (param === 'current-study') {
+        return Promise.resolve(stubValueStudy);
+      }
+      if (param === 'uuid') {
+        return Promise.resolve(uniqueId);
+      }
+      return null;
+    });
 
     const response: Responses = {};
 
@@ -124,23 +146,33 @@ describe('SurveyDataService', () => {
       alert_time: 'string',
     };
 
-    expect(service.sendSurveyDataToServer(data1))
-      .withContext('data is responses to questions')
-      .toBeTruthy();
+    // data is responses to questions
+    await service.sendSurveyDataToServer(data1);
+    // data is pvt entries
+    await service.sendSurveyDataToServer(data1);
 
-    expect(service.sendSurveyDataToServer(data2))
-      .withContext('data is pvt entries')
-      .toBeTruthy();
-
+    expect(studyTaskServiceSpy.getAllTasks).toHaveBeenCalledTimes(2);
+    expect(httpClientSpy.post).toHaveBeenCalledTimes(2);
+    expect(uuidServiceSpy.generateUUID).toHaveBeenCalledTimes(2);
+    expect(StorageServiceSpy.get).toHaveBeenCalledTimes(4);
   });
 
   it('should log page visit to the server', async () => {
     const stubValueStudy: string = JSON.stringify(study_tasks.study);
     const bodyData = new FormData();
+    const uniqueId =
+      Date.now().toString(36) + Math.random().toString(36).substring(2);
     httpClientSpy.post.and.nextWith(bodyData);
-    await StorageServiceSpy.get.and.returnValue(
-      Promise.resolve(stubValueStudy)
-    );
+    uuidServiceSpy.generateUUID.and.returnValue(uniqueId);
+    StorageServiceSpy.get.and.callFake((param) => {
+      if (param === 'current-study') {
+        return Promise.resolve(stubValueStudy);
+      }
+      if (param === 'uuid') {
+        return Promise.resolve(uniqueId);
+      }
+      return null;
+    });
     const log: LogEvent = {
       timestamp: 'string',
       milliseconds: 2,
@@ -148,8 +180,10 @@ describe('SurveyDataService', () => {
       event: 'string',
       module_index: 1,
     } as LogEvent;
-
-    expect(service.logPageVisitToServer(log)).toBeTruthy();
+    await service.logPageVisitToServer(log);
+    expect(httpClientSpy.post).toHaveBeenCalledTimes(1);
+    expect(uuidServiceSpy.generateUUID).toHaveBeenCalledTimes(1);
+    expect(StorageServiceSpy.get).toHaveBeenCalledTimes(2);
   });
 
   it('should upload pending data to the server and also locally', async () => {
@@ -157,20 +191,20 @@ describe('SurveyDataService', () => {
     const bodyData = new FormData();
     httpClientSpy.post.and.nextWith(bodyData);
     // Making the return value of the get function call to be stubValue
-    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
-    await StorageServiceSpy.keys.and.returnValue(
-      Promise.resolve(['1', '2', '3'])
-    );
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    StorageServiceSpy.keys.and.returnValue(Promise.resolve(['1', '2', '3']));
 
     const dataType1 = 'pending-log';
     const dataType2 = 'pending-data';
 
-    expect(service.uploadPendingData(dataType1))
-      .withContext('data type is "pending-log"')
-      .toBeTruthy();
 
-    expect(service.uploadPendingData(dataType2))
-      .withContext('data type is "pending-data"')
-      .toBeTruthy();
+    //data type is "pending-log"
+    await (await service.uploadPendingData(dataType1));
+
+    //data type is "pending-data"
+    await (await service.uploadPendingData(dataType2));
+
+    expect(StorageServiceSpy.get).toHaveBeenCalledTimes(2);
+    expect(StorageServiceSpy.keys).toHaveBeenCalledTimes(2);
   });
 });

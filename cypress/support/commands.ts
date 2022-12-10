@@ -72,7 +72,6 @@ Cypress.Commands.add('createStudyForNow', () => {
     store = await storage.create();
     const study = JSON.parse(JSON.stringify(studyData.study));
     const tasks: Task[] = JSON.parse(JSON.stringify(studyData.tasks));
-    console.log('Tasks are: ',tasks.length );
     for (let i = 0; i < tasks.length; i++) {
       tasks[i].time = (new Date(new Date().getTime() + (i+1) * 1000)).toString();
     }

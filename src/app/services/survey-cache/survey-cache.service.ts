@@ -37,12 +37,10 @@ export class SurveyCacheService {
       // get the fileName from the URL
       const urlSplit = url.split('/');
       const fileName = urlSplit[urlSplit.length - 1];
-      console.log('Downloaded with URL: ', url);
       const file: FileDownloadResponse = await FileDownload.download({
         uri: url,
         fileName: this.file.dataDirectory + fileName,
       });
-      console.log('Downloaded file correctly with path: ', file.path);
       return file.path;
     } catch (error) {
       throw error;
@@ -163,7 +161,7 @@ export class SurveyCacheService {
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));
       } catch (e) {
-        console.log('error: ' + e);
+        console.log('Error: ' + e);
       }
 
       // dismiss the loading spinner

@@ -85,18 +85,18 @@ export class HomePage implements OnInit {
     ChangeTheme.initializeTheme();
     if (ChangeTheme.getTheme() === 'light') {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
     }
@@ -228,20 +228,20 @@ export class HomePage implements OnInit {
   async toggleTheme() {
     if (ChangeTheme.getTheme() === 'light') {
       await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
       this.tum_image = 'assets/imgs/tum-light.png';
       ChangeTheme.setTheme(true);
     } else {
       await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
       this.tum_image = 'assets/imgs/tum-icon.png';
@@ -282,7 +282,6 @@ export class HomePage implements OnInit {
         study.properties.study_id !== undefined;
 
       if (validStudy) {
-        console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
       } else {
         if (this.loadingService) {
@@ -444,7 +443,6 @@ export class HomePage implements OnInit {
             this.loadingService.isCaching = true;
             this.loadingService.present(this.translations.msg_caching);
           });
-          console.log('Caching now');
           this.surveyCacheService.cacheAllMedia(this.study);
         }
         // setup the study task objects

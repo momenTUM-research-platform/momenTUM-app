@@ -145,7 +145,6 @@ export class StudyTasksService {
       return dateA.getTime() - dateB.getTime();
     });
 
-    console.log('generateStudyTasks... ');
     // save tasks and condition to storage
     this.storageService.set('condition', condition);
     // show loading bar
@@ -153,7 +152,6 @@ export class StudyTasksService {
     this.loadingService.present('Loading...');
     await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
     this.loadingService.dismiss();
-    console.log('generateStudyTasks... ');
     return study_tasks;
   }
 
