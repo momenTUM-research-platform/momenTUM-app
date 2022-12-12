@@ -1,486 +1,202 @@
 <ion-header>
-  <ion-toolbar mode="md">
-    <ion-buttons slot="start" mode="md">
-      <ion-item class="light-blue-toolbar" lines="none">
-        <ion-button
-          style="height: 35px"
-          size="medium"
-          color="secondary"
-          (click)="back()"
-        >
-          <ion-icon slot="icon-only" name="arrow-back">Home</ion-icon>
-        </ion-button>
-        <span class="text">{{this.current_section_name}}</span>
-      </ion-item>
+  <ion-toolbar>
+    <ion-title> {{this.current_section_name}} </ion-title>
+    <ion-buttons slot="start">
+      <ion-button
+        style="height: 35px"
+        size="medium"
+        color="primary"
+        (click)="back()"
+      >
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
     </ion-buttons>
-
-    <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
-      <span class="text">{{this.current_section}}/{{this.num_sections}}</span>
+    <ion-item slot="end" lines="none" style="--background: transparent">
+      <ion-label color="primary"
+        >{{this.current_section}}/{{this.num_sections}}</ion-label
+      >
     </ion-item>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="scroll-content">
-  <div id="survey-list">
-    <!--survey content-->
-    <ion-item
-      lines="none"
-      *ngFor="let question of survey.sections[this.current_section-1].questions"
-      class="ion-text-wrap survey-item"
-      [hidden]="!question.hideSwitch"
-    >
-      <br />
-      <!-- instruction type -->
-      <div
-        item-content
-        *ngIf="question.type === 'instruction'"
-        class="light-blue-card-div-instruction"
-      >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p
-                    [class.showError]="!question.hideError"
-                    [innerHTML]="question.text"
-                  ></p>
-                </span>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
+<ion-content>
 
-      <!-- slider type -->
-      <div
-        style="width: 100%"
-        item-content
-        *ngIf="question.type === 'slider'"
-        class="light-blue-card-div-instruction"
-      >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p
-                    [class.showError]="!question.hideError"
-                    [innerHTML]="question.text"
-                  ></p>
-                </span>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-range
-                  [min]="question.min"
-                  [max]="question.max"
-                  [(ngModel)]="question.model"
-                  [pin]="true"
-                  [value]="question.model"
-                  (ionChange)="setAnswer(question)"
-                  color="secondary"
-                  style="font-size: small"
-                >
-                </ion-range>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p class="slider-label-left">{{question.hint_left}}</p>
-                  <p class="slider-label-right">{{question.hint_right}}</p>
-                </span>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
+  <!--questions-->
+  <ion-card
+    *ngFor="let question of survey.sections[this.current_section-1].questions"
+    [hidden]="!question.hideSwitch"
+    color="secondary"
+  >
+    <!--instructions (careful: this is used in every question type, not only instructions)-->
+    <ion-card-header>
+      <ion-label
+        [class.showError]="!question.hideError"
+        [innerHTML]="question.text"
+      ></ion-label>
+    </ion-card-header>
 
-      <!-- video/audio/image type -->
-      <div
-        style="width: 100%; padding-right: 6px !important"
-        item-content
-        *ngIf="question.type === 'media'"
-        class="light-blue-card-div"
-      >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <!-- video -->
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <video
-                  *ngIf="question.subtype === 'video'"
-                  controls="controls"
-                  controlsList="nodownload"
-                  [poster]="question.thumb"
-                  preload="metadata"
-                  webkit-playsinline="webkit-playsinline"
-                  class="videoPlayer"
-                >
-                  <source [src]="question.src" />
-                </video>
-              </ion-col>
-            </ion-row>
-
-            <!-- audio -->
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <audio
-                  *ngIf="question.subtype === 'audio'"
-                  style="width: 100%"
-                  controls="controls"
-                  preload="metadata"
-                  controlsList="nodownload"
-                >
-                  <source [src]="question.src" type="audio/mpeg" />
-                </audio>
-              </ion-col>
-            </ion-row>
-
-            <!-- image -->
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-img
-                  *ngIf="question.subtype === 'image'"
-                  style="width: 100%"
-                  [src]="question.src"
-                ></ion-img>
-              </ion-col>
-            </ion-row>
-
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <p
-                  *ngIf="question.text"
-                  [class.showError]="!question.hideError"
-                  [innerHTML]="question.text"
-                ></p>
-                <br />
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
-
-      <!-- text input -->
-      <div
-        item-content
-        *ngIf="question.type === 'text'"
-        class="light-blue-card-grid"
-      >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <p
-                  [class.showError]="!question.hideError"
-                  [innerHTML]="question.text"
-                ></p>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-input
-                  *ngIf="question.subtype === 'short'"
-                  [(ngModel)]="question.model"
-                  (ionBlur)="setAnswer(question)"
-                  style="font-size: small"
-                  type="text"
-                  autocomplete="on"
-                  autocorrect="on"
-                  placeholder="Enter response..."
-                >
-                </ion-input>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-input
-                  *ngIf="question.subtype === 'numeric'"
-                  [(ngModel)]="question.model"
-                  (ionBlur)="setAnswer(question)"
-                  style="font-size: small"
-                  placeholder="Enter number..."
-                  type="number"
-                  pattern="\d*"
-                ></ion-input>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-textarea
-                  *ngIf="question.subtype === 'long'"
-                  [(ngModel)]="question.model"
-                  (ionBlur)="setAnswer(question)"
-                  style="font-size: small"
-                  placeholder="Enter response..."
-                  auto-grow="true"
-                  rows="3"
-                ></ion-textarea>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
-
-      <!-- multi -->
-      <div
-        item-content
-        *ngIf="question.type === 'multi'"
-        class="light-blue-card-div"
-      >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p
-                    [class.showError]="!question.hideError"
-                    [innerHTML]="question.text"
-                  ></p>
-                </span>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <div *ngIf="question.modal">
-                  <ion-item class="mult-select" lines="none">
-                    <ion-label style="display: none"></ion-label>
-                    <ion-select
-                      *ngIf="question.radio"
-                      class="ion-radio-select-style"
-                      (ionChange)="setAnswer(question)"
-                      [(ngModel)]="question.model"
-                      placeholder="Select..."
-                      okText="Select"
-                      cancelText="Dismiss"
-                    >
-                      <ion-select-option
-                        color="tertiary"
-                        *ngFor="let option of question.optionsChecked"
-                        >"{{option.text}}"
-                      </ion-select-option>
-                    </ion-select>
-                    <ion-select
-                      *ngIf="!question.radio"
-                      style="width: 100%; max-width: 100%"
-                      (ionChange)="setAnswer(question)"
-                      [(ngModel)]="question.model"
-                      placeholder="Select..."
-                      okText="Select"
-                      cancelText="Dismiss"
-                      multiple
-                    >
-                      <ion-select-option
-                        color="tertiary"
-                        *ngFor="let option of question.optionsChecked"
-                        >{{option.text}}
-                      </ion-select-option>
-                    </ion-select>
-                  </ion-item>
-                </div>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <div *ngIf="!question.modal">
-                  <ion-radio-group
-                    *ngIf="question.radio"
-                    (ionChange)="setAnswer(question)"
-                    [(ngModel)]="question.model"
-                  >
-                    <ion-item
-                      *ngFor="let option of question.optionsChecked"
-                      class="radio-button-style"
-                      lines="none"
-                    >
-                      <ion-label style="font-size: medium" class="ion-text-wrap"
-                        >{{option.text}}</ion-label
-                      >
-                      <ion-radio
-                        slot="start"
-                        color="light"
-                        value="{{option.text}}"
-                      ></ion-radio>
-                    </ion-item>
-                  </ion-radio-group>
-                  <div radio-group *ngIf="!question.radio">
-                    <ion-item
-                      *ngFor="let option of question.optionsChecked"
-                      lines="none"
-                    >
-                      <ion-label style="font-size: medium" class="ion-text-wrap"
-                        >{{option.text}}</ion-label
-                      >
-                      <ion-checkbox
-                        color="secondary"
-                        (click)="changeCheckStatus(option, question)"
-                        [(ngModel)]="option.checked"
-                      ></ion-checkbox>
-                    </ion-item>
-                  </div>
-                </div>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-        <br />
-      </div>
-
-      <!-- datetimepicker -->
-      <div
-        item-content
+    <!--input-->
+    <ion-card-content>
+      <!--date time-->
+      <ion-datetime
         *ngIf="question.type === 'datetime'"
-        class="light-blue-card-div"
+        locale="de-DE"
+        [(ngModel)]="question.model"
+        (ionChange)="setAnswer(question)"
+        presentation="{{question.subtype === 'time' ? 'time' : question.subtype === 'date' ? 'date' : 'date-time'}}"
+        color="primary"
+      ></ion-datetime>
+      <!--slider type-->
+      <ion-range
+        *ngIf="question.type === 'slider'"
+        [min]="question.min"
+        [max]="question.max"
+        [(ngModel)]="question.model"
+        [pin]="true"
+        [value]="question.model"
+        (ionChange)="setAnswer(question)"
+        style="font-size: small"
       >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p
-                    [class.showError]="!question.hideError"
-                    [innerHTML]="question.text"
-                  ></p>
-                </span>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-datetime
-                  color="blue"
-                  locale="de-DE"
-                  *ngIf="question.subtype === 'date-time'"
-                  style="font-size: small"
-                  [(ngModel)]="question.model"
-                  presentation="datetime"
-                  (ionChange)="setAnswer(question)"
-                ></ion-datetime>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-datetime
-                  color="blue"
-                  locale="de-DE"
-                  *ngIf="question.subtype === 'date'"
-                  style="font-size: small"
-                  [(ngModel)]="question.model"
-                  presentation="date"
-                  (ionChange)="setAnswer(question)"
-                ></ion-datetime>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-datetime
-                  color="blue"
-                  locale="de-DE"
-                  *ngIf="question.subtype === 'time'"
-                  style="font-size: small"
-                  [(ngModel)]="question.model"
-                  presentation="time"
-                  (ionChange)="setAnswer(question)"
-                ></ion-datetime>
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
-
-      <!-- boolean toggle -->
-      <div
+        <ion-label color="dark" slot="start">{{question.hint_left}}</ion-label>
+        <ion-label color="dark" slot="end">{{question.hint_right}}</ion-label>
+      </ion-range>
+      <!--video type-->
+      <video
+        *ngIf="question.type === 'media' && question.subtype === 'video'"
+        controls="controls"
+        controlsList="nodownload"
+        [poster]="question.thumb"
+        preload="metadata"
+        webkit-playsinline="webkit-playsinline"
         style="width: 100%"
-        item-content
-        *ngIf="question.type === 'yesno'"
-        class="light-blue-card-div"
       >
-        <ion-item class="light-blue-card-bg" lines="none">
-          <ion-grid>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <span class="text">
-                  <p
-                    [class.showError]="!question.hideError"
-                    [innerHTML]="question.text"
-                  ></p>
-                </span>
-              </ion-col>
-            </ion-row>
-            <ion-row class="ion-row-items">
-              <ion-col>
-                <ion-segment
-                  [(ngModel)]="question.model"
-                  (ionChange)="setAnswer(question)"
-                >
-                  <ion-segment-button
-                    value="{{question.yes_text}}"
-                    layout="icon-start"
-                  >
-                    <ion-label>{{question.yes_text}}</ion-label>
-                    <ion-icon name="checkmark"></ion-icon>
-                  </ion-segment-button>
-                  <ion-segment-button
-                    value="{{question.no_text}}"
-                    layout="icon-start"
-                  >
-                    <ion-label>{{question.no_text}}</ion-label>
-                    <ion-icon name="close"></ion-icon>
-                  </ion-segment-button>
-                </ion-segment>
-                <br />
-              </ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-item>
-      </div>
-
-      <!-- external -->
-      <div
-        class="external-container"
+        <source [src]="question.src" />
+      </video>
+      <!--audio type-->
+      <audio
+        *ngIf="question.type === 'media' && question.subtype === 'audio'"
         style="width: 100%"
-        item-content
-        *ngIf="question.type === 'external'"
+        controls
+        preload="metadata"
+        controlsList="nodownload"
       >
-        <iframe frameborder="0" scrolling="no" [src]="question.src"></iframe>
-      </div>
-
-      <!-- file -->
-      <div style="width: 100%" item-content *ngIf="question.type === 'file'">
-        <p
-          [class.showError]="!question.hideError"
-          [innerHTML]="question.text"
-        ></p>
-
-        <ion-button
-          color="primary"
-          fill="outline"
-          (click)="openExternalFile(question.src)"
+        <source [src]="question.src" type="audio/ogg">
+        your device does not support the audio element
+      </audio>
+      <!--image type-->
+      <ion-img
+        *ngIf="question.type === 'media' && question.subtype === 'image'"
+        style="width: 100%"
+        [src]="question.src"
+      ></ion-img>
+      <!--short text input-->
+      <ion-input
+        *ngIf="question.type === 'text' && question.subtype !== 'long'"
+        [(ngModel)]="question.model"
+        (ionBlur)="setAnswer(question)"
+        type="{{question.subtype === 'short' ? 'text' : 'number'}}"
+        autocomplete="on"
+        autocorrect="on"
+        placeholder="{{question.subtype === 'short' ? 'Enter response...' : 'Enter number...'}}"
+        pattern="{{question.subtype === 'short' ? undefined : '\d*'}}"
+      >
+      </ion-input>
+      <!--long text input-->
+      <ion-textarea
+        *ngIf="question.type === 'text' && question.subtype === 'long'"
+        [(ngModel)]="question.model"
+        (ionBlur)="setAnswer(question)"
+        placeholder="Enter response..."
+        auto-grow="true"
+        rows="3"
+      ></ion-textarea>
+      <!--multi input-->
+      <ion-list
+        *ngIf="question.type === 'multi'"
+        inset="true"
+      >
+        <!--no modal, radio-->
+        <ion-radio-group
+          *ngIf="!question.modal && question.radio"
+          (ionChange)="setAnswer(question)"
+          [(ngModel)]="question.model"
         >
-          <ion-icon slot="start" name="attach"></ion-icon>
-          {{question.file_name}}
-        </ion-button>
-        <br /><br />
-      </div>
-    </ion-item>
-    <!--submit button-->
-    <ion-item-group>
-      <!-- <ion-item-divider color="secondary"></ion-item-divider> -->
-      <ion-item lines="none" class="ion-text-center" class="bottom-button">
-        <ion-label>
-          <ion-button
-            fill="outline"
-            class="submit-next-button"
-            (click)="submit()"
-            size="large"
-            expand="block"
-            color="secondary"
-            >{{this.submit_text}}</ion-button
+          <ion-item
+            *ngFor="let option of question.optionsChecked"
+            lines="none"
           >
-        </ion-label>
-      </ion-item>
-    </ion-item-group>
-  </div>
+            <ion-label
+            >{{option.text}}</ion-label>
+            <ion-radio
+              slot="end"
+              color="primary"
+              value="{{option.text}}"
+            ></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+        <!--no modal, no radio-->
+        <ng-container
+          *ngIf="!question.modal && !question.radio"
+        >
+          <ion-item
+            *ngFor="let option of question.optionsChecked"
+            lines="none"
+          >
+            <ion-label>{{option.text}}</ion-label>
+            <ion-checkbox
+              color="primary"
+              (click)="changeCheckStatus(option, question)"
+              [(ngModel)]="option.checked"
+            ></ion-checkbox>
+          </ion-item>
+        </ng-container>
+        <!--modal, no radio and radio-->
+        <ion-select
+          *ngIf="question.modal"
+          (ionChange)="setAnswer(question)"
+          [(ngModel)]="question.model"
+          placeholder="Select..."
+          okText="Select"
+          cancelText="Dismiss"
+          multiple="{{!question.radio}}"
+        >
+          <ion-select-option *ngFor="let option of question.optionsChecked">
+            {{option.text}}
+          </ion-select-option>
+        </ion-select>
+      </ion-list>
+      <!--yes no-->
+      <ion-segment
+        *ngIf="question.type === 'yesno'"
+        [(ngModel)]="question.model"
+        (ionChange)="setAnswer(question)"
+      >
+        <ion-segment-button
+          value="{{question.yes_text}}"
+          layout="icon-start"
+        >
+          <ion-label>{{question.yes_text}}</ion-label>
+          <ion-icon name="checkmark"></ion-icon>
+        </ion-segment-button>
+        <ion-segment-button
+          value="{{question.no_text}}"
+          layout="icon-start"
+        >
+          <ion-label>{{question.no_text}}</ion-label>
+          <ion-icon name="close"></ion-icon>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-card-content>
+  </ion-card>
+
+  <!--submit button-->
+  <ion-button
+    fill="outline"
+    (click)="submit()"
+    size="large"
+    expand="block"
+    style="margin: 15px"
+  >
+    {{this.submit_text}}
+  </ion-button>
 </ion-content>

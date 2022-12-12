@@ -94,7 +94,6 @@ export class SurveyPage implements OnInit {
    */
   ngOnInit() {
     // set statusBar to visible on Android
-    // this.statusBar.styleLightContent();
     StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
       console.log(
         'StatusBar is not implemented, Web implementation error. ERROR: ' + e
