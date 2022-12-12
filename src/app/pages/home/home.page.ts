@@ -86,7 +86,6 @@ export class HomePage implements OnInit {
       StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
         console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'sunny');
       ChangeTheme.setTheme(true);
       this.darkMode = true;
     } else {
@@ -96,7 +95,6 @@ export class HomePage implements OnInit {
       StatusBar.setStyle({ style: Style.Light }).catch((e) => {
         console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'moon');
       ChangeTheme.setTheme(false);
       this.darkMode = false;
     }
@@ -110,9 +108,9 @@ export class HomePage implements OnInit {
         console.log('StatusBar.setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+
         console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'moon');
       this.darkMode = false;
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
@@ -121,7 +119,6 @@ export class HomePage implements OnInit {
       StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
         console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'sunny');
       this.darkMode = true;
     }
 
