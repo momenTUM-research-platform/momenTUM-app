@@ -44,17 +44,21 @@
   src: url("./assets/fonts/TUMNeueHelvetica-Bold.ttf");
 }
 
-// schema themes
-.header-icon {
-  max-height: 16px;
-}
-
-.header-title-thin {
-  font-weight: 50;
-  padding-left: 5px;
-}
-
-// momenTUM themes
+/* the font used*/
 * {
   --ion-font-family: "TUM Neue Helvetica";
+}
+
+/* the title in the header on each page */
+ion-title {
+  font-weight: 50;
+  color: var(--ion-color-primary);
+}
+
+/* the date time component */
+ion-datetime {
+  --background: var(--ion-color-light);
+  --background-rgb: var(--ion-color-light-rgb);
+
+  border-radius: 15px;
 }
