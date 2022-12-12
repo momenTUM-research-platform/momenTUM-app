@@ -1,56 +1,38 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
-      <span class="header-title-thin">momenTUM</span>
+      momenTUM
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content>
   <ion-item-group>
-    <ion-grid>
-      <ion-row>
-        <ion-col stacked class="icon-image" size="4">
-          <img src="assets/icon/Person.svg" class="icon" />
-        </ion-col>
-        <ion-col size="8">
-          <!-- <ion-item>User ID</ion-item>
-      <ion-item >
-          {{this.uuid}}
-      </ion-item> -->
-          <ion-list>
-            <ion-item lines="none">
-              <ion-label color="secondary" stacked class="title-label">
-                User ID
-              </ion-label>
-            </ion-item>
-
-            <ion-item lines="none">
-              <ion-label> {{this.uuid}} </ion-label>
-            </ion-item>
-          </ion-list>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+    <ion-item lines="full">
+      <ion-icon color="primary" slot="start" style="font-size: 64px" name="person-circle-outline"></ion-icon>
+      <ion-label color="primary" class="ion-text-wrap">
+        <p>User ID</p>
+        <h3>{{this.uuid}}</h3>
+      </ion-label>
+    </ion-item>
   </ion-item-group>
   <ion-item-group [hidden]="!isEnrolled">
-    <ion-label color="secondary" stacked class="title-label">
+    <ion-label color="dark" position="stacked" class="title-label">
       Notifications
     </ion-label>
-
-    <ion-item lines="none">
+    <ion-item>
       <ion-label>Enable Notifications</ion-label>
       <ion-toggle
-        color="secondary"
+        color="primary"
         (ionChange)="toggleNotifications()"
         [(ngModel)]="notificationsEnabled"
       ></ion-toggle>
     </ion-item>
     <div *ngIf="this.study?.properties.instructions?.length > 0">
-      <ion-label color="secondary" stacked class="title-label">
+      <ion-label color="dark" position="stacked" class="title-label">
         About this study
       </ion-label>
-      <ion-item lines="none">
+      <ion-item>
         <ion-label
           style="white-space: pre-wrap !important"
           [innerHTML]="this.study?.properties.instructions"
@@ -62,11 +44,10 @@
     <div
       *ngIf="this.study?.properties.support_email?.length > 0 || this.study?.properties.support_url?.length > 0"
     >
-      <ion-label color="secondary" stacked class="title-label">
+      <ion-label color="dark" position="stacked" class="title-label">
         Support
       </ion-label>
       <ion-item
-        lines="none"
         *ngIf="this.study?.properties.support_email?.length > 0"
         (click)="openSupportEmail(this.study?.properties.support_email, this.study?.properties.study_name)"
         detail
@@ -74,7 +55,6 @@
         <ion-label> Contact us by email </ion-label>
       </ion-item>
       <ion-item
-        lines="none"
         *ngIf="this.study?.properties.support_url?.length > 0"
         (click)="openSupportURL(this.study?.properties.support_url)"
         detail
@@ -85,10 +65,10 @@
     <div
       *ngIf="this.study?.properties.ethics?.length > 0 || this.study?.properties.pls?.length > 0"
     >
-      <ion-label color="secondary" stacked class="title-label">
+      <ion-label color="dark" position="stacked" class="title-label">
         Ethics Information
       </ion-label>
-      <ion-item lines="none" *ngIf="this.study?.properties.ethics?.length > 0">
+      <ion-item *ngIf="this.study?.properties.ethics?.length > 0">
         <ion-label
           style="white-space: pre-wrap !important"
           [innerHTML]="this.study?.properties.ethics"
@@ -97,18 +77,16 @@
         </ion-label>
       </ion-item>
       <ion-item
-        lines="none"
         *ngIf="this.study?.properties.pls?.length > 0"
         (click)="openSupportURL(this.study?.properties.pls)"
-        detail
       >
         <ion-label> Plain Language Statement </ion-label>
       </ion-item>
     </div>
-    <ion-label color="secondary" stacked class="title-label">
+    <ion-label color="dark" class="title-label">
       Withdraw
     </ion-label>
-    <ion-item lines="none" (click)="withdrawFromStudy()" detail>
+    <ion-item (click)="withdrawFromStudy()">
       <ion-label> Withdraw from study </ion-label>
     </ion-item>
   </ion-item-group>

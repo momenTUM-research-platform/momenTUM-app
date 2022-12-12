@@ -118,6 +118,7 @@ export class SettingsPage {
         {
           text: 'Cancel',
           role: 'cancel',
+          cssClass: 'alert-button-cancel',
         },
         {
           text: 'Withdraw',
@@ -151,6 +152,7 @@ export class SettingsPage {
                 this.navController.navigateRoot('/');
               });
           },
+          cssClass: 'alert-button-confirm',
         },
       ],
     });
