@@ -1,3 +1,4 @@
+// icon if no graph is displayed
 #stats-icon {
   font-size: 3em;
 }
@@ -8,17 +9,6 @@
   padding-right: 20px;
 }
 
-.blurb-style {
-  font-size: 13px;
-  color: var(--ion-color-tertiary-contrast) !important;
-}
-
 ion-item {
   --ion-item-background: transparent;
-}
-
-.title-label {
-  margin: 3px;
-  font-size: 15px;
-  color: var(--ion-color-tertiary) !important;
 }

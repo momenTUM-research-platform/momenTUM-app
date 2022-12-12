@@ -1,7 +1,7 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
-      <span class="header-title-thin">momenTUM</span>
+      momenTUM
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,15 +9,15 @@
 <ion-content>
   <ion-item lines="none" *ngIf="!(graphs.length > 0)">
     <ion-label class="ion-text-wrap ion-text-center">
-      <br /><br />
-      <ion-icon id="stats-icon" color="secondary" name="stats-chart"></ion-icon
-      ><br /><br />
+      <br><br>
+      <ion-icon id="stats-icon" color="primary" name="stats-chart"></ion-icon
+      ><br><br>
       {{ 'placeholder_my-progress' | translate }}<br /><br />
     </ion-label>
   </ion-item>
 
   <div *ngFor="let graph of graphs">
-    <ion-item-divider color="secondary" class="ion-text-wrap" lines="none"
+    <ion-item-divider color="primary" class="ion-text-wrap"
       >{{graph.header}}</ion-item-divider
     >
     <canvas
@@ -31,20 +31,20 @@
     >
     </canvas>
     <ion-item lines="full">
-      <ion-label color="secondary" class="ion-text-wrap">
+      <ion-label color="primary" class="ion-text-wrap">
         <p class="blurb-style" [innerHTML]="graph.blurb"></p>
       </ion-label>
     </ion-item>
   </div>
 
   <div *ngIf="enrolledInStudy">
-    <ion-item color="tertiary" lines="none" *ngIf="history.length > 0">
-      <ion-label stacked> Recently Completed </ion-label>
+    <ion-item color="primary" lines="none" *ngIf="history.length > 0">
+      <ion-label>Recently Completed</ion-label>
     </ion-item>
 
     <ion-item *ngFor="let record of history">
       <ion-label> {{record.task_name}} </ion-label>
-      <ion-label slot="end" color="medium" class="ion-text-right">
+      <ion-label slot="end" color="medium">
         {{record.moment_time}}
       </ion-label>
     </ion-item>
