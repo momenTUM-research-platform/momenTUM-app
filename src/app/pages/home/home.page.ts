@@ -34,11 +34,9 @@ export class HomePage implements OnInit {
   // stores the details of the study
   study: Study | null = null;
   // stores the list of tasks to be completed by the user
-  task_list: Array<any> = new Array();
+  task_list: Array<any> = [];
   // dark mode
   darkMode = false;
-  //image
-  tum_image = 'assets/imgs/tum-icon.png';
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
@@ -89,8 +87,8 @@ export class HomePage implements OnInit {
         console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
-      this.tum_image = 'assets/imgs/tum-light.png';
       ChangeTheme.setTheme(true);
+      this.darkMode = true;
     } else {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
         console.log('StatusBar.setBackgroundColor(): ' + e);
@@ -99,8 +97,8 @@ export class HomePage implements OnInit {
         console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
-      this.tum_image = 'assets/imgs/tum-icon.png';
       ChangeTheme.setTheme(false);
+      this.darkMode = false;
     }
   }
 
@@ -115,6 +113,7 @@ export class HomePage implements OnInit {
         console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'moon');
+      this.darkMode = false;
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
         console.log('StatusBar.setBackgroundColor(): ' + e);
@@ -123,6 +122,7 @@ export class HomePage implements OnInit {
         console.log('StatusBar.setStyle(): ' + e);
       });
       document.querySelector('ion-icon').setAttribute('name', 'sunny');
+      this.darkMode = true;
     }
 
     // need to subscribe to this event in order
@@ -150,9 +150,7 @@ export class HomePage implements OnInit {
   }
 
   async ionViewWillEnter() {
-    // check if dark mode
-    this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
+    this.darkMode = ChangeTheme.getTheme() === 'dark';
     // translate
     let key: keyof Translations;
     // eslint-disable-next-line guard-for-in
@@ -343,7 +341,6 @@ export class HomePage implements OnInit {
   async enterURL() {
     const alert = await this.alertController.create({
       header: this.translations['btn_enter-url'],
-      cssClass: 'alertStyle',
       inputs: [
         {
           name: 'url',
@@ -356,7 +353,6 @@ export class HomePage implements OnInit {
         {
           text: this.translations.btn_cancel,
           role: 'cancel',
-          cssClass: 'secondary',
         },
         {
           text: this.translations.btn_enrol,
@@ -377,7 +373,6 @@ export class HomePage implements OnInit {
   async enterStudyID() {
     const alert = await this.alertController.create({
       header: this.translations['btn_study-id'],
-      cssClass: 'alertStyle',
       inputs: [
         {
           name: 'id',
@@ -389,7 +384,6 @@ export class HomePage implements OnInit {
         {
           text: this.translations.btn_cancel,
           role: 'cancel',
-          cssClass: 'secondary',
         },
         {
           text: this.translations.btn_enrol,
@@ -582,7 +576,6 @@ export class HomePage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Oops...',
       message: msg,
-      cssClass: 'alertStyle',
       buttons: ['Dismiss'],
     });
     await alert.present();
@@ -594,7 +587,6 @@ export class HomePage implements OnInit {
   async displayBarcodeError() {
     const alert = await this.alertController.create({
       header: 'Permission Required',
-      cssClass: 'alertStyle',
       message: this.translations.msg_camera,
       buttons: ['Dismiss'],
     });
