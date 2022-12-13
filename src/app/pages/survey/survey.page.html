@@ -44,7 +44,6 @@
         [(ngModel)]="question.model"
         (ionChange)="setAnswer(question)"
         presentation="{{question.subtype === 'time' ? 'time' : question.subtype === 'date' ? 'date' : 'date-time'}}"
-        color="primary"
       ></ion-datetime>
       <!--slider type-->
       <ion-range

@@ -37,10 +37,17 @@ ion-select::part(icon) {
   color: var(--ion-color-medium);
 }
 
-/* error */
+/* input required error */
 .showError:before { content:" *"; }
-
 .showError {
   font-weight:bold;
   color:#F44336 !important;
+}
+
+/* the date time component */
+ion-datetime {
+  --background: var(--ion-color-light);
+  --background-rgb: var(--ion-color-light-rgb);
+  --color: var(--ion-color-primary);
+  border-radius: 15px;
 }
