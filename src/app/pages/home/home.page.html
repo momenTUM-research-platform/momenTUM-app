@@ -50,7 +50,7 @@
         lines="none"
         *ngIf="task.type !== 'header'"
         detail="true"
-        [href]="task.type === 'alarm-outline' ? '/pvt/' + task.task_id : '/survey/' + task.task_id"
+        [routerLink]="task.type === 'alarm-outline' ? '/pvt/' + task.task_id : '/survey/' + task.task_id"
       >
         <ion-icon color="medium" name="{{task.type}}" slot="start"></ion-icon>
         <ion-label class="ion-text-wrap" color="primary">
