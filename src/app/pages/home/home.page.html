@@ -80,8 +80,11 @@
 <ion-footer [hidden]="hideEnrolOptions">
   <ion-grid class="ion-margin-bottom">
     <ion-row class="ion-justify-content-center">
-      <ion-button class="study-sign-in-button" (click)="scanBarcode()"
-        >Scan QR Code</ion-button
+      <ion-button
+        class="study-sign-in-button"
+        routerLink="/scanner"
+        routerDirection="root"
+      >Scan QR Code</ion-button
       >
     </ion-row>
     <ion-row class="ion-justify-content-center">

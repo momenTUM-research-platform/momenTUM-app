@@ -55,3 +55,8 @@ ion-title {
   color: var(--ion-color-primary);
 }
 
+/* when scanning, set background to invisible */
+body.scanner-active {
+  background: transparent;
+  --ion-background-color: transparent;
+}

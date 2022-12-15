@@ -312,25 +312,6 @@ export class HomePage implements OnInit {
       // This means invalid URL
     }
   }
-  /**
-   * Uses the barcode scanner to enrol in a study
-   */
-  async scanBarcode() {
-    this.barcodeService
-      .startScan()
-      .then((barcodeData) => {
-        if (barcodeData.hasContent) {
-          this.attemptToDownloadStudy(barcodeData?.content, true, false);
-        }
-      })
-      .catch((err) => {
-        if (!this.loadingService.isLoading) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
-        this.displayBarcodeError();
-      });
-  }
 
   /**
    * Handles the alert dialog to enrol via URL
