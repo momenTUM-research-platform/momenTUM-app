@@ -58,3 +58,65 @@
 * {
   --ion-font-family: "TUM Neue Helvetica";
 }
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+
+@import "~@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+
+@import "~@ionic/angular/css/normalize.css";
+@import "~@ionic/angular/css/structure.css";
+@import "~@ionic/angular/css/typography.css";
+@import "~@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+
+@import "~@ionic/angular/css/padding.css";
+@import "~@ionic/angular/css/float-elements.css";
+@import "~@ionic/angular/css/text-alignment.css";
+@import "~@ionic/angular/css/text-transformation.css";
+@import "~@ionic/angular/css/flex-utils.css";
+
+/* Custom fonts for momenTUM */
+
+@font-face {
+  font-family: "TUM Neue Helvetica";
+  font-style: normal;
+  font-weight: normal;
+  src: url("./assets/fonts/TUMNeueHelvetica-Regular.ttf");
+}
+
+@font-face {
+  font-family: "TUM Neue Helvetica";
+  font-style: normal;
+  font-weight: bold;
+  src: url("./assets/fonts/TUMNeueHelvetica-Bold.ttf");
+}
+
+/* the font used*/
+* {
+  --ion-font-family: "TUM Neue Helvetica";
+}
+
+/* the title in the header on each page */
+ion-title {
+  font-weight: 50;
+  color: var(--ion-color-primary);
+}
+
+/* when scanning, set background to invisible */
+body.scanner-active {
+  background: transparent;
+  --ion-background-color: transparent;
+}
