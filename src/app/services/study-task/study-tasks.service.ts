@@ -145,16 +145,13 @@ export class StudyTasksService {
       return dateA.getTime() - dateB.getTime();
     });
 
-    console.log('generateStudyTasks... ');
     // save tasks and condition to storage
     this.storageService.set('condition', condition);
-    console.log('length of study-tasks: ', study_tasks.length);
     // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present('Loading...');
     await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
     this.loadingService.dismiss();
-
     return study_tasks;
   }
 
@@ -163,7 +160,8 @@ export class StudyTasksService {
    */
   async getAllTasks(): Promise<Task[]> {
     const tasks: any = await this.storageService.get('study-tasks');
-    return JSON.parse(tasks);
+    const task_list: Task[] = JSON.parse(tasks);
+    return task_list;
   }
 
   /**

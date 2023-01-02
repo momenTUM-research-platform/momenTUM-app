@@ -105,19 +105,20 @@ export class HomePage implements OnInit {
     ChangeTheme.initializeTheme();
     if (ChangeTheme.getTheme() === 'light') {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Light }).catch((e) => {
 
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
+
       });
       this.darkMode = false;
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+        console.log('StatusBar error with setStyle(): ' + e);
       });
       this.darkMode = true;
     }
@@ -160,23 +161,26 @@ export class HomePage implements OnInit {
     this.notificationsService.requestPermissions();
 
     this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading);
+    this.loadingService.present(this.translations.label_loading).catch((e) => {
+      console.log('Loading service present error: ' + e);
+    });
 
     this.hideEnrolOptions = true;
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
+
     try {
       await this.storageService.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
       await this.storageService.init();
     }
+
     Promise.all([this.storageService.get('current-study')]).then((values) => {
       const studyObject: any = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
-
         this.study = JSON.parse(studyObject);
 
         // log the user visiting this tab
@@ -241,6 +245,29 @@ export class HomePage implements OnInit {
     }
   }
 
+  async toggleTheme() {
+    if (ChangeTheme.getTheme() === 'light') {
+      await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
+        console.log('StatusBar error with setStyle(): ' + e);
+      });
+      document.querySelector('ion-icon').setAttribute('name', 'sunny');
+      this.tum_image = 'assets/imgs/tum-light.png';
+      ChangeTheme.setTheme(true);
+    } else {
+      await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
+        console.log('StatusBar error with setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.log('StatusBar error with setStyle(): ' + e);
+      });
+      document.querySelector('ion-icon').setAttribute('name', 'moon');
+      this.tum_image = 'assets/imgs/tum-icon.png';
+      ChangeTheme.setTheme(false);
+    }
+  }
   /**
    * Attempt to download a study from the URL scanned/entered by a user
    *
@@ -275,7 +302,6 @@ export class HomePage implements OnInit {
         study.properties.study_id !== undefined;
 
       if (validStudy) {
-        console.log('Enrolling in a study.... ');
         this.enrolInStudy(study);
       } else {
         if (this.loadingService) {
@@ -419,15 +445,9 @@ export class HomePage implements OnInit {
         const tasks = this.study
           ? await this.studyTasksService.generateStudyTasks(this.study)
           : [];
-
-        console.log('Length of tasks is: ', tasks.length);
-        console.log('Type of tasks is: ', typeof tasks);
-
         // setup the notifications
-        this.notificationsService.setNext30Notifications();
-
-        this.loadStudyDetails();
-        const studyTasks = await this.storageService.get('study-tasks');
+        await this.notificationsService.setNext30Notifications();
+        await this.loadStudyDetails();
       });
   }
 
@@ -435,14 +455,11 @@ export class HomePage implements OnInit {
    * Loads the details of the current study, including overdue tasks
    */
   async loadStudyDetails() {
-    //const tassk = await this.storageService.get('study-tasks');
-    //console.log("Just checking: ", tassk);
-    //this.jsonText = this.study['properties'].study_name;
     this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
       for (const task of this.task_list) {
-        task.moment = moment(task.time).fromNow();
+        task.moment = moment(new Date(task.time)).fromNow();
       }
 
       // show the study tasks
@@ -563,7 +580,7 @@ export class HomePage implements OnInit {
    * Displays a message when camera permission is not allowed
    */
   async displayBarcodeError() {
-    const alert = await this.alertController.create({
+    const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'Permission Required',
       message: this.translations.msg_camera,
       buttons: ['Dismiss'],
@@ -581,8 +598,7 @@ export class HomePage implements OnInit {
   /**
    * Refreshes the list of tasks
    */
-  doRefresh(refresher: RefresherCustomEvent) {
-    // What i
+  async doRefresh(refresher: RefresherCustomEvent) {
     if (!this.loadingService.isLoading) {
       this.ionViewWillEnter();
     }

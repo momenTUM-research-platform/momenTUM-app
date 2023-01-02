@@ -13,7 +13,6 @@ import { FormsModule } from '@angular/forms';
 /* plugins */
 
 import { IonicStorageModule } from '@ionic/storage-angular';
-import { FileTransfer } from '@ionic-native/file-transfer/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
@@ -44,7 +43,6 @@ export function LanguageLoader(http: HttpClient) {
   ],
   providers: [
     File,
-    FileTransfer,
     FormsModule,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],

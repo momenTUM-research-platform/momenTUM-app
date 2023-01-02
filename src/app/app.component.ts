@@ -9,6 +9,8 @@ import { AlertController } from '@ionic/angular';
 import { StorageService } from './services/storage/storage.service';
 import { NotificationsService } from './services/notification/notifications.service';
 import { ActionPerformed } from '@capacitor/local-notifications';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { BarcodeService } from './services/barcode/barcode.service';
 
 @Component({
   selector: 'app-root',
@@ -23,12 +25,18 @@ export class AppComponent implements OnInit {
     private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
+    private barcodeScannerService: BarcodeService,
     private storage: StorageService
   ) {
     this.initializeApp();
   }
 
   async ngOnInit() {
+
+    await this.barcodeScannerService.checkPermission().catch((err) => {
+      console.log(err);
+    });
+
     await this.platform.ready();
 
     await this.storage.init();
@@ -73,7 +81,7 @@ export class AppComponent implements OnInit {
   async initializeApp() {
     this.platform.ready().then(async () => {
       await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
-        console.log('StatusBar.setOverlaysWebView(): ' + e);
+        console.log('StatusBar error with setOverlaysWebView(): ' + e);
       });
       SplashScreen.hide();
     });

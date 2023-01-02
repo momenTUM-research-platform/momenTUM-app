@@ -1,3 +1,4 @@
+import { EmailComposer } from 'capacitor-email-composer';
 import { Component, OnInit } from '@angular/core';
 import { NavController, AlertController } from '@ionic/angular';
 import { NotificationsService } from '../../services/notification/notifications.service';
@@ -6,6 +7,7 @@ import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StorageService } from '../../services/storage/storage.service';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-settings',
@@ -61,7 +63,8 @@ export class SettingsPage {
     ]).then((values) => {
       // check if user is currently enrolled in study
       // to show/hide additional options
-      const studyObject: any = values[0];
+      const studyObject: string = values[0];
+
       if (studyObject !== null) {
         this.isEnrolled = true;
         this.study = JSON.parse(studyObject);
@@ -79,8 +82,6 @@ export class SettingsPage {
       } else {
         this.notificationsEnabled = notificationsEnabled;
       }
-
-      console.log('isEnrolled: ', this.isEnrolled);
       if (this.isEnrolled) {
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -175,13 +176,22 @@ export class SettingsPage {
    *
    * @param support_url The current study's support website URL
    */
+
   openSupportURL(support_url: string) {
-    Browser.open({ url: support_url, windowName: '_system' }).catch((e) => {
-      console.log(
-        'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
-          e
+    if (Capacitor.isNativePlatform()) {
+      // Return a Promise resolved with the result of calling the open method of the Browser object
+      return Browser.open({ url: support_url, windowName: '_window' }).catch(
+        (e) => {
+          console.log(
+            'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
+              e
+          );
+        }
       );
-    });
+    } else {
+      // Return a Promise resolved with the result of calling the open method of the window object
+      return Promise.resolve(window.open(support_url, '_blank'));
+    }
   }
 
   /**
@@ -193,5 +203,11 @@ export class SettingsPage {
   openSupportEmail(support_email: string, study_name: string) {
     window.location.href =
       'mailto:' + support_email + '?subject=Support: ' + study_name;
+    EmailComposer.open({
+      to: [support_email],
+      subject: 'Support: ' + study_name,
+    }).catch((err) => {
+      console.log(err);
+    });
   }
 }

@@ -13,4 +13,18 @@ describe('BarcodeService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  it('expect to call start scan', (done) => {
+    service.startScan().catch((message) => {
+      expect(message.toString()).toBe("Error: Not implemented on web.");
+      done();
+    });
+  });
+
+  it('expect to check premission if they are granted for barcode', (done) => {
+    service.didUserGrantPermission().catch((message) => {
+      expect(message.toString()).toBe("Error: Not implemented on web.");
+      done();
+    });
+  });
 });

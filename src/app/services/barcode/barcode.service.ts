@@ -23,7 +23,7 @@ export class BarcodeService {
 
     // if the result has content
     if (result.hasContent) {
-      console.log(result.content); // log the raw scanned content
+      console.log('Barcode scanner results: ' + result.content); // log the raw scanned content
     }
 
     return result;
@@ -111,9 +111,7 @@ export class BarcodeService {
 
   askUser(): void {
     this.prepare();
-
     const c = confirm('Do you want to scan a barcode?');
-
     if (c) {
       this.startScan();
     } else {

@@ -1,12 +1,17 @@
+// @ts-nocheck
+
 import { TestBed } from '@angular/core/testing';
 
+import { BarcodeService } from '../../services/barcode/barcode.service';
 import { LoadingService } from './loading-service.service';
 
 describe('LoadingService', () => {
   let service: LoadingService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [ BarcodeService],
+    });
     service = TestBed.inject(LoadingService);
   });
 

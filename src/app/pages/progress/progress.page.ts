@@ -130,7 +130,7 @@ export class ProgressPage {
             if (task.completed && task.response_time) {
               const historyItem = {
                 task_name: task.name.replace(/<\/?[^>]+(>|$)/g, ''),
-                moment_time: moment(task.response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
+                moment_time: moment(new Date(task.response_time)).fromNow(), //format("Do MMM, YYYY").fromNow()
                 response_time: new Date(task.response_time),
               };
               this.history.unshift(historyItem);
@@ -141,6 +141,7 @@ export class ProgressPage {
 
           // get all graphs
           for (const module of this.studyJSON.modules) {
+
             const graph = module.graph;
             const study_name = module.name;
             const graph_header = module.name;
@@ -168,7 +169,7 @@ export class ProgressPage {
                     for (const k in task.responses) {
                       if (k === variableToGraph) {
                         // format the response time
-                        const response_time = moment(task.response_time).format(
+                        const response_time = moment(new Date(task.response_time)).format(
                           'MMM Do, h:mma'
                         );
                         task_labels.push(response_time);
@@ -199,7 +200,6 @@ export class ProgressPage {
 
               // if the task had any data to graph, push it
               if (task_data.length > 0) {
-                console.log('Graph object: %j', graphObj);
                 this.graphs.push(graphObj);
               }
             }
