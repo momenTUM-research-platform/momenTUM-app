@@ -1,133 +1,35 @@
-#section-title {
-  font-weight: 50;
+/* input required error */
+.showError:before { content:" *"; }
+.showError {
+  font-weight:bold;
+  color:#F44336 !important;
 }
 
 ion-icon {
   font-size: 50px;
+}
+ion-list {
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 .videoPlayer {
   width: 100%;
 }
 
-.showError:before {
-  content: " *";
-}
-
-.showError {
-  font-weight: bold;
-  color: #f44336 !important;
-}
-
-p {
-  white-space: pre-wrap;
-}
-
-.light-blue-toolbar {
-  height: fit-content;
-  --min-height: 37px;
-  --ion-item-background: var(--ion-color-tertiary);
-  --padding-start: 10px;
-  --inner-padding-start: 0px;
-  --border-radius: 10px !important;
-  --vertical-align: middle;
-  text-align: center;
-  color: var(--ion-color-tertiary-contrast);
-}
-
-.slider-label-left {
-  width: 50%;
+ion-card,
+.card-ios,
+.card-md {
+  padding-top: 10px;
+  margin: 25px !important;
+  border-radius: 10px;
+  box-shadow: rgba(var(--ion-color-primary-rgb), 0.2) 0px 5px 7px -1px;
+  font-weight: 400;
+  font-size: 18px;
   text-align: left;
-  float: left;
-  font-size: small;
-  margin-top: -5px;
-  color: gray;
 }
 
-.slider-label-right {
-  width: 50%;
-  text-align: right;
-  float: left;
-  font-size: small;
-  margin-top: -5px;
-  color: gray;
-}
-
-.external-container {
-  min-height: 100px;
-  background: url("../../../assets/imgs/spinner.gif");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 50px 50px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.light-blue-card {
-  --ion-item-background: var(--ion-color-tertiary);
-  --padding-start: 0px;
-  --inner-padding-start: 0px;
-  --margin-start: 50px;
-  border-radius: 10px;
-  overflow: hidden;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
-  text-align: center;
-  color: var(--ion-color-tertiary-contrast);
-}
-
-.light-blue-card-page {
-  --ion-item-background: var(--ion-color-tertiary);
-  --margin: 5px;
-  margin: 5px;
-  border-radius: 10px;
-  overflow: hidden;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
-  text-align: center;
-  color: var(--ion-color-tertiary-contrast);
-}
-
-.light-blue-card-bg {
-  --ion-item-background: var(--ion-color-tertiary);
-  width: 100%;
-  margin-top: 10px;
-  border-radius: 10px;
-  --border-radius: 10px !important;
-  overflow: hidden;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
-  text-align: center;
-  color: var(--ion-color-tertiary-contrast);
-}
-
-.light-blue-card-div-instruction {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  --inner-padding-start: 5px;
-}
-
-.light-blue-card-div {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  width: 100%;
-}
-
-.light-blue-card-grid {
-  width: 100%;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.mult-select {
-  width: 100%;
-  text-align: left !important;
-}
+/***/
 
 .ion-radio-select-style {
   width: 100%;
@@ -152,56 +54,20 @@ p {
   color: var(--ion-color-tertiary-contrast);
 }
 
-ion-input {
-  --background: var(--ion-input-color);
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-  border-radius: 10px !important;
-}
-
-submit-next-button {
-  --border-radius: 15px;
-  width: 80%;
-}
-
-bottom-button {
-  align-items: center;
-  width: 80%;
-}
 ion-button {
   --border-radius: 15px;
 }
-ion-segment {
-  --background: transparent !important;
-}
 ion-segment-button {
-  --indicator-box-shadow: transparent !important;
   border-radius: 15px !important;
   padding: 0px;
   margin-right: 10px;
   margin-left: 10px;
   --background: var(--ion-segment-button);
   --color: var(--ion-color-tertiary-contrast);
-  --background-checked: linear-gradient(
-    to right,
-    var(--ion-color-tertiary-shade),
-    var(--ion-color-tertiary-shade)
-  ) !important;
   --color-checked: var(--ion-segment-button);
   --indicator-color: transparent !important; /* this solution */
+  --indicator-box-shadow: transparent !important;
 }
-
-ion-datetime {
-  --color: var(--ion-color-tertiary-contrast);
-  --placeholder-color: transparent !important;
-}
-
-
-ion-segment-button {
-  /*--background-checked: var(--ion-color-secondary);*/
-  --indicator-color: var(--ion-color-secondary);
-}
-
 
 ion-datetime {
   --background: #ffffff;

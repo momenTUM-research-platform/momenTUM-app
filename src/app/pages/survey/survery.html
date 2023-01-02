@@ -20,7 +20,6 @@
 </ion-header>
 
 <ion-content>
-
   <!--questions-->
   <ion-card
     *ngFor="let question of survey.sections[this.current_section-1].questions"
@@ -79,7 +78,7 @@
         preload="metadata"
         controlsList="nodownload"
       >
-        <source [src]="question.src" type="audio/ogg">
+        <source [src]="question.src" type="audio/ogg" />
         your device does not support the audio element
       </audio>
       <!--image type-->
@@ -110,10 +109,7 @@
         rows="3"
       ></ion-textarea>
       <!--multi input-->
-      <ion-list
-        *ngIf="question.type === 'multi'"
-        inset="true"
-      >
+      <ion-list *ngIf="question.type === 'multi'" inset="true">
         <!--no modal, radio-->
         <ion-radio-group
           *ngIf="!question.modal && question.radio"
@@ -122,28 +118,27 @@
         >
           <ion-item
             *ngFor="let option of question.optionsChecked"
+            class="radio-button-style"
             lines="none"
           >
-            <ion-label
-            >{{option.text}}</ion-label>
+            <ion-label style="font-size: medium"
+              >{{option.text}}</ion-label
+            >
             <ion-radio
-              slot="end"
-              color="primary"
+              slot="start"
+              color="light"
               value="{{option.text}}"
             ></ion-radio>
           </ion-item>
         </ion-radio-group>
         <!--no modal, no radio-->
-        <ng-container
-          *ngIf="!question.modal && !question.radio"
-        >
-          <ion-item
-            *ngFor="let option of question.optionsChecked"
-            lines="none"
-          >
-            <ion-label>{{option.text}}</ion-label>
+        <ng-container *ngIf="!question.modal && !question.radio">
+          <ion-item *ngFor="let option of question.optionsChecked" lines="none">
+            <ion-label style="font-size: medium"
+              >{{option.text}}</ion-label
+            >
             <ion-checkbox
-              color="primary"
+              color="secondary"
               (click)="changeCheckStatus(option, question)"
               [(ngModel)]="option.checked"
             ></ion-checkbox>
@@ -152,6 +147,7 @@
         <!--modal, no radio and radio-->
         <ion-select
           *ngIf="question.modal"
+          style="width: 100%; max-width: 100%"
           (ionChange)="setAnswer(question)"
           [(ngModel)]="question.model"
           placeholder="Select..."
@@ -159,7 +155,10 @@
           cancelText="Dismiss"
           multiple="{{!question.radio}}"
         >
-          <ion-select-option *ngFor="let option of question.optionsChecked">
+          <ion-select-option
+            color="tertiary"
+            *ngFor="let option of question.optionsChecked"
+          >
             {{option.text}}
           </ion-select-option>
         </ion-select>
@@ -170,21 +169,34 @@
         [(ngModel)]="question.model"
         (ionChange)="setAnswer(question)"
       >
-        <ion-segment-button
-          value="{{question.yes_text}}"
-          layout="icon-start"
-        >
+        <ion-segment-button value="{{question.yes_text}}" layout="icon-start">
           <ion-label>{{question.yes_text}}</ion-label>
           <ion-icon name="checkmark"></ion-icon>
         </ion-segment-button>
-        <ion-segment-button
-          value="{{question.no_text}}"
-          layout="icon-start"
-        >
+        <ion-segment-button value="{{question.no_text}}" layout="icon-start">
           <ion-label>{{question.no_text}}</ion-label>
           <ion-icon name="close"></ion-icon>
         </ion-segment-button>
       </ion-segment>
+      <!--external-->
+      <iframe
+        *ngIf="question.type === 'external'"
+        style="width: 100%"
+        frameborder="0"
+        scrolling="no"
+        [src]="question.src"
+      ></iframe>
+      <!--file-->
+      <ion-segment-button
+        *ngIf="question.type === 'file'"
+        style="width: 100%"
+        value="Open file"
+        layout="icon-start"
+        (click)="openExternalFile(question.src)"
+      >
+        <ion-label>{{question.file_name}}</ion-label>
+        <ion-icon size="small" name="open-outline"></ion-icon>
+      </ion-segment-button>
     </ion-card-content>
   </ion-card>
 
