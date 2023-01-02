@@ -19,10 +19,6 @@ ion-icon {
   color: #f44336 !important;
 }
 
-.scroll-content {
-  padding-bottom: 0 !important;
-}
-
 p {
   white-space: pre-wrap;
 }
@@ -198,4 +194,20 @@ ion-segment-button {
 ion-datetime {
   --color: var(--ion-color-tertiary-contrast);
   --placeholder-color: transparent !important;
+}
+
+
+ion-segment-button {
+  /*--background-checked: var(--ion-color-secondary);*/
+  --indicator-color: var(--ion-color-secondary);
+}
+
+
+ion-datetime {
+  --background: #ffffff;
+  --background-rgb: 255, 241, 242;
+  color: #3070b3 !important;
+  --placeholder-color: #000000 !important;
+  border-radius: 16px;
+  box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
 }
