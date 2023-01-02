@@ -5,18 +5,33 @@
   color:#F44336 !important;
 }
 
-ion-icon {
-  font-size: 50px;
-}
-ion-list {
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
 .videoPlayer {
   width: 100%;
 }
 
+/* For the input */
+ion-input {
+  background-color: var(--ion-color-secondary-tint);
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  border-radius: 10px !important;
+}
+
+/* For the toolbar */
+.light-blue-toolbar {
+  height: fit-content;
+  --min-height: 37px;
+  --ion-item-background: var(--ion-color-tertiary);
+  --padding-start: 10px;
+  --inner-padding-start: 0px;
+  --border-radius: 10px !important;
+  --vertical-align: middle;
+  text-align: center;
+  color: var(--ion-color-tertiary-contrast);
+}
+
+
+/* For the card design */
 ion-card,
 .card-ios,
 .card-md {
@@ -29,8 +44,12 @@ ion-card,
   text-align: left;
 }
 
-/***/
+/* For Yes or No questions icon */
+ion-icon {
+  font-size: 30px;
+}
 
+/* For radio buttons to be curves and have specific colors when selected */
 .ion-radio-select-style {
   width: 100%;
   max-width: 100%;
@@ -43,7 +62,6 @@ ion-card,
 }
 
 .radio-button-style {
-  --ion-item-background: var(--ion-input-color);
   margin-top: 10px !important;
   margin-bottom: 10px !important;
   border-radius: 50px !important;
@@ -54,26 +72,55 @@ ion-card,
   color: var(--ion-color-tertiary-contrast);
 }
 
+/* This is specific to multiple choice questions,
+   they need transparent background for them to adapt
+   our design colors
+*/
+ion-list {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* For file button alignment */
+.center{
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+  display: block !important;
+}
+
+/* For submit button */
 ion-button {
   --border-radius: 15px;
 }
+ion-segment {
+  --background: transparent !important;
+}
+
+/* For Yes or No questions button designs */
 ion-segment-button {
+  --indicator-box-shadow: transparent !important;
   border-radius: 15px !important;
   padding: 0px;
   margin-right: 10px;
   margin-left: 10px;
-  --background: var(--ion-segment-button);
+  --background: var(--ion-color-secondary-tint);
   --color: var(--ion-color-tertiary-contrast);
-  --color-checked: var(--ion-segment-button);
-  --indicator-color: transparent !important; /* this solution */
-  --indicator-box-shadow: transparent !important;
+  --background-checked: linear-gradient(
+    to right,
+    var(--ion-color-tertiary-shade),
+    var(--ion-color-tertiary-shade)
+  ) !important;
+  --color-checked: var(--ion-color-secondary-tint);
+  --indicator-color: transparent !important;
+  --indicator-color-checked: transparent !important;
 }
 
+/* For datetime */
 ion-datetime {
-  --background: #ffffff;
-  --background-rgb: 255, 241, 242;
-  color: #3070b3 !important;
-  --placeholder-color: #000000 !important;
-  border-radius: 16px;
-  box-shadow: rgba(var(--ion-color-rose-rgb), 0.3) 0px 10px 15px -3px;
+  --background: var(--ion-color-light-contrast);
+  --background-rgb: var(--ion-color-light-rgb);
+  --color: var(--ion-color-primary);
+  border-radius: 15px;
+  box-shadow: rgba(var(--ion-color-primary), 0.3) 0px 5px 7px -1px;
 }

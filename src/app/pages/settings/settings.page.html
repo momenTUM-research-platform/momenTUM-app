@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
       <span class="header-title-thin">momenTUM</span>
     </ion-title>
@@ -11,22 +11,22 @@
     <ion-grid>
       <ion-row>
         <ion-col stacked class="icon-image" size="4">
-          <img src="assets/icon/Person.svg" class="icon" />
+          <img height="100px" src="assets/icon/Person.svg" class="icon" />
         </ion-col>
         <ion-col size="8">
-          <!-- <ion-item>User ID</ion-item>
-      <ion-item >
-          {{this.uuid}}
-      </ion-item> -->
           <ion-list>
             <ion-item lines="none">
               <ion-label color="secondary" stacked class="title-label">
                 User ID
               </ion-label>
             </ion-item>
-
             <ion-item lines="none">
-              <ion-label> {{this.uuid}} </ion-label>
+              <ion-label
+                style="white-space: pre-wrap !important"
+                [innerHTML]="this.uuid"
+                class="ion-text-wrap"
+              >
+              </ion-label>
             </ion-item>
           </ion-list>
         </ion-col>

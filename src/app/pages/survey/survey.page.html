@@ -168,32 +168,35 @@
       >
         <ion-segment-button value="{{question.yes_text}}" layout="icon-start">
           <ion-label>{{question.yes_text}}</ion-label>
-          <ion-icon name="checkmark"></ion-icon>
+          <ion-icon name="checkmark-sharp"></ion-icon>
         </ion-segment-button>
         <ion-segment-button value="{{question.no_text}}" layout="icon-start">
           <ion-label>{{question.no_text}}</ion-label>
-          <ion-icon name="close"></ion-icon>
+          <ion-icon name="close-sharp"></ion-icon>
         </ion-segment-button>
       </ion-segment>
       <!--external-->
       <iframe
         *ngIf="question.type === 'external'"
-        style="width: 100%"
+        width="100%"
+        height="100%"
+        style="--webkit-transform:scale(0.5);--moz-transform-scale: (0.5);"
         frameborder="0"
-        scrolling="no"
+        scrolling="yes"
         [src]="question.src"
       ></iframe>
       <!--file-->
-      <ion-segment-button
+      <ion-button
         *ngIf="question.type === 'file'"
-        style="width: 100%"
+        class="center"
         value="Open file"
+        color="light"
         layout="icon-start"
         (click)="openExternalFile(question.src)"
       >
-        <ion-label>{{question.file_name}}</ion-label>
+        <ion-label style="margin:auto;">{{question.file_name}}</ion-label>
         <ion-icon size="small" name="open-outline"></ion-icon>
-      </ion-segment-button>
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
