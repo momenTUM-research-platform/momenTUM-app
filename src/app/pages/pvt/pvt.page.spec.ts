@@ -65,7 +65,6 @@ describe('PvtPage', () => {
     }).compileComponents();
 
     angularStorageSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
-    angularStorageSpy.get.and.returnValue(Promise.resolve('some value'));
 
     fixture = TestBed.createComponent(PvtPage);
     component = fixture.componentInstance;

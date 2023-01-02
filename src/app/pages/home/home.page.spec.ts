@@ -1,4 +1,4 @@
-import { IonicModule, IonIcon, AlertController} from '@ionic/angular';
+import { IonicModule, IonIcon, AlertController } from '@ionic/angular';
 import { RefresherCustomEvent } from '@ionic/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
@@ -376,7 +376,6 @@ describe('HomePage', () => {
     expect(spyStartScan).toHaveBeenCalledTimes(1);
   });
 
-
   it('should call attempt display enrol error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(
       AlertController
@@ -428,7 +427,7 @@ describe('HomePage', () => {
     expect(component.task_list[0].index).toEqual(stubValueTask[0].index);
   });
 
-  it('should call ionViewWillEnter and complete the refresher after a delay', done => {
+  it('should call ionViewWillEnter and complete the refresher after a delay', (done) => {
     const myRefresherElement = jasmine.createSpyObj<HTMLIonRefresherElement>(
       'HTMLIonRefresherElement',
       ['complete']
@@ -444,6 +443,4 @@ describe('HomePage', () => {
       done();
     }, 250);
   });
-
-
 });

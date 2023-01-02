@@ -49,11 +49,10 @@ describe('StudyTasksService', () => {
   });
 
   // For testing JSONs jasmine.objectContaining(
-
   it('should get all tasks from storage', async () => {
     const stubValue: string = JSON.stringify(study_tasks.tasks);
     // Making the return value of the get function call to be stubValue
-    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
     const response: Task[] = await service.getAllTasks();
 
     expect(StorageServiceSpy.get.calls.count())
@@ -67,17 +66,20 @@ describe('StudyTasksService', () => {
 
   it('should get tasks display list from storage', async () => {
     const stubValue: string = JSON.stringify(study_tasks.tasks);
-    const stubDisplayValue: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks_display));
+    const stubDisplayValue: Task[] = JSON.parse(
+      JSON.stringify(study_tasks.tasks_display)
+    );
     // Making the return value of the get function call to be stubValue
-    await StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
     const response: Task[] = await service.getTaskDisplayList();
     expect(StorageServiceSpy.get.calls.count())
       .withContext('spy method was called once')
       .toBe(1);
 
-    // As of Oct 11, 2022, there are 6 tasks to be displayed
     expect(response.length)
-      .withContext('There are 3 different types, so with headers, 6 items are to be displayed')
+      .withContext(
+        'There are 3 different types, so with headers, 6 items are to be displayed'
+      )
       .toBe(6);
     expect(response)
       .withContext('Expected to be mostly the same values')

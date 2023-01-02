@@ -67,8 +67,7 @@ describe('SurveryCacheService', () => {
 
   it('should show cache all media', async () => {
     const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
-
-    await StorageServiceSpy.get.and.returnValue(
+    StorageServiceSpy.get.and.returnValue(
       Promise.resolve(JSON.stringify(study))
     );
 
@@ -99,7 +98,7 @@ describe('SurveryCacheService', () => {
   it('should download all the media', async () => {
     // Call this method to store all the urls in the service
     const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
-    await StorageServiceSpy.get.and.returnValue(
+    StorageServiceSpy.get.and.returnValue(
       Promise.resolve(JSON.stringify(study))
     );
 
@@ -118,12 +117,11 @@ describe('SurveryCacheService', () => {
   it('should check if finished', async () => {
     const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
     // Sets storage key 'current-study' with a Study
-    await StorageServiceSpy.get.and.returnValue(
+    StorageServiceSpy.get.and.returnValue(
       Promise.resolve(JSON.stringify(study))
     );
 
     service.getMediaURLs(study);
-
 
     // Check if the media count is greater than 0
     expect(service.mediaCount)

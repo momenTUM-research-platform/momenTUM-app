@@ -55,5 +55,6 @@ describe('TabsPage', () => {
 
   it('should create TabsPage', () => {
     expect(component).toBeTruthy();
+    expect(component.selectedLanguage).toBeDefined();
   });
 });

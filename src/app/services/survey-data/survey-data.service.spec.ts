@@ -77,15 +77,20 @@ describe('SurveyDataService', () => {
 
   it('should save to local storage and get it', async () => {
     const data = 'Data';
-    StorageServiceSpy.set.and.callThrough();
-    await service.saveToLocalStorage('Test', data);
+    const key = 'Test';
+    StorageServiceSpy.set
+      .withArgs(key, data)
+      .and.returnValue(Promise.resolve());
+    await service.saveToLocalStorage(key, data);
+    expect(StorageServiceSpy.set).toHaveBeenCalledWith(key, data);
     expect(StorageServiceSpy.set).toHaveBeenCalledTimes(1);
   });
 
   it('should save to local storage and get it', async () => {
     const data = 'Data';
-    StorageServiceSpy.get.and.returnValue(Promise.resolve(data));
-    const value: any = await service.getFromLocalStorage('Test');
+    const key = 'Test';
+    StorageServiceSpy.get.withArgs(key).and.returnValue(Promise.resolve(data));
+    const value: any = await service.getFromLocalStorage(key);
     expect(StorageServiceSpy.get).toHaveBeenCalledTimes(1);
     expect(value).toBe(data);
   });
@@ -94,7 +99,6 @@ describe('SurveyDataService', () => {
     const url = 'http://localhost:3001/api/surveys/study_for_ios';
     const bodyData = new FormData();
     bodyData.append('TestKey', 'TestValue');
-
     httpClientSpy.post.and.nextWith(bodyData);
     const result: any = await service.attemptHttpPost(url, bodyData);
     expect(bodyData)
@@ -114,6 +118,7 @@ describe('SurveyDataService', () => {
     studyTaskServiceSpy.getAllTasks.and.returnValue(
       Promise.resolve(JSON.parse(stubValueTasks))
     );
+
     httpClientSpy.post.and.nextWith(bodyData);
     uuidServiceSpy.generateUUID.and.returnValue(uniqueId);
     StorageServiceSpy.get.and.callFake((param) => {
@@ -149,7 +154,7 @@ describe('SurveyDataService', () => {
     // data is responses to questions
     await service.sendSurveyDataToServer(data1);
     // data is pvt entries
-    await service.sendSurveyDataToServer(data1);
+    await service.sendSurveyDataToServer(data2);
 
     expect(studyTaskServiceSpy.getAllTasks).toHaveBeenCalledTimes(2);
     expect(httpClientSpy.post).toHaveBeenCalledTimes(2);
@@ -197,12 +202,11 @@ describe('SurveyDataService', () => {
     const dataType1 = 'pending-log';
     const dataType2 = 'pending-data';
 
-
     //data type is "pending-log"
-    await (await service.uploadPendingData(dataType1));
+    await await service.uploadPendingData(dataType1);
 
     //data type is "pending-data"
-    await (await service.uploadPendingData(dataType2));
+    await await service.uploadPendingData(dataType2);
 
     expect(StorageServiceSpy.get).toHaveBeenCalledTimes(2);
     expect(StorageServiceSpy.keys).toHaveBeenCalledTimes(2);
