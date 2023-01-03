@@ -1,5 +1,5 @@
 import { EmailComposer } from 'capacitor-email-composer';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavController, AlertController } from '@ionic/angular';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { Browser } from '@capacitor/browser';

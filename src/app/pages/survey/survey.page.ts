@@ -5,7 +5,7 @@ import { StatusBar } from '@capacitor/status-bar';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
-import { Browser, OpenOptions } from '@capacitor/browser';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';

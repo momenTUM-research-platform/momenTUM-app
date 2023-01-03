@@ -59,11 +59,6 @@ export class BarcodeService {
       return false;
     }
 
-    if (status.asked) {
-      // system requested the user for permission during this call
-      // only possible when force set to true
-    }
-
     if (status.neverAsked) {
       // user has not been requested this permission before
       // it is advised to show the user some sort of prompt
@@ -87,10 +82,6 @@ export class BarcodeService {
     // so request it
     const statusRequest = await BarcodeScanner.checkPermission({ force: true });
 
-    if (statusRequest.asked) {
-      // system requested the user for permission during this call
-      // only possible when force set to true
-    }
 
     if (statusRequest.granted) {
       // the user did grant the permission now
@@ -106,17 +97,4 @@ export class BarcodeService {
     BarcodeScanner.stopScan();
   }
 
-  public prepare(): void {
-    BarcodeScanner.prepare();
-  }
-
-  askUser(): void {
-    this.prepare();
-    const c = confirm('Do you want to scan a barcode?');
-    if (c) {
-      this.startScan();
-    } else {
-      this.stopScan();
-    }
-  }
 }

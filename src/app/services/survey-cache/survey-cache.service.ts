@@ -5,7 +5,6 @@ import {
   FileDownload,
   FileDownloadResponse,
 } from 'capacitor-plugin-filedownload';
-import { Filesystem } from '@capacitor/filesystem';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({

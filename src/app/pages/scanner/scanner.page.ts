@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { ViewWillEnter, ViewWillLeave, NavController } from '@ionic/angular';
-import { NavigationExtras, Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { NavController } from '@ionic/angular';
+import { NavigationExtras } from '@angular/router';
 import { BarcodeService } from '../../services/barcode/barcode.service';
 
 @Component({

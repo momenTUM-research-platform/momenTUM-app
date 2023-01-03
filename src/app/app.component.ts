@@ -1,15 +1,13 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { SurveyDataService } from './services/survey-data/survey-data.service';
 import * as moment from 'moment';
-import { AlertController } from '@ionic/angular';
 import { StorageService } from './services/storage/storage.service';
 import { NotificationsService } from './services/notification/notifications.service';
 import { ActionPerformed } from '@capacitor/local-notifications';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { BarcodeService } from './services/barcode/barcode.service';
 
 @Component({

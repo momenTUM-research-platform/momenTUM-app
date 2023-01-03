@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import * as moment from 'moment';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
