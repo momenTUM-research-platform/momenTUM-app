@@ -8,7 +8,6 @@ import {
   CancelOptions,
   PendingLocalNotificationSchema,
   ListChannelsResult,
-  ActionPerformed,
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
 import { StudyTasksService } from '../study-task/study-tasks.service';
@@ -156,7 +155,6 @@ export class NotificationsService {
   async requestPermissions() {
     const status: string = (await LocalNotifications.checkPermissions())
       .display;
-    console.log('Status is: ' + status);
     if (status.endsWith('granted')) {
       // Do nothing
     } else {

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   BarcodeScanner,
+  CheckPermissionOptions,
   ScanResult,
 } from '@capacitor-community/barcode-scanner';
 
@@ -23,14 +24,14 @@ export class BarcodeService {
 
     // if the result has content
     if (result.hasContent) {
-      console.log(result.content); // log the raw scanned content
+      console.log('Barcode scanner results: ' + result.content); // log the raw scanned content
     }
 
     return result;
   }
 
-  async checkPermission() {
-    const status = await this.didUserGrantPermission();
+  async checkPermission(option?: CheckPermissionOptions) {
+    const status = await this.didUserGrantPermission(option);
 
     if (!status) {
       // the user denied permission for good
@@ -44,9 +45,9 @@ export class BarcodeService {
     }
   }
 
-  async didUserGrantPermission() {
+  async didUserGrantPermission(option?: CheckPermissionOptions) {
     // check if user already granted permission
-    const status = await BarcodeScanner.checkPermission({ force: false });
+    const status = await BarcodeScanner.checkPermission(option);
 
     if (status.granted) {
       // user granted permission
@@ -56,11 +57,6 @@ export class BarcodeService {
     if (status.denied) {
       // user denied permission
       return false;
-    }
-
-    if (status.asked) {
-      // system requested the user for permission during this call
-      // only possible when force set to true
     }
 
     if (status.neverAsked) {
@@ -86,10 +82,6 @@ export class BarcodeService {
     // so request it
     const statusRequest = await BarcodeScanner.checkPermission({ force: true });
 
-    if (statusRequest.asked) {
-      // system requested the user for permission during this call
-      // only possible when force set to true
-    }
 
     if (statusRequest.granted) {
       // the user did grant the permission now
@@ -105,19 +97,4 @@ export class BarcodeService {
     BarcodeScanner.stopScan();
   }
 
-  public prepare(): void {
-    BarcodeScanner.prepare();
-  }
-
-  askUser(): void {
-    this.prepare();
-
-    const c = confirm('Do you want to scan a barcode?');
-
-    if (c) {
-      this.startScan();
-    } else {
-      this.stopScan();
-    }
-  }
 }

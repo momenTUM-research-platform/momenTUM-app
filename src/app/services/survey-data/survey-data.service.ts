@@ -30,14 +30,13 @@ export class SurveyDataService {
         headers: {},
         connectTimeout: 60000,
       };
-
       // Now a get request
       Http.get(options)
         .then((data) => {
           resolve(data.data);
         })
         .catch((error) => {
-          console.log('[From Get Remote Data] Error message: ' + error);
+          console.log('Error in getting remote data: ' + error);
           reject(error);
         });
     });
@@ -61,7 +60,6 @@ export class SurveyDataService {
    */
   async getFromLocalStorage(key: string): Promise<any> {
     const data = await this.storage.get(key);
-    console.log('Data from storage is: ' + data);
     return data;
   }
 
@@ -152,7 +150,11 @@ export class SurveyDataService {
           const json = JSON.stringify(object);
           this.storage.set(logUuid, json);
         }
+      }).catch((error)=>{
+        console.log('Error in attempt http post: ', error || '');
       });
+    }).catch((error)=>{
+      console.log('Error in log Page Visit To Server: ', error.message || '');
     });
   }
 
@@ -211,14 +213,12 @@ export class SurveyDataService {
       this.httpClient.post(postURL, bodyData).subscribe({
         next: (v) => {
           resolve(v);
-          console.log('Notice Survey: ' + v);
         },
         error: (e) => {
           console.log('Error in attempt http post: ', e || '');
           resolve(false);
         },
         complete: () => {
-          console.log('Complete');
           resolve(true);
         },
       });

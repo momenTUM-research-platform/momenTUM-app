@@ -32,8 +32,9 @@
       (click)="exit()"
       name="close"
       *ngIf="enableExit"
+      data-cy="exitbutton"
     ></ion-icon>
-    <div class="timer-box center-abs">
+    <div class="timer-box center-abs"  data-cy="timerbox" >
       <h2 *ngIf="timer >= 0">{{timer}}</h2>
       <h2 *ngIf="reactedTooLate">{{tooLateMessage}}</h2>
       <h2 *ngIf="reactedTooEarly">{{tooEarlyMessage}}</h2>

@@ -44,17 +44,24 @@
   src: url("./assets/fonts/TUMNeueHelvetica-Bold.ttf");
 }
 
-// schema themes
-.header-icon {
-  max-height: 16px;
-}
-
-.header-title-thin {
-  font-weight: 50;
-  padding-left: 5px;
-}
-
-// momenTUM themes
+/* the font used*/
 * {
   --ion-font-family: "TUM Neue Helvetica";
+}
+
+/* the title in the header on each page */
+ion-title {
+  font-weight: 50;
+  color: var(--ion-color-primary);
+}
+
+/* when scanning, set background to invisible */
+body.scanner-active {
+  background: transparent;
+  --ion-background-color: transparent;
+}
+
+/* Useful for the select buttons when the texts are really long */
+.item.sc-ion-label-md-h, .item .sc-ion-label-md-h{
+  white-space: normal !important;
 }

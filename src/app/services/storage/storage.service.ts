@@ -23,7 +23,7 @@ export class StorageService {
     return await this.nStorage.set(key, value);
   }
 
-  public async get(key: string): Promise<{ value: any }> {
+  public async get(key: string): Promise<any> {
     return await this.nStorage.get(key);
   }
 
