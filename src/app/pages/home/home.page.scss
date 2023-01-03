@@ -18,22 +18,14 @@
   border-radius: 10px;
 }
 
-.enrolment-img-light {
-	height: 40%;
-  width: 60%;
-	margin-top: 10%;
-	margin-left: auto;
-	margin-right: auto;
-  margin-bottom: auto;
+
+// Name suggests the designs of the title labels
+.title-label{
+  font-size: 17px;
+  font-weight: bold;
 }
 
 // banner-image
 .banner-image {
   padding: 32px 64px;
-}
-
-// modules, module group titles, empty message
-ion-item {
-  --padding-top: 16px;
-  --padding-bottom: 16px;
 }

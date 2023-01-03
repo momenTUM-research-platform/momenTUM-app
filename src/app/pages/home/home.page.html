@@ -60,9 +60,9 @@
         </ion-label>
       </ion-item>
       <!--item group title-->
-      <ion-item-divider *ngIf="task.type === 'header'" color="light">
-        <ion-label color="medium">{{task.label}}</ion-label>
-      </ion-item-divider>
+      <ion-item *ngIf="task.type === 'header'" lines="none">
+        <ion-label stacked class="title-label">{{task.label}}</ion-label>
+      </ion-item>
     </ng-container>
     <ion-item lines="none" class="ion-text-center" [hidden]="task_list.length">
       <ion-label *ngIf="study" class="ion-text-wrap">

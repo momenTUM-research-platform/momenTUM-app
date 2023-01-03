@@ -56,8 +56,12 @@
         (ionChange)="setAnswer(question)"
         style="font-size: small"
       >
-        <ion-label color="dark" slot="start">{{question.hint_left}}</ion-label>
-        <ion-label color="dark" slot="end">{{question.hint_right}}</ion-label>
+        <ion-item style="width: 20%; text-align: center;" color="none"  lines="none" slot="start">
+          <ion-label >{{question.hint_left}}</ion-label>
+        </ion-item>
+        <ion-item style="width: 20%; text-align: center;" color="none"  lines="none" slot="end">
+          <ion-label >{{question.hint_right}}</ion-label>
+        </ion-item>
       </ion-range>
       <!--video type-->
       <video
@@ -180,7 +184,7 @@
         *ngIf="question.type === 'external'"
         width="100%"
         height="100%"
-        style="--webkit-transform:scale(0.5);--moz-transform-scale: (0.5);"
+        style="--webkit-transform: scale(0.5); --moz-transform-scale: (0.5)"
         frameborder="0"
         scrolling="yes"
         [src]="question.src"
@@ -194,7 +198,7 @@
         layout="icon-start"
         (click)="openExternalFile(question.src)"
       >
-        <ion-label style="margin:auto;">{{question.file_name}}</ion-label>
+        <ion-label style="margin: auto">{{question.file_name}}</ion-label>
         <ion-icon size="small" name="open-outline"></ion-icon>
       </ion-button>
     </ion-card-content>

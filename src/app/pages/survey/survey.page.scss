@@ -17,6 +17,14 @@ ion-input {
   border-radius: 10px !important;
 }
 
+/* For the textarea input */
+ion-textarea {
+  background-color: var(--ion-color-secondary-tint);
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  border-radius: 10px !important;
+}
+
 /* For the toolbar */
 .light-blue-toolbar {
   height: fit-content;
