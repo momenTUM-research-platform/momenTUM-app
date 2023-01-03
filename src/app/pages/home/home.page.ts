@@ -17,7 +17,8 @@ import * as moment from 'moment';
 import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
-import { BarcodeService } from '../../services/barcode/barcode.service';
+import { NavController } from '@ionic/angular';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -66,12 +67,13 @@ export class HomePage implements OnInit {
   selectedLanguage: string;
 
   constructor(
-    private barcodeService: BarcodeService,
     private surveyDataService: SurveyDataService,
     private notificationsService: NotificationsService,
     private surveyCacheService: SurveyCacheService,
     private studyTasksService: StudyTasksService,
     private uuidService: UuidService,
+    private navController: NavController,
+    private route: ActivatedRoute,
     private router: Router,
     private platform: Platform,
     private loadingService: LoadingService,
@@ -80,25 +82,48 @@ export class HomePage implements OnInit {
     private translate: TranslateService
   ) {}
 
+  // Async method because every method that is called from the status bar are also Asynchronus methods
+  async toggleTheme() {
+    if (ChangeTheme.getTheme() === 'light') {
+      await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
+        console.log('StatusBar.setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
+      });
+      ChangeTheme.setTheme(true);
+      this.darkMode = true;
+    } else {
+      await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
+        console.log('StatusBar.setBackgroundColor(): ' + e);
+      });
+      await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
+        console.log('StatusBar.setStyle(): ' + e);
+      });
+      ChangeTheme.setTheme(false);
+      this.darkMode = false;
+    }
+  }
+
   ngOnInit() {
     // Initialize theme, toggle icon, and StatusBar accordingly
     ChangeTheme.initializeTheme();
     if (ChangeTheme.getTheme() === 'light') {
       StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar error with setBackgroundColor(): ' + e);
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar error with setStyle(): ' + e);
+        console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'moon');
+      this.darkMode = false;
     } else {
       StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar error with setBackgroundColor(): ' + e);
+        console.log('StatusBar.setBackgroundColor(): ' + e);
       });
       StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar error with setStyle(): ' + e);
+        console.log('StatusBar.setStyle(): ' + e);
       });
-      document.querySelector('ion-icon').setAttribute('name', 'sunny');
+      this.darkMode = true;
     }
 
     // need to subscribe to this event in order
@@ -123,12 +148,18 @@ export class HomePage implements OnInit {
         }
       }
     });
+
+    // Need to make sure data from QR code scanner arrived or not
+    this.route.queryParams.subscribe(async (params) => {
+      if (this.router.getCurrentNavigation()?.extras.state) {
+        const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
+        await this.attemptToDownloadStudy(url, true, false);
+      }
+    });
   }
 
   async ionViewWillEnter() {
-    // check if dark mode
-    this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
+    this.darkMode = ChangeTheme.getTheme() === 'dark';
     // translate
     let key: keyof Translations;
     // eslint-disable-next-line guard-for-in
@@ -141,26 +172,23 @@ export class HomePage implements OnInit {
     this.notificationsService.requestPermissions();
 
     this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading).catch((e) => {
-      console.log('Loading service present error: ' + e);
-    });
+    this.loadingService.present(this.translations.label_loading);
 
     this.hideEnrolOptions = true;
     this.isEnrolledInStudy = false;
 
     // check if user is currently enrolled in study
-
     try {
       await this.storageService.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
       await this.storageService.init();
     }
-
     Promise.all([this.storageService.get('current-study')]).then((values) => {
       const studyObject: any = values[0];
       if (studyObject !== null) {
         // convert the study to a JSON object
+
         this.study = JSON.parse(studyObject);
 
         // log the user visiting this tab
@@ -225,29 +253,14 @@ export class HomePage implements OnInit {
     }
   }
 
-  async toggleTheme() {
-    if (ChangeTheme.getTheme() === 'light') {
-      await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar error with setBackgroundColor(): ' + e);
-      });
-      await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar error with setStyle(): ' + e);
-      });
-      document.querySelector('ion-icon').setAttribute('name', 'sunny');
-      this.tum_image = 'assets/imgs/tum-light.png';
-      ChangeTheme.setTheme(true);
-    } else {
-      await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar error with setBackgroundColor(): ' + e);
-      });
-      await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar error with setStyle(): ' + e);
-      });
-      document.querySelector('ion-icon').setAttribute('name', 'moon');
-      this.tum_image = 'assets/imgs/tum-icon.png';
-      ChangeTheme.setTheme(false);
-    }
+  /**
+   * ScanQR Code router
+   */
+
+  async scanQR() {
+    return this.navController.navigateForward('/scanner');
   }
+
   /**
    * Attempt to download a study from the URL scanned/entered by a user
    *
@@ -318,26 +331,6 @@ export class HomePage implements OnInit {
       // This means invalid URL
     }
   }
-  /**
-   * Uses the barcode scanner to enrol in a study
-   */
-  async scanBarcode() {
-    this.barcodeService
-      .startScan()
-      .then((barcodeData) => {
-        if (barcodeData.hasContent) {
-          this.attemptToDownloadStudy(barcodeData?.content, true, false);
-        }
-      })
-      .catch((err) => {
-        if (!this.loadingService.isLoading) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
-
-        this.displayBarcodeError();
-      });
-  }
 
   /**
    * Handles the alert dialog to enrol via URL
@@ -345,7 +338,6 @@ export class HomePage implements OnInit {
   async enterURL() {
     const alert = await this.alertController.create({
       header: this.translations['btn_enter-url'],
-      cssClass: 'alertStyle',
       inputs: [
         {
           name: 'url',
@@ -379,7 +371,6 @@ export class HomePage implements OnInit {
   async enterStudyID() {
     const alert = await this.alertController.create({
       header: this.translations['btn_study-id'],
-      cssClass: 'alertStyle',
       inputs: [
         {
           name: 'id',
@@ -544,10 +535,10 @@ export class HomePage implements OnInit {
     if (!isQRCode && !isJSONinvalid && isURLproblem) {
       if (isStudyID) {
         msg =
-          "We couldn't load your study. The URL is an invalid. Please ensure you are entering the correct ID.";
+          "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct ID.";
       } else {
         msg =
-          "We couldn't load your study. The URL is an invalid. Please ensure you are entering the correct URL.";
+          "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL.";
       }
     }
     /**
@@ -555,14 +546,14 @@ export class HomePage implements OnInit {
      */
     if (isQRCode && !isJSONinvalid && isURLproblem) {
       msg =
-        "We couldn't load your study. The URL is an invalid. Please ensure you are scanning the correct code.";
+        "We couldn't load your study. The URL is invalid. Please ensure you are scanning the correct code.";
     }
     /**
      * All three is the problem
      */
     if (isQRCode && isJSONinvalid && isURLproblem) {
       msg =
-        "We couldn't load your study. The downloaded study is an invalid. Please check your internet connection and ensure \
+        "We couldn't load your study. The downloaded study is invalid. Please check your internet connection and ensure \
       you are scanning the correct code.";
     }
 
@@ -575,7 +566,6 @@ export class HomePage implements OnInit {
     const alert = await this.alertController.create({
       header: 'Oops...',
       message: msg,
-      cssClass: 'alertStyle',
       buttons: ['Dismiss'],
     });
     await alert.present();
@@ -587,7 +577,6 @@ export class HomePage implements OnInit {
   async displayBarcodeError() {
     const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'Permission Required',
-      cssClass: 'alertStyle',
       message: this.translations.msg_camera,
       buttons: ['Dismiss'],
     });

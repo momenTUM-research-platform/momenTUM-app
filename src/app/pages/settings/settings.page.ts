@@ -114,7 +114,6 @@ export class SettingsPage {
     const alert = await this.alertController.create({
       header: 'Are you sure?',
       message: 'By withdrawing, you will lose all progress.',
-      cssClass: 'alertStyle',
       buttons: [
         {
           text: 'Cancel',

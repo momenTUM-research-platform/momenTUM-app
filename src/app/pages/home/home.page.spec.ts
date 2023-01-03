@@ -23,7 +23,6 @@ import {
 } from '@angular/common/http';
 import { By } from '@angular/platform-browser';
 import { HomePage } from './home.page';
-import { BarcodeService } from '../../services/barcode/barcode.service';
 import { StatusBar, StatusBarPlugin } from '@capacitor/status-bar';
 import { ChangeTheme } from '../../shared/change-theme';
 import { LoadingService } from '../../services/loading/loading-service.service';
@@ -67,7 +66,6 @@ describe('HomePage', () => {
         }),
       ],
       providers: [
-        BarcodeService,
         { provide: AlertController, useValue: new MockAlertController() },
         { provide: StatusBar, useValue: statusBarSpy },
         { provide: USE_DEFAULT_LANG, useValue: true },
@@ -105,7 +103,7 @@ describe('HomePage', () => {
 
     const el = document.querySelector('ion-icon');
     expect(el).toBeDefined();
-    expect(el.getAttribute('name')).toEqual('moon');
+    expect(el.getAttribute('name')).toEqual('sunny');
 
     const el_body = document.body;
     expect(el_body).toBeDefined();
@@ -369,12 +367,7 @@ describe('HomePage', () => {
     });
   });
 
-  it('should call attempt To scan barcode', async () => {
-    const barcodeService = fixture.debugElement.injector.get(BarcodeService);
-    const spyStartScan = spyOn(barcodeService, 'startScan').and.callThrough();
-    await component.scanBarcode();
-    expect(spyStartScan).toHaveBeenCalledTimes(1);
-  });
+
 
   it('should call attempt display enrol error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(
@@ -398,7 +391,6 @@ describe('HomePage', () => {
 
     const alert = {
       header: 'Permission Required',
-      cssClass: 'alertStyle',
       message:
         'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
       buttons: ['Dismiss'],

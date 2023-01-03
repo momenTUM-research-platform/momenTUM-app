@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   BarcodeScanner,
+  CheckPermissionOptions,
   ScanResult,
 } from '@capacitor-community/barcode-scanner';
 
@@ -29,8 +30,8 @@ export class BarcodeService {
     return result;
   }
 
-  async checkPermission() {
-    const status = await this.didUserGrantPermission();
+  async checkPermission(option?: CheckPermissionOptions) {
+    const status = await this.didUserGrantPermission(option);
 
     if (!status) {
       // the user denied permission for good
@@ -44,9 +45,9 @@ export class BarcodeService {
     }
   }
 
-  async didUserGrantPermission() {
+  async didUserGrantPermission(option?: CheckPermissionOptions) {
     // check if user already granted permission
-    const status = await BarcodeScanner.checkPermission({ force: false });
+    const status = await BarcodeScanner.checkPermission(option);
 
     if (status.granted) {
       // user granted permission
