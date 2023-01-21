@@ -278,18 +278,22 @@ export class HomePage implements OnInit {
     try {
       const result = await this.surveyDataService.getRemoteData(url);
 
+
+
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
 
-      const study: Study = JSON.parse(JSON.stringify(result));
+      // Major check here, because some downloaded data need to be converted to a JSON String
+      // then parased, since they may already be a JSON, where as, URLs ending in JSON, they
+      // already contain Stringifyed JSON, so they only need to be parsed.
 
+      const study: Study = JSON.parse(JSON.stringify(result));
       // checks if the returned text is parseable as JSON, and whether it contains
       // some of the key fields used by schema so it can determine whether it is
       // actually a schema study URL
       // @ts-ignore
-
-      validStudy =
+     validStudy =
         study.properties !== undefined && // @ts-ignore
         study.modules !== undefined && // @ts-ignore
         study.properties.study_id !== undefined;
@@ -301,6 +305,7 @@ export class HomePage implements OnInit {
           // Added this condition
           this.loadingService.dismiss();
         }
+
         this.displayEnrolError(isQRCode, true, true, isStudyID);
       }
     } catch (e: any) {
