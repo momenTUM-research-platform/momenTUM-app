@@ -38,14 +38,7 @@ export class SurveyDataService {
         .catch((error) => {
           console.log('Error in getting remote data: ' + error);
           reject(error);
-          resolve(false);
-        },
-        complete: () => {
-          console.info('Complete');
-          resolve(true);
-        },
-      });
-
+        });
     });
   }
 
