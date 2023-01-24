@@ -1,27 +1,13 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { Storage } from '@ionic/storage-angular';
-import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
-import {
-  DateTime, External,
-  Instruction, Media,
-  Module,
-  Multi,
-  Option,
-  Question,
-  Responses,
-  Slider,
-  Study,
-  Task,
-  Text,
-  YesNo
-} from 'types';
+import { StorageService } from '../../services/storage/storage.service';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-survey',
@@ -71,12 +57,13 @@ export class SurveyPage implements OnInit {
     },
     sections: [
       {
+        id: '',
         name: '',
         shuffle: false,
         questions: [],
-      }
+      },
     ],
-    uuid: '',
+    id: '',
     unlock_after: [],
     shuffle: false,
   };
@@ -92,36 +79,34 @@ export class SurveyPage implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private storage: Storage,
-    private statusBar: StatusBar,
+    private storage: StorageService,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
     private toastController: ToastController,
-    private ngZone: NgZone,
-    private iab: InAppBrowser
-  ) { }
+    private ngZone: NgZone
+  ) {}
 
   /**
    * Triggered when the survey page is first opened
    * Initialises the survey and displays it on the screen
    */
-  ngOnInit() {
-    // set statusBar to visible on Android
-    //this.statusBar.styleLightContent();
-    this.statusBar.overlaysWebView(false);
-    this.statusBar.backgroundColorByHexString('#0F2042');
+  async ngOnInit() {
 
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
-        ((
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        ) as HTMLElement ).style.height = `${e.data.frameHeight + 10}px`;
-        ((
-          document.querySelector('iframe[src^="' + e.data.url + '"]')
-        ) as HTMLElement ).style.width = `99%`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.height = `${e.data.frameHeight + 10}px`;
+        (
+          document.querySelector(
+            'iframe[src^="' + e.data.url + '"]'
+          ) as HTMLElement
+        ).style.width = `99%`;
       }
     });
 
@@ -131,13 +116,14 @@ export class SurveyPage implements OnInit {
     Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
-    ]).then((values) => {
-      const studyObject = values[0];
+    ]).then(async (values) => {
+      const studyObject: any = values[0];
       const uuid = values[1];
-
       // get the task object for this task
-      this.studyTasksService.getAllTasks().then((tasks) => {
+
+      await this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
+
         for (let i = 0; i < this.tasks.length; i++) {
           if (this.task_id === String(this.tasks[i].task_id)) {
             this.module_name = this.tasks[i].name;
@@ -177,9 +163,11 @@ export class SurveyPage implements OnInit {
         }
 
         // shuffle questions if required
-        for (const section of this.survey.sections) {
-          if (section.shuffle) {
-            section.questions = this.shuffle(section.questions);
+        if (this.survey.sections !== undefined) {
+          for (const section of this.survey.sections) {
+            if (section.shuffle) {
+              section.questions = this.shuffle(section.questions);
+            }
           }
         }
 
@@ -190,7 +178,7 @@ export class SurveyPage implements OnInit {
 
         // get the user ID and then set up question variables
         // initialise all of the questions to be displayed
-        this.setupQuestionVariables(uuid);
+        this.setupQuestionVariables(uuid.toString());
 
         // set the submit text as appropriate
         if (this.current_section < this.num_sections) {
@@ -206,18 +194,20 @@ export class SurveyPage implements OnInit {
         // toggle rand_group questions
         // figure out which ones are grouped together, randomly show one and set its response value to 1
         const randomGroups: { [rand_group: string]: string[] } = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (question.rand_group) {
-              // set a flag to indicate that this question shouldn't reappear via branching logic
-              question.noToggle = true;
+        if (this.survey.sections !== undefined) {
+          for (const section of this.survey.sections) {
+            for (const question of section.questions) {
+              if (question.rand_group) {
+                // set a flag to indicate that this question shouldn't reappear via branching logic
+                question.noToggle = true;
 
-              // categorise questions by rand_group
-              if (!(question.rand_group in randomGroups)) {
-                randomGroups[question.rand_group] = [];
-                randomGroups[question.rand_group].push(question.id);
-              } else {
-                randomGroups[question.rand_group].push(question.id);
+                // categorise questions by rand_group
+                if (!(question.rand_group in randomGroups)) {
+                  randomGroups[question.rand_group] = [];
+                  randomGroups[question.rand_group].push(question.id);
+                } else {
+                  randomGroups[question.rand_group].push(question.id);
+                }
               }
             }
           }
@@ -278,6 +268,11 @@ export class SurveyPage implements OnInit {
   }
 
   /**
+   * Called on ngOnInIt to set the variabled of the task
+   *
+   */
+
+  /**
    * Handles the back button behaviour
    */
   back() {
@@ -292,13 +287,15 @@ export class SurveyPage implements OnInit {
       });
     } else {
       // save an exit log
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'survey',
-        event: 'exit',
-        module_index: this.module_index,
-      });
+      this.surveyDataService
+        .logPageVisitToServer({
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page: 'survey',
+          event: 'exit',
+          module_index: this.module_index,
+        })
+        .catch(() => {});
       // nav back to the home screen
       this.navController.navigateRoot('/');
     }
@@ -310,76 +307,78 @@ export class SurveyPage implements OnInit {
    */
   setupQuestionVariables(uuid: string) {
     // for all relevant questions add an empty response variable
-    for (const section of this.survey.sections) {
-      for (const question of section.questions) {
-        // for all question types that can be responded to, set default values
-        question.response = '';
-        question.model = '';
-        question.hideError = true;
-        question.hideSwitch = true;
+    if (this.survey.sections) {
+      for (const section of this.survey.sections) {
+        for (const question of section.questions) {
+          // for all question types that can be responded to, set default values
+          question.response = '';
+          question.model = '';
+          question.hideError = true;
+          question.hideSwitch = true;
 
-        // for datetime questions, default to the current date/time
-        if (question.type === 'datetime') {
-          // placeholder for dates
-          question.model = moment().format();
+          // for datetime questions, default to the current date/time
+          if (question.type === 'datetime') {
+            // placeholder for dates
+            question.model = moment().format();
 
-          // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
-        } else if (
-          question.type === 'media' &&
-          (question.subtype === 'audio' || question.subtype === 'video')
-        ) {
-          // @ts-ignore
-          question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            question.src
-          );
-          if (question.subtype === 'video') {
+            // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
+          } else if (
+            question.type === 'media' &&
+            (question.subtype === 'audio' || question.subtype === 'video')
+          ) {
             // @ts-ignore
-            question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.thumb
+            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              question.src
             );
-          }
+            if (question.subtype === 'video') {
+              // @ts-ignore
+              question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
+                question.thumb
+              );
+            }
 
-          // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
-        } else if (question.type === 'external') {
-          question.src = question.src + '?uuid=' + uuid;
-          // @ts-ignore
-          question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            question.src
-          );
+            // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
+          } else if (question.type === 'external') {
+            question.src = question.src + '?uuid=' + uuid;
+            // @ts-ignore
+            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              question.src
+            );
 
-          // for slider questions, set the default value to be halfway between min and max
-        } else if (question.type === 'slider') {
-          // get min and max
-          const min = question.min;
-          const max = question.max;
+            // for slider questions, set the default value to be halfway between min and max
+          } else if (question.type === 'slider') {
+            // get min and max
+            const min = question.min;
+            const max = question.max;
 
-          // set the default value of the slider to the middle value
-          const model = min + (max - min) / 2;
-          question.model = model;
+            // set the default value of the slider to the middle value
+            const model = min + (max - min) / 2;
+            question.model = model;
 
-          // a starting value must also be set for the slider to work properly
-          question.value = model;
+            // a starting value must also be set for the slider to work properly
+            question.value = model;
 
-          // for checkbox items, the response is set to an empty array
-        } else if (question.type === 'multi') {
-          // set up checked tracking for checkbox questions types
-          const tempOptions: Option[] = [];
-          for (const option of question.options) {
-            tempOptions.push({
-              text: option,
-              checked: false,
-            });
-          }
-          question.optionsChecked = tempOptions;
+            // for checkbox items, the response is set to an empty array
+          } else if (question.type === 'multi') {
+            // set up checked tracking for checkbox questions types
+            const tempOptions: Option[] = [];
+            for (const option of question.options) {
+              tempOptions.push({
+                text: option,
+                checked: false,
+              });
+            }
+            question.optionsChecked = tempOptions;
 
-          // counterbalance the choices if necessary
-          if (question.shuffle) {
-            question.optionsChecked = this.shuffle(question.optionsChecked);
-          }
+            // counterbalance the choices if necessary
+            if (question.shuffle) {
+              question.optionsChecked = this.shuffle(question.optionsChecked);
+            }
 
-          // set the empty response to an array for checkbox questions
-          if (!question.radio) {
-            question.response = [];
+            // set the empty response to an array for checkbox questions
+            if (!question.radio) {
+              question.response = [];
+            }
           }
         }
       }
@@ -445,7 +444,16 @@ export class SurveyPage implements OnInit {
    * @param url The url of the PDF file to open
    */
   openExternalFile(url: string) {
-    this.iab.create(url, '_system');
+    if (Capacitor.isNativePlatform()) {
+      Browser.open({ url, windowName: '_system' }).catch((e) => {
+        console.log(
+          'ERROR in promise caught: settings.page.ts: Browser.open() threw: + ' +
+            e
+        );
+      });
+    } else {
+      window.open(url, '_blank');
+    }
   }
 
   toggleDynamicQuestions(question: Question) {
@@ -462,19 +470,23 @@ export class SurveyPage implements OnInit {
         if ('hide_id' in q && q.hide_id === id) {
           const hideValue = q.hide_value;
 
-          if (q.type === 'multi' || q.type === 'yesno') {
+          if (
+            question.type === 'multi' ||
+            question.type === 'yesno' ||
+            question.type === 'text'
+          ) {
             // determine whether to hide/show the element
             const hideIf = q.hide_if;
-            const valueEquals = hideValue === q.response;
+            const valueEquals = hideValue === question.response;
             if (valueEquals === hideIf) {
               q.hideSwitch = false;
             } else {
               q.hideSwitch = true;
             }
           } else if (
-            q.type === 'slider' &&
+            question.type === 'slider' &&
             typeof hideValue === 'string' &&
-            q.response
+            question.response
           ) {
             const direction = hideValue.substring(0, 1);
             const cutoff = parseInt(
@@ -483,13 +495,13 @@ export class SurveyPage implements OnInit {
             );
             const lessThan = direction === '<';
             if (lessThan) {
-              if (q.response <= cutoff) {
+              if (question.response <= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
               }
             } else {
-              if (q.response >= cutoff) {
+              if (question.response >= cutoff) {
                 q.hideSwitch = true;
               } else {
                 q.hideSwitch = false;
@@ -505,7 +517,7 @@ export class SurveyPage implements OnInit {
    * Triggered whenever the submit button is called
    * Checks if all required questions have been answered and then moves to the next section/saves the response
    */
-  submit() {
+  async submit() {
     let errorCount = 0;
     for (const question of this.questions) {
       if (
@@ -524,8 +536,9 @@ export class SurveyPage implements OnInit {
       // if user on last page and there are no errors, fine to submit
       if (this.current_section === this.num_sections) {
         // add the alert time to the response
+
         this.tasks[this.task_index].alert_time = moment(
-          this.tasks[this.task_index].time
+          new Date(this.tasks[this.task_index].time).toISOString()
         ).format();
 
         // get a timestmap of submission time in both readable and ms format
@@ -548,27 +561,31 @@ export class SurveyPage implements OnInit {
         this.tasks[this.task_index].responses = responses;
 
         // attempt to post surveyResponse to server
-        this.surveyDataService.sendSurveyDataToServer({
-          module_index: this.module_index,
-          module_name: this.module_name,
-          responses,
-          response_time,
-          response_time_in_ms: response_time_ms,
-          alert_time: this.tasks[this.task_index].alert_time || '',
-        });
+        this.surveyDataService
+          .sendSurveyDataToServer({
+            module_index: this.module_index,
+            module_name: this.module_name,
+            responses,
+            response_time,
+            response_time_in_ms: response_time_ms,
+            alert_time: this.tasks[this.task_index].alert_time || '',
+          })
+          .catch(() => {});
 
         // write tasks back to storage
-        this.storage.set('study-tasks', this.tasks).then(() => {
-          // save an exit log
-          this.surveyDataService.logPageVisitToServer({
-            timestamp: moment().format(),
-            milliseconds: moment().valueOf(),
-            page: 'survey',
-            event: 'submit',
-            module_index: this.module_index,
+        await this.storage
+          .set('study-tasks', JSON.stringify(this.tasks))
+          .then(async () => {
+            // save an exit log
+            this.surveyDataService.logPageVisitToServer({
+              timestamp: moment().format(),
+              milliseconds: moment().valueOf(),
+              page: 'survey',
+              event: 'submit',
+              module_index: this.module_index,
+            });
+            this.navController.navigateRoot('/');
           });
-          this.navController.navigateRoot('/');
-        });
       } else {
         this.ngZone.run(() => {
           this.current_section++;
@@ -611,7 +628,7 @@ export class SurveyPage implements OnInit {
       ],
     });
 
-    toast.present();
+    toast?.present().catch(() => {});
   }
 
   /**

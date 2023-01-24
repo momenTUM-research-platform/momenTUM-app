@@ -1,92 +1,31 @@
-ion-content {
-	--offset-top: 1px;
-}
-
-.page-home {
-	.moment {
-		font-size: small;
-		color: gray;
-	}
-
-	.rotate-90 {
-		display: inline-block;
-		transform: rotate(90deg);
-	}
-}
-
-.secondary {
-	color: #005293;
-}
-
+// welcome text
 .welcome-msg {
-	text-align: center;
-	width: 80%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.enrolment-img-dark {
-	height: 40%;
-  width: 60%;
-	margin-top: 10%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.enrolment-img-light {
-	height: 40%;
-  width: 60%;
-	margin-top: 10%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.enrolment-text {
-	text-align: center;
-	width: 80%;
-	margin-left: auto;
-	margin-right: auto;
-	margin-bottom: 5%;
-	font-weight: bold;
-}
-ion-button {
-  --border-radius: 15px;
+  text-align: center;
   width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-ion-footer{
-  padding-top: 10px;
-  padding-bottom: 10px;
+// study sign in buttons
+.study-sign-in-button {
+  width: 80%;
+  margin: 8px 0;
+  --border-radius: 15px;
 }
 
-ion-label {
-  margin-bottom: 3px;
-  margin-top: 3px;
+// study-image
+.study-image::part(image) {
+  border-radius: 10px;
 }
 
-.banner-img {
-  border-radius: 30px !important;
-  overflow: hidden;
-  width:101%;
-  height:101%;
-  margin-left:-5px;
-  padding:20px;
-}
 
-ion-img::part(image) {
-  border-radius: 20px;
-}
-
+// Name suggests the designs of the title labels
 .title-label{
-  margin: 3px;
   font-size: 17px;
   font-weight: bold;
 }
 
-
-ion-item {
-  --ion-item-background: transparent;
-}
-ion-list {
-  --ion-item-background: transparent;
+// banner-image
+.banner-image {
+  padding: 32px 64px;
 }

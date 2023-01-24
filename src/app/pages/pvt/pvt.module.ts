@@ -9,12 +9,7 @@ import { PvtPageRoutingModule } from './pvt-routing.module';
 import { PvtPage } from './pvt.page';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    PvtPageRoutingModule
-  ],
-  declarations: [PvtPage]
+  imports: [CommonModule, FormsModule, IonicModule, PvtPageRoutingModule],
+  declarations: [PvtPage],
 })
 export class PvtPageModule {}

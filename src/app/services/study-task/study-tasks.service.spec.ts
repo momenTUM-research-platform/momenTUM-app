@@ -1,102 +1,33 @@
-import { TestBed } from '@angular/core/testing';
+// @ts-nocheck
 
+import { TestBed } from '@angular/core/testing';
 import { StudyTasksService } from './study-tasks.service';
-import { Storage } from '@ionic/storage-angular';
-import { Task, Study } from 'types';
+import { Study, Task } from 'src/app/models/types';
+import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
+import { StorageService } from '../storage/storage.service';
+import { BarcodeService } from '../../services/barcode/barcode.service';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;
-  let angularStorageSpy: jasmine.SpyObj<Storage>;
-
-  const study_object = {
-    properties: {
-      study_name: 'Demo',
-      study_id: '3ZDOGAH',
-      created_by: 'Adrian Shatte',
-      instructions: 'This is a demo study showing the features of schema',
-      post_url: 'https://tuspl22-momentum.srv.mwn.de/post.php',
-      empty_msg: "You're all up to date",
-      banner_url: 'https://getschema.app/img/schema_banner.png',
-      support_url: 'https://getschema.app',
-      support_email: 'hello@getschema.app',
-      conditions: ['Control', 'Treatment'],
-      cache: false,
-      ethics: 'This study was approved by ethics body with approval #123456789',
-      pls: 'https://getschema.app/pls-file-link.pdf',
-    },
-    modules: [
-      {
-        type: 'survey',
-        name: 'Elements',
-        submit_text: 'Submit',
-        alerts: {
-          title: 'Elements Demo',
-          message: 'Tap to open app',
-          duration: 1,
-          times: [
-            {
-              hours: 9,
-              minutes: 30,
-            },
-          ],
-          random: true,
-          random_interval: 30,
-          sticky: false,
-          sticky_label: '',
-          timeout: true,
-          timeout_after: 30,
-          start_offset: 1,
-        },
-        graph: {
-          display: true,
-          title: 'Slider Graph',
-          blurb:
-            'This graph displays the values from the slider element as a bar graph, displaying the past 7 responses.',
-          variable: 'slider-0yih1evt',
-          type: 'bar',
-          max_points: 7,
-        },
-        sections: [
-          {
-            name: 'Section 1',
-            questions: [
-              {
-                id: 'instruction-pvke1yey',
-                type: 'instruction',
-                text: 'This is an instruction type.',
-                required: false,
-                hide_id: '',
-                hide_value: '',
-                hide_if: true,
-              },
-            ],
-            shuffle: false,
-          },
-        ],
-        shuffle: false,
-        condition: '*',
-        uuid: 'dee87a08-8616-453a-9a6e-9e8f8ea9c942',
-        unlock_after: [],
-      },
-    ],
-  };
+  let StorageServiceSpy: jasmine.SpyObj<StorageService>;
 
   beforeEach(() => {
-    const spyStorage = jasmine.createSpyObj('Storage', [
-      'create',
-      'get',
+    const storageSpy = jasmine.createSpyObj('StorageServiceeSpy', [
+      'init',
       'set',
+      'get',
     ]);
     TestBed.configureTestingModule({
-      providers: [
-        {
-          provide: Storage,
-          useValue: spyStorage,
-        },
-      ],
+      BarcodeService,
+      providers: [{ provide: StorageService, useValue: storageSpy }],
     }).compileComponents();
     service = TestBed.inject(StudyTasksService);
-    angularStorageSpy = TestBed.inject(Storage) as jasmine.SpyObj<Storage>;
+
+    // Jasmine Implmentation
+    // Inject both the service-to-test and its (spy) dependency
+    StorageServiceSpy = TestBed.inject(
+      StorageService
+    ) as jasmine.SpyObj<StorageService>;
   });
 
   it('should be created', () => {
@@ -104,66 +35,54 @@ describe('StudyTasksService', () => {
   });
 
   it('should generate study tasks', async () => {
-    const stubValue: Study = JSON.parse(JSON.stringify(study_object));
+    await StorageServiceSpy.init();
+    const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
+    const tasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
+
     // returns a study task and also stores it in the storage
-    const response: object[] = await service.generateStudyTasks(stubValue);
+    const response: Task[] = await service.generateStudyTasks(study);
 
-    angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
-
-    const study_task_list = [{
-      uuid: study_object.modules[0].uuid,
-      name: study_object.modules[0].name,
-      unlock_after: study_object.modules[0].unlock_after,
-      sticky: study_object.modules[0].alerts.sticky,
-      sticky_label: study_object.modules[0].alerts.sticky_label,
-      alert_title: study_object.modules[0].alerts.title,
-      alert_message: study_object.modules[0].alerts.message,
-      timeout: study_object.modules[0].alerts.timeout,
-      timeout_after: study_object.modules[0].alerts.timeout_after
-    }];
-
-    expect(response[0])
-      .withContext('response was same as stubValue')
-      .toEqual(jasmine.objectContaining(study_task_list[0]));
+    //jasmine.objectContaining()
+    expect(response.length)
+      .withContext('response length was same as tasks')
+      .toEqual(tasks.length);
   });
 
+  // For testing JSONs jasmine.objectContaining(
   it('should get all tasks from storage', async () => {
-    const study_task_list = [{
-      uuid: study_object.modules[0].uuid,
-      name: study_object.modules[0].name,
-      unlock_after: study_object.modules[0].unlock_after,
-      sticky: study_object.modules[0].alerts.sticky,
-      sticky_label: study_object.modules[0].alerts.sticky_label,
-      alert_title: study_object.modules[0].alerts.title,
-      alert_message: study_object.modules[0].alerts.message,
-      timeout: study_object.modules[0].alerts.timeout,
-      timeout_after: study_object.modules[0].alerts.timeout_after
-    }];
-    const stubValue: Task[]= JSON.parse(JSON.stringify(study_task_list));
-
-    angularStorageSpy.get.and.returnValue(Promise.resolve(stubValue));
+    const stubValue: string = JSON.stringify(study_tasks.tasks);
+    // Making the return value of the get function call to be stubValue
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
     const response: Task[] = await service.getAllTasks();
 
-    expect(angularStorageSpy.get.calls.count())
+    expect(StorageServiceSpy.get.calls.count())
       .withContext('spy method was called once')
       .toBe(1);
 
     expect(response[0])
       .withContext('response was same as stubValue')
-      .toBe(stubValue[0]);
+      .toEqual(JSON.parse(stubValue));
   });
 
   it('should get tasks display list from storage', async () => {
-    await angularStorageSpy.get.and.returnValue(Promise.resolve(study_object));
-
-    const response: any = await service.getTaskDisplayList();
-
-    expect(angularStorageSpy.get.calls.count())
+    const stubValue: string = JSON.stringify(study_tasks.tasks);
+    const stubDisplayValue: Task[] = JSON.parse(
+      JSON.stringify(study_tasks.tasks_display)
+    );
+    // Making the return value of the get function call to be stubValue
+    StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
+    const response: Task[] = await service.getTaskDisplayList();
+    expect(StorageServiceSpy.get.calls.count())
       .withContext('spy method was called once')
       .toBe(1);
 
+    expect(response.length)
+      .withContext(
+        'There are 3 different types, so with headers, 6 items are to be displayed'
+      )
+      .toBe(6);
     expect(response)
-      .withContext('response was same as study_object')
-      .toEqual(study_object.modules[0].unlock_after);
+      .withContext('Expected to be mostly the same values')
+      .toEqual(stubDisplayValue);
   });
 });

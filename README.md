@@ -1,125 +1,160 @@
-# Initial Starter - MomenTUM App
+# momenTUM
 
-This is an ionic-angular mobile application.
-This readme gives a step by step installation guide for the respective
-reader to follow along with building the app.
+The purpose of this document is to give the respective reader an overview of the general idea and implementation of the momenTUM mobile application and how it is built.
 
-# Usages
+**momenTUM** is a cross-platform mobile application for collecting and monitoring intervention studies. It is licensed under the [GNU General Public License v3.0](https://choosealicense.com/licenses/gpl-3.0/).
 
-Sample URLs:
-* https://gist.githubusercontent.com/BlenDaniel/6f44bdf665123d612295ed47d1a58a77/raw/40e95e86ff86267f0dae21491102c5f32fe283f9/Test.json
-* https://gist.githubusercontent.com/BlenDaniel/e632a053ffc22e40cebe07efd18c6200/raw/049790c18f5dab943dafe998879a3c38ef732618/AnotherTest.json
-* https://tuspl22-momentum.srv.mwn.de/api/surveys/demo 
-* https://tuspl22-momentum.srv.mwn.de/api/surveys/onlyPVT_myID2000_1655989948278
-* https://ashatte.io/schema/sleep.json
+It supports:
 
-## Installations
+- A diverse range of elements, including slider, text input, date/time, audio, video, image, and more, with support for branching logic.
+- Flexible module scheduling, to deliver surveys and/or interventions to participants at random or fixed intervals.
+- Participant randomisation into distinct conditions with different modules and scheduling.
+- Study registration via scanning a QR code or directly entering protocol URL.
+- Dynamic feedback charts to track participant progress on specific variables.
+- Distributed architecture, such that study protocols and data can be stored on your own server.
 
-#### 1. Install node and npm
+#### Technologies used for implementation:
 
-[Download from here](https://nodejs.org/en/download/)
+- [Ionic](https://ionicframework.com/) - Cross-platform mobile app development
+- [node.js](https://nodejs.org/en/) - Cross-platform JavaScript run-time environment
+- [Chart.js](Chart.js) - Open source HTML5 charts
 
-#### 2. Make sure your installations are complete and working by running the following commands
+## Requirements Analysis
 
-    $ node -v
-    $ npm -v
+### User requirements
 
-#### 3. Install Ionic
+- A student/subject will have the option to use the reaction-time test.
+- A student/subject will have the option to see draft studies that they did not submit yet.
+- A student/subject will have access to see already submitted studies.
+- A student/subject can have access to see all the surveys in the study.
 
-    $ sudo npm install -g @ionic/cli
+### System requirements
 
-#### 4. Make sure your installations are complete and working by running the following commands
+- A student/subject can view new and upcoming studies or already submitted/ongoing studies.
+- A student/subject has the option withdraw from the study
+- A student/subject can choose notification preferences.
 
-    $ ionic -v
+## Usecase Diagram
 
-#### 5. Install node_modules
+<img src="https://i.postimg.cc/rmxzt3GF/Use-case.png" height="300">
 
-    $ sudo npm i
+## Citation
 
-### Useless
+If you use schema in your own research, please cite the following:
 
-#### 1. To create a new app with tabs
+> Shatte, A. B. R., & Teague, S. J. (2020). schema: An open-source, distributed mobile platform for deploying mHealth research tools and interventions. BMC Medical Research Methodology, 20(1), 1-12. Retrieved from [https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-00973-5](https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-020-00973-5)
 
-    $ ionic start [new-app-name] tabs --type=angular
+> Shatte, A. B. R., & Teague, S. J. (2019, June 12). schema (Version 1.0). Zenodo. http://doi.org/10.5281/zenodo.3243918
 
-# Previewing
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3243918.svg)](https://doi.org/10.5281/zenodo.3243918)
 
-The following guide shows how to use Cordova to build for Browser, Android and iOS platform targets.
-<br>
+# Development
 
-## Browser Preview
+For a more detailed tutorial on how to develop Ionic projects visit:
 
-#### 1. Install cordova browers
+>https://ionicframework.com/docs
 
-    $ ionic cordova platform add browser
+## Set up local project
 
-#### 2. Prepare
+Navigate to the destination of your project and clone the GitHub repository:
 
-    $ ionic cordova prepare browser
+      cd /full/path/to/your/destination
+      git clone https://github.com/TUMChronobiology/momenTUM-app.git
+      cd momenTUM-app
 
-#### 2. Run the following command
+[Install node and npm](https://nodejs.org/en/download/) or check whether they are installed:
 
-    $ ionic cordova run browser
+      node -v
+      npm -v
 
-## iOS Preview
+Install global npm packages:
 
-#### 1. Xcode installation with an emulator
+      npm i -g @ionic/cli @angular/cli native-run cordova-res
 
-Note: If you don't already have an xcode and an emulator installed, follow the following guide
-to install it. <br>[Guide here](https://ionicframework.com/docs/developing/ios#xcode-setup)
+Navigate to the momenTUM-app folder and install the dependencies:
 
-#### 2. Cordova Setup
+      cd /path/to/momenTUM-app
+      npm i
 
-    $ npm install -g ios-sim
-    $ brew install ios-deploy
+## Build and run project
 
-#### 3. Project Setup​
+### Run in web browser
 
-Generate the native project, if it does not already exist. (You can only install one)
+Run a development server with live-reload in your browser:
 
-#### For Cordova, run the following:
+      ionic serve
 
-    $ ionic cordova prepare ios
+### Build and run on iOS emulator
+Notice: iOS apps can only be developed on macOS with Xcode installed.
 
-#### 2. Running with cordova
+Download Xcode:
+>https://developer.apple.com/xcode/.
 
-    $ ionic cordova run ios -l --external
+Once Xcode is installed, make sure the command-line tools are selected for use:
 
-#### Reference
+      xcode-select --install
 
-> https://ionicframework.com/docs/developing/ios#xcode-setup
+Create an iOS emulator:
+> 1. Open Xcode.
+> 2. Navigate to Window » Devices and Simulators.
+> 3. Create a new simulator, if it doesn't already exist.
 
-## Android Preview
+Generate a native project:
 
-#### 1. Android Studio and Android SDK installation
+      ionic cap add ios
 
-Note: If you don't already have android studio or an emulator installed, follow the following guide
-to install it. <br>[Guide here](https://ionicframework.com/docs/developing/android#android-studio)
+Open in Xcode:
 
-#### 2. Cordova Setup
+      ionic cap open ios
 
-Additional setup is required for Cordova to support programmatic builds. This section is not necessary for Capacitor.
+Sign the App:
+>1. Click on the Project root.
+>2. under the Signing section, ensure Automatically manage signing is enabled.
+>3. Then, select a Development Team.
 
-> Install Java [here](https://ionicframework.com/docs/developing/android#java) <br>
-> Install Gradle [here](https://ionicframework.com/docs/developing/android#gradle)
+You can now close Xcode and build & run the App on iOS with live-reload:
 
-#### 3. Project Setup​
+      ionic cap copy ios
+      ionic cap run ios -l
 
-Generate the native project, if it does not already exist. (You can only install one)
+For debugging, you can use the Safari Browser:
+> 1. Open Safari
+> 2. Navigate to Develop >> _name_of_emulator_ >> localhost
 
-#### For Cordova, run the following:
+Alternatively, you can run the native iOS Project in Xcode.
 
-    $ ionic cordova prepare android
+### Android
 
-#### 2. Running with cordova
+Install [Android Studio](https://developer.android.com/studio/install):
+>https://developer.android.com/studio/install
 
-    $ ionic cordova run android
+Install the Android SDK by opening Android Studio. It will lead you through the installation.
+Open ~/.bashrc, ~/.bash_profile, or similar bash startup scripts and add the following lines:
 
-    $ ionic cordova run android -l
+      export ANDROID_SDK_ROOT=/Path/to/android/sdk
+      # avdmanager, sdkmanager
+      export PATH=$PATH:$ANDROID_SDK_ROOT/tools/bin
+      # adb, logcat
+      export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
+      # emulator
+      export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
 
-#### Reference
+In Android Studio, open the _Virtual Device Manager_ and create a _Virtual Device_. Run the Device and keep the emulator running.
+Generate the android native project by running the following inside of the momenTUM-app directory:
 
-> https://ionicframework.com/docs/developing/android#installing-android-studio
+      ionic cap add android
+
+Build the web assets and copy them into the native project:
+
+      ionic cap copy android
+
+Run the app with live-reload:
+
+      ionic cap run android -l
+
+For debugging, open [chrome://inspect](chrome://inspect) with the Chrome Web Browser.
+
+Alternatively, you can run the native Android Project in Android Studio.
 
 # Testing
 
@@ -127,25 +162,16 @@ For testing, run the following command.
 
     ng test
 
-## New features
+For a code-coverage report:
 
-#### 1. Generating new features
-
-        $ ionic generate
-        ? What would you like to generate?
-        ❯ page
-        component
-        service
-        module
-        class
-        directive
-        guard
+    ng test --no-watch --code-coverage
 
 ## End-to-end testing
 
 Cypress is used for E2E-Testing, which simulates a user interacting with the app. To run, start the app in the browser and then start cypress. A new cypress window will open.
 
 ```
-ionic cordova run browser
+ionic serve
 npm run cypress
 ```
+

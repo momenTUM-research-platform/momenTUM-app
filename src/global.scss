@@ -9,7 +9,6 @@
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
-
 /* Core CSS required for Ionic components to work properly */
 
 @import "~@ionic/angular/css/core.css";
@@ -19,7 +18,7 @@
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import '~@ionic/angular/css/display.css';
+@import "~@ionic/angular/css/display.css";
 
 /* Optional CSS utils that can be commented out */
 
@@ -32,30 +31,37 @@
 /* Custom fonts for momenTUM */
 
 @font-face {
-  font-family: 'TUM Neue Helvetica';
+  font-family: "TUM Neue Helvetica";
   font-style: normal;
   font-weight: normal;
-  src: url('./assets/fonts/TUMNeueHelvetica-Regular.ttf');
+  src: url("./assets/fonts/TUMNeueHelvetica-Regular.ttf");
 }
 
 @font-face {
-  font-family: 'TUM Neue Helvetica';
+  font-family: "TUM Neue Helvetica";
   font-style: normal;
   font-weight: bold;
-  src: url('./assets/fonts/TUMNeueHelvetica-Bold.ttf');
+  src: url("./assets/fonts/TUMNeueHelvetica-Bold.ttf");
 }
 
-// schema themes
-.header-icon {
-    max-height: 16px;
-}
-
-.header-title-thin {
-    font-weight: 50;
-    padding-left: 5px;
-}
-
-// momenTUM themes
+/* the font used*/
 * {
-  --ion-font-family: 'TUM Neue Helvetica';
+  --ion-font-family: "TUM Neue Helvetica";
+}
+
+/* the title in the header on each page */
+ion-title {
+  font-weight: 50;
+  color: var(--ion-color-primary);
+}
+
+/* when scanning, set background to invisible */
+body.scanner-active {
+  background: transparent;
+  --ion-background-color: transparent;
+}
+
+/* Useful for the select buttons when the texts are really long */
+.item.sc-ion-label-md-h, .item .sc-ion-label-md-h{
+  white-space: normal !important;
 }

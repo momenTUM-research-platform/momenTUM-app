@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Storage } from '@ionic/storage';
+import { Component } from '@angular/core';
 import * as moment from 'moment';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-progress',
@@ -82,7 +82,7 @@ export class ProgressPage {
   ];
 
   constructor(
-    private storage: Storage,
+    private storage: StorageService,
     private studyTasksService: StudyTasksService,
     private surveyDataService: SurveyDataService,
     private translateConfigService: TranslateConfigService
@@ -101,7 +101,7 @@ export class ProgressPage {
       this.storage.get('current-study'),
       this.storage.get('enrolment-date'),
     ]).then((values) => {
-      const studyObject = values[0];
+      const studyObject: any = values[0];
       const enrolmentDate = values[1];
 
       if (studyObject !== null) {
@@ -109,7 +109,10 @@ export class ProgressPage {
         this.enrolledInStudy = true;
 
         // calculate the study day
-        this.studyDay = this.diffDays(new Date(enrolmentDate), new Date());
+        this.studyDay = this.diffDays(
+          new Date(enrolmentDate.toString()),
+          new Date()
+        );
 
         // log the user visiting this tab
         this.surveyDataService.logPageVisitToServer({
@@ -127,7 +130,7 @@ export class ProgressPage {
             if (task.completed && task.response_time) {
               const historyItem = {
                 task_name: task.name.replace(/<\/?[^>]+(>|$)/g, ''),
-                moment_time: moment(task.response_time).fromNow(), //format("Do MMM, YYYY").fromNow()
+                moment_time: moment(new Date(task.response_time)).fromNow(), //format("Do MMM, YYYY").fromNow()
                 response_time: new Date(task.response_time),
               };
               this.history.unshift(historyItem);
@@ -138,6 +141,7 @@ export class ProgressPage {
 
           // get all graphs
           for (const module of this.studyJSON.modules) {
+
             const graph = module.graph;
             const study_name = module.name;
             const graph_header = module.name;
@@ -165,7 +169,7 @@ export class ProgressPage {
                     for (const k in task.responses) {
                       if (k === variableToGraph) {
                         // format the response time
-                        const response_time = moment(task.response_time).format(
+                        const response_time = moment(new Date(task.response_time)).format(
                           'MMM Do, h:mma'
                         );
                         task_labels.push(response_time);
@@ -196,7 +200,6 @@ export class ProgressPage {
 
               // if the task had any data to graph, push it
               if (task_data.length > 0) {
-                console.log("Graph object: %j", graphObj);
                 this.graphs.push(graphObj);
               }
             }

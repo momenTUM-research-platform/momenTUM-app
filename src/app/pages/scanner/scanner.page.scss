@@ -1,0 +1,10 @@
+.box {
+  border: 2px solid red;
+  border-radius: 16px;
+  width: 70%;
+  padding-top: 70%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

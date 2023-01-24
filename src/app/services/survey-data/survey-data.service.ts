@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Storage } from '@ionic/storage-angular';
 import { Platform } from '@ionic/angular';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { HTTP } from '@ionic-native/http/ngx';
-import { LogEvent, Study, SurveyData } from 'types';
+import { HttpClient } from '@angular/common/http';
+import { Http } from '@capacitor-community/http';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,9 +12,7 @@ import { LogEvent, Study, SurveyData } from 'types';
 export class SurveyDataService {
   constructor(
     private httpClient: HttpClient,
-    private httpClient2: HttpClient,
-    private http2: HTTP,
-    private storage: Storage,
+    private storage: StorageService,
     private platform: Platform,
     private uuidService: UuidService,
     private studyTasksService: StudyTasksService
@@ -26,16 +23,20 @@ export class SurveyDataService {
    *
    * @param surveyURL The web URL where a survey is hosted.
    */
-  getRemoteData(surveyURL: string) {
+  getRemoteData(surveyURL: string): any {
     return new Promise((resolve, reject) => {
-      const nheaders = { headers: new HttpHeaders({ timeout: `${7000}` })};
-      this.httpClient.get(surveyURL, nheaders)
-      .subscribe({
-        next: (data) => {
-          resolve(data);
-        },
-        error: (error) => {
-          console.info('Error in get Remote Data: ' + error || '');
+      const options = {
+        url: surveyURL,
+        headers: {},
+        connectTimeout: 60000,
+      };
+      // Now a get request
+      Http.get(options)
+        .then((data) => {
+          resolve(data.data);
+        })
+        .catch((error) => {
+          console.log('Error in getting remote data: ' + error);
           reject(error);
           resolve(false);
         },
@@ -55,7 +56,18 @@ export class SurveyDataService {
    * @param data
    */
   async saveToLocalStorage(key: string, data: string) {
-    this.storage.set(key, data);
+    return await this.storage.set(key, data);
+  }
+
+  /**
+   * Saves data to local storage
+   *
+   * @param key
+   * @param data
+   */
+  async getFromLocalStorage(key: string): Promise<any> {
+    const data = await this.storage.get(key);
+    return data;
   }
 
   /**
@@ -69,15 +81,15 @@ export class SurveyDataService {
       this.storage.get('uuid'),
       this.studyTasksService.getAllTasks(),
     ]).then((values) => {
-      const studyJSON = JSON.parse(values[0]);
+      const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
-      const tasks = values[2];
+
       const dataUuid = this.uuidService.generateUUID('pending-data');
 
       // create form data to store the survey data
       const bodyData = new FormData();
       bodyData.append('data_type', 'survey_response');
-      bodyData.append('user_id', uuid);
+      bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', String(surveyData.module_index));
       bodyData.append('module_name', surveyData.module_name);
@@ -92,7 +104,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url,
+        studyJSON?.properties.post_url + '/response',
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
@@ -117,14 +129,14 @@ export class SurveyDataService {
       this.storage.get('current-study'),
       this.storage.get('uuid'),
     ]).then((values) => {
-      const studyJSON = JSON.parse(values[0]);
+      const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
       const logUuid = this.uuidService.generateUUID('pending-log');
 
       // create form data to store the log data
       const bodyData = new FormData();
       bodyData.append('data_type', 'log');
-      bodyData.append('user_id', uuid);
+      bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', logEvent.module_index);
       bodyData.append('page', logEvent.page);
@@ -134,7 +146,7 @@ export class SurveyDataService {
       bodyData.append('platform', this.platform.platforms()[0]);
 
       return this.attemptHttpPost(
-        studyJSON?.properties.post_url,
+        studyJSON?.properties.post_url + '/log',
         bodyData
       ).then((postSuccessful) => {
         if (!postSuccessful) {
@@ -145,7 +157,11 @@ export class SurveyDataService {
           const json = JSON.stringify(object);
           this.storage.set(logUuid, json);
         }
+      }).catch((error)=>{
+        console.log('Error in attempt http post: ', error || '');
       });
+    }).catch((error)=>{
+      console.log('Error in log Page Visit To Server: ', error.message || '');
     });
   }
 
@@ -157,7 +173,7 @@ export class SurveyDataService {
   uploadPendingData(dataType: 'pending-log' | 'pending-data') {
     return Promise.all([this.storage.get('current-study'), this.storage.keys()])
       .then((values) => {
-        const studyJSON = JSON.parse(values[0]);
+        const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
         const keys = values[1];
 
         const pendingLogKeys = [];
@@ -174,7 +190,7 @@ export class SurveyDataService {
       .then((data) => {
         data.pendingLogKeys.map((pendingKey) => {
           this.storage.get(pendingKey).then((log) => {
-            const logJSONObj = JSON.parse(log);
+            const logJSONObj = JSON.parse(log.toString());
             const bodyData = new FormData();
             for (const key in logJSONObj) {
               if (logJSONObj.hasOwnProperty(key)) {
@@ -184,7 +200,7 @@ export class SurveyDataService {
             this.attemptHttpPost(data.post_url, bodyData).then(
               (postSuccessful) => {
                 if (postSuccessful) {
-                  this.storage.remove(pendingKey);
+                  this.storage.removeItem(pendingKey);
                 }
               }
             );
@@ -204,14 +220,12 @@ export class SurveyDataService {
       this.httpClient.post(postURL, bodyData).subscribe({
         next: (v) => {
           resolve(v);
-          console.log('Notice Survey: ' + v);
         },
         error: (e) => {
-          console.info('Error in attemptHttpPost ' + e || '');
+          console.log('Error in attempt http post: ', e || '');
           resolve(false);
         },
         complete: () => {
-          console.info('Complete');
           resolve(true);
         },
       });

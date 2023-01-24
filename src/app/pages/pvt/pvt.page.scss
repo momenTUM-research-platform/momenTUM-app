@@ -6,7 +6,6 @@ $timerFontSize: 30px;
 $paragraphFontSize: 15px;
 $buttonFontSize: 20px;
 
-
 * {
   color: black;
   text-align: center;
@@ -68,7 +67,7 @@ button:hover {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
 }
 
 .pane {

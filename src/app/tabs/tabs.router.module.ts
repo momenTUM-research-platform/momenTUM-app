@@ -9,28 +9,35 @@ const routes: Routes = [
     children: [
       {
         path: 'home',
-        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule)
+        loadChildren: () =>
+          import('../pages/home/home.module').then((m) => m.HomePageModule),
       },
       {
         path: 'progress',
-        loadChildren: () => import('../pages/progress/progress.module').then(m => m.ProgressPageModule)
+        loadChildren: () =>
+          import('../pages/progress/progress.module').then(
+            (m) => m.ProgressPageModule
+          ),
       },
       {
         path: 'settings',
-        loadChildren: () => import('../pages/settings/settings.module').then(m => m.SettingsPageModule)
+        loadChildren: () =>
+          import('../pages/settings/settings.module').then(
+            (m) => m.SettingsPageModule
+          ),
       },
       {
         path: '',
         redirectTo: '/tabs/home',
-        pathMatch: 'full'
+        pathMatch: 'full',
       },
-    ]
+    ],
   },
   {
     path: '',
     redirectTo: '/tabs/home',
-    pathMatch: 'full'
-  }
+    pathMatch: 'full',
+  },
 ];
 
 @NgModule({

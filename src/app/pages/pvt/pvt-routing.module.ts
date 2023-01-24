@@ -6,8 +6,8 @@ import { PvtPage } from './pvt.page';
 const routes: Routes = [
   {
     path: '',
-    component: PvtPage
-  }
+    component: PvtPage,
+  },
 ];
 
 @NgModule({
