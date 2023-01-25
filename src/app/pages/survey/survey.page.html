@@ -54,13 +54,33 @@
         [pin]="true"
         [value]="question.model"
         (ionChange)="setAnswer(question)"
-        style="font-size: small"
+        style="font-size: small; margin-inline: 0px !important"
       >
-        <ion-item style="width: 20%; padding:6px !important; text-align: center;" color="none"  lines="none" slot="start">
-          <ion-label >{{question.hint_left}}</ion-label>
+        <ion-item
+          style="
+            --padding-start: 5px !important;
+            --inner-padding-end: 0px !important;
+            margin-inline: 0px 14px !important;
+            text-align: center;
+          "
+          color="none"
+          lines="none"
+          slot="start"
+        >
+          <ion-label style="width: 100%">{{question.hint_left}}</ion-label>
         </ion-item>
-        <ion-item style="width: 20%; padding:6px !important; text-align: center;" color="none"  lines="none" slot="end">
-          <ion-label >{{question.hint_right}}</ion-label>
+        <ion-item
+          style="
+            --padding-start: 0px !important;
+            --inner-padding-end: 5px !important;
+            margin-inline: 14px 0px !important;
+            text-align: center;
+          "
+          color="none"
+          lines="none"
+          slot="end"
+        >
+          <ion-label style="width: 100%">{{question.hint_right}}</ion-label>
         </ion-item>
       </ion-range>
       <!--video type-->
