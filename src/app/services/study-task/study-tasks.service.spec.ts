@@ -1,8 +1,5 @@
-// @ts-nocheck
-
 import { TestBed } from '@angular/core/testing';
 import { StudyTasksService } from './study-tasks.service';
-import { Study, Task } from 'src/app/models/types';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
 import { BarcodeService } from '../../services/barcode/barcode.service';
@@ -18,8 +15,10 @@ describe('StudyTasksService', () => {
       'get',
     ]);
     TestBed.configureTestingModule({
-      BarcodeService,
-      providers: [{ provide: StorageService, useValue: storageSpy }],
+      providers: [
+        { provide: StorageService, useValue: storageSpy },
+        BarcodeService,
+      ],
     }).compileComponents();
     service = TestBed.inject(StudyTasksService);
 

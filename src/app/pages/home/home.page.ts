@@ -39,7 +39,7 @@ export class HomePage implements OnInit {
   // dark mode
   darkMode = false;
   //image
-  tum_image = 'assets/imgs/tum-icon.png';
+  tum_image = 'assets/imgs/icon.png';
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
