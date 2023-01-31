@@ -10,7 +10,7 @@
 </ion-header>
 
 <!-- Check to make sure the isHidden property is in the right place -->
-<ion-content class="ion-no-padding" scroll="false">
+<ion-content class="ion-no-padding">
   <ion-refresher
     *ngIf="hideEnrolOptions"
     slot="fixed"
@@ -25,7 +25,7 @@
   <!-- Displayed if user is not enrolled in a study -->
   <ion-img
   class="banner-image"
-    [src]="darkMode ? 'assets/imgs/tum-light.png' : 'assets/imgs/tum-icon.png'"
+    [src]="'assets/imgs/logo-name.png'"
     [hidden]="hideEnrolOptions"
   ></ion-img>
   <ion-text [hidden]="hideEnrolOptions" style="margin-top:5%">
