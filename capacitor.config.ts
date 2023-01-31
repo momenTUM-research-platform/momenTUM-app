@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tum.momentum',
+  appId: 'de.tum.sg.momentum',
   appName: 'momenTUM',
   webDir: 'www',
   bundledWebRuntime: true,
