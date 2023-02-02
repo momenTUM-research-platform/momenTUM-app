@@ -85,6 +85,8 @@ export class SurveyDataService {
       bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', String(surveyData.module_index));
+      // Included module_id
+      bodyData.append('module_id', studyJSON?.modules[surveyData.module_index].id);
       bodyData.append('module_name', surveyData.module_name);
       'responses' in surveyData &&
         bodyData.append('responses', JSON.stringify(surveyData.responses));
@@ -132,6 +134,8 @@ export class SurveyDataService {
       bodyData.append('user_id', uuid.toString());
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', logEvent.module_index);
+      // Included module_id
+      bodyData.append('module_id', studyJSON?.modules[Number(logEvent.module_index)].id);
       bodyData.append('page', logEvent.page);
       bodyData.append('event', logEvent.event);
       bodyData.append('timestamp', logEvent.timestamp);
