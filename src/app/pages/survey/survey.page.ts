@@ -526,7 +526,11 @@ export class SurveyPage implements OnInit {
         question.hideSwitch === true
       ) {
         question.hideError = false;
-        errorCount++;
+        // Only works for question types other than instruction
+        if(question.type !== 'instruction'){
+          errorCount++;
+        }
+
       } else {
         question.hideError = true;
       }
