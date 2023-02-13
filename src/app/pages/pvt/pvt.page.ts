@@ -4,14 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
-import { NavController } from '@ionic/angular';
+import {NavController, ViewWillEnter} from '@ionic/angular';
 
 @Component({
   selector: 'app-pvt',
   templateUrl: './pvt.page.html',
   styleUrls: ['./pvt.page.scss'],
 })
-export class PvtPage implements OnInit {
+export class PvtPage implements OnInit, ViewWillEnter {
   // INPUT from study
   trials: number;
   min: number;
@@ -32,13 +32,13 @@ export class PvtPage implements OnInit {
   reacted: boolean;
   reactedTooEarly: boolean;
   reactedTooLate: boolean;
-  state: 'instructions' | 'countdown' | 'RTT' | 'results';
+  state: 'Instructions' | 'countdown' | 'PVT' | 'Results';
   counter: number; // countdown
-  timer: number; // for RTT page
-  instructionTimer: any; // for instructions page
+  timer: number; // for PVT page
+  instructionTimer: any; // for Instructions page
   exited: boolean;
-  tooLateMessage = 'too late';
-  tooEarlyMessage = 'too early';
+  readonly tooLateMessage = 'too late';
+  readonly tooEarlyMessage = 'too early';
 
   constructor(
     private surveyDataService: SurveyDataService,
@@ -48,31 +48,34 @@ export class PvtPage implements OnInit {
     private storageService: StorageService
   ) {
     this.reactionTimes = [];
-    this.state = 'instructions';
+    this.state = 'Instructions';
     this.exited = false;
     this.reactedTooLate = false;
     this.reactedTooEarly = false;
+    this.timer = 0;
   }
 
   /**
-   * Sets up the variables.
-   * (Angular lifecycle hook method.
-   * Check out https://angular.io/guide/lifecycle-hooks for more documentation)
+   * Angular lifecycle hook method.
+   * Read https://angular.io/guide/lifecycle-hooks.
    * */
   async ngOnInit() {
-    await this.setUpVariables();
-    this.instructionRTT();
+    await this.setStudyParameters();
+  }
+
+  ionViewWillEnter() {
+    this.runInstructionTimer();
   }
 
   /**
-   * Handles the "start" button behavior.
-   * Launches the whole process from counting down to finishing the RTT.
+   * Handles the "startPVT" button behavior.
+   * Launches the whole process from counting down to finishing the PVT.
    * */
-  async start() {
+  async startPVT() {
     this.state = 'countdown'; // load view of countdown
     await this.countdown(3);
-    this.state = 'RTT'; // load view of RTT
-    await this.RTT();
+    this.state = 'PVT'; // load view of PVT
+    await this.PVT();
     if (this.exited) {
       return;
     }
@@ -81,13 +84,13 @@ export class PvtPage implements OnInit {
 
   /**
    * Handles the exit buttons behavior.
-   * Submits the results.
-   * Either loads the results page or navigates to the homepage.
+   * Submits the Results.
+   * Either loads the Results page or navigates to the homepage.
    * */
   async exit() {
     this.exited = true;
     if (this.showResults) {
-      this.state = 'results';
+      this.state = 'Results';
       this.submit();
     } else {
       this.submit();
@@ -105,7 +108,7 @@ export class PvtPage implements OnInit {
   /**
    * Counts down to 0. The number being counted down is stored in the **counter** variable of this class.
    *
-   * @param from the number (in seconds) deciding the start of the countdown.
+   * @param from the number (in seconds) deciding the startPVT of the countdown.
    * */
   public async countdown(from: number) {
     this.state = 'countdown';
@@ -117,9 +120,9 @@ export class PvtPage implements OnInit {
   }
 
   /**
-   * Conducts the RTT (reaction time test).
+   * Conducts the PVT (reaction time test).
    * */
-  public async RTT() {
+  public async PVT() {
     let trialCount = 1;
     while (trialCount <= this.trials && !this.exited) {
       // reset variables
@@ -191,34 +194,33 @@ export class PvtPage implements OnInit {
   }
 
   /**
-   * Conducts a fake RTT for the instruction page.
+   * The runInstructionTimer() function
+   * runs the instruction timer until a state change occurs.
+   * It calculates a random amount of time (maxTime) for the timer to run,
+   * and then increments the timer until it reaches maxTime.
+   * The timer will only be rendered if it is greater than 0 (see html).
    * */
-  public async instructionRTT() {
-    while (this.state === 'instructions') {
-      this.instructionTimer = undefined;
+  public async runInstructionTimer() {
+    this.instructionTimer = 0;
+    console.log('run instruction timer: ' + this.instructionTimer);
+    while (this.state === 'Instructions') {
       await this.sleep(this.min + Math.random() * (this.max - this.min));
-      await this.runInstructionTimer();
+      const maxTime = 250 + Math.random() * 100;
+      const start = Date.now();
+      do {
+        this.instructionTimer = Date.now() - start; // update timer
+        await this.sleep(0);
+      } while (this.instructionTimer < maxTime);
       await this.sleep(2000);
+      this.instructionTimer = 0;
     }
   }
 
   /**
-   * Starts the fake timer and ends it after a random amount of time, between 250 and 350 ms
+   * setStudyParameters()
+   * copies all study-PVT-parameters from storage to the variables of this class.
    * */
-  public async runInstructionTimer() {
-    this.instructionTimer = 0;
-    const runTime = 250 + Math.random() * 100;
-    const start = Date.now();
-    do {
-      this.instructionTimer = Date.now() - start;
-      await this.sleep(0);
-    } while (this.instructionTimer < runTime);
-  }
-
-  /**
-   * Defines all Input variables, which are defined in the study.
-   * */
-  public async setUpVariables() {
+  public async setStudyParameters() {
     const task_id = this.route.snapshot.paramMap.get('task_id');
     await this.getModule(task_id).then((module) => {
       this.trials = module.trials;
@@ -298,8 +300,8 @@ export class PvtPage implements OnInit {
    * @param ms number of milliseconds that the function waits
    * @returns a promise
    * */
-  public sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  public sleep(milliseconds: number) {
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
   }
 
   /**

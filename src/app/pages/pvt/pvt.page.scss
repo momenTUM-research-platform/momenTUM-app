@@ -1,76 +1,44 @@
+// CSS Variables to quickly edit the fonts and the timer box.
 $timerBoxWidth: 160px;
 $timerBoxHeight: 80px;
-
-$titleFontSize: 40px;
 $timerFontSize: 30px;
-$paragraphFontSize: 15px;
-$buttonFontSize: 20px;
+$countdownFontSize: 100px;
+$paragraphFontSize: large;
 
-* {
-  color: black;
-  text-align: center;
-  padding: 0;
-  margin: 0;
-}
-
+/* Used for the countdown element */
 h1 {
-  font-size: $titleFontSize;
-  font-weight: bold;
-  padding-top: 30%;
+  font-size: $countdownFontSize;
+  font-weight: bolder;
 }
 
-h2 {
-  font-weight: bold;
-  font-size: $timerFontSize;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
+/* Used for larger text blocks */
 p {
   font-size: $paragraphFontSize;
   padding: 2% 5%;
 }
 
-button {
-  background: transparent;
-  font-size: $buttonFontSize;
-  font-weight: bold;
-  position: absolute;
-  bottom: 10%;
-  transform: translateX(-50%);
-  width: 90%;
-  color: black;
-}
-
-button:hover {
-  color: grey;
-}
-
-.top-right-position {
-  position: absolute;
-  right: 5%;
-  top: 10%;
-}
-
+/* Used to style the timer-box */
 .timer-box {
   height: $timerBoxHeight;
   width: $timerBoxWidth;
-  box-shadow: inset 0 0 0 2px;
-  margin: 20px 0;
+  border: solid 2px;
   position: relative;
-  left: 50%;
   transform: translateX(-50%);
+  left: 50%;
+  display: flex;
+  justify-content: center;
+
+  /* Used for the timer label */
+  .timer-label {
+    font-size: $timerFontSize;
+    font-weight: bold;
+  }
 }
 
+/* Position the timer box and the countdown */
 .center-abs {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.pane {
-  background: white;
-  height: 100%;
 }

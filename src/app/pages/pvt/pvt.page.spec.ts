@@ -140,9 +140,9 @@ describe('PvtPage', () => {
       });
     });
 
-    it('should call setUpVariables', fakeAsync(async () => {
+    it('should call setStudyParameters', fakeAsync(async () => {
       const valueStudy = JSON.parse(stubValueStudy);
-      await component.setUpVariables();
+      await component.setStudyParameters();
       await fixture.detectChanges();
       const index = 1;
       expect(spygetAllTasks).toHaveBeenCalledTimes(1);
@@ -194,13 +194,13 @@ describe('PvtPage', () => {
     });
   });
 
-  it('should exit when the state is not instructions or make instructionTimer greater than 0', async () => {
-    component.state = 'results';
-    component.instructionRTT();
+  it('should exit when the state is not Instructions or make instructionTimer greater than 0', async () => {
+    component.state = 'Results';
+    component.runInstructionTimer();
     expect(component.instructionTimer).toBeUndefined();
 
-    component.state = 'instructions';
-    component.instructionRTT().then(() => {
+    component.state = 'Instructions';
+    component.runInstructionTimer().then(() => {
       expect(component.instructionTimer).toBeGreaterThanOrEqual(0);
     });
   });
@@ -281,7 +281,7 @@ describe('PvtPage', () => {
 
 });
 /**
- * start
+ * startPVT
  * exit
- * RTT
+ * PVT
  */
