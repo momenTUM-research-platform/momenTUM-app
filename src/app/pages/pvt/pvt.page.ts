@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { SurveyDataService } from '../../services/survey-data/survey-data.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
-import {NavController, ViewWillEnter} from '@ionic/angular';
+import { NavController, ViewWillLeave } from '@ionic/angular';
 
 @Component({
   selector: 'app-pvt',
   templateUrl: './pvt.page.html',
   styleUrls: ['./pvt.page.scss'],
 })
-export class PvtPage implements OnInit, ViewWillEnter {
+export class PvtPage implements OnInit, ViewWillLeave {
   // INPUT from study
   trials: number;
   min: number;
@@ -32,8 +32,8 @@ export class PvtPage implements OnInit, ViewWillEnter {
   reacted: boolean;
   reactedTooEarly: boolean;
   reactedTooLate: boolean;
-  state: 'Instructions' | 'countdown' | 'PVT' | 'Results';
-  counter: number; // countdown
+  state: 'Instructions' | 'Countdown' | 'PVT' | 'Results' | 'Exited';
+  counter: number; // Countdown
   timer: number; // for PVT page
   instructionTimer: any; // for Instructions page
   exited: boolean;
@@ -61,10 +61,11 @@ export class PvtPage implements OnInit, ViewWillEnter {
    * */
   async ngOnInit() {
     await this.setStudyParameters();
+    this.runInstructionTimer();
   }
 
-  ionViewWillEnter() {
-    this.runInstructionTimer();
+  ionViewWillLeave() {
+    this.state = 'Exited';
   }
 
   /**
@@ -72,14 +73,16 @@ export class PvtPage implements OnInit, ViewWillEnter {
    * Launches the whole process from counting down to finishing the PVT.
    * */
   async startPVT() {
-    this.state = 'countdown'; // load view of countdown
     await this.countdown(3);
+    if (this.exited) {
+      return;
+    }
     this.state = 'PVT'; // load view of PVT
     await this.PVT();
     if (this.exited) {
       return;
     }
-    this.exit();
+    await this.exit();
   }
 
   /**
@@ -108,12 +111,12 @@ export class PvtPage implements OnInit, ViewWillEnter {
   /**
    * Counts down to 0. The number being counted down is stored in the **counter** variable of this class.
    *
-   * @param from the number (in seconds) deciding the startPVT of the countdown.
+   * @param from the number (in seconds) deciding the startPVT of the Countdown.
    * */
   public async countdown(from: number) {
-    this.state = 'countdown';
+    this.state = 'Countdown';
     this.counter = from;
-    while (this.counter > 0) {
+    while (this.counter > 0 && this.state === 'Countdown') {
       await this.sleep(1000);
       this.counter--;
     }
@@ -127,9 +130,7 @@ export class PvtPage implements OnInit, ViewWillEnter {
     while (trialCount <= this.trials && !this.exited) {
       // reset variables
       this.timer = -1;
-      this.reacted = false;
-      this.reactedTooEarly = false;
-      this.reactedTooLate = false;
+      this.reacted = this.reactedTooEarly = this.reactedTooLate = false;
 
       // calculate random time to wait
       const wait = this.getUniformRand(this.min, this.max);
@@ -141,9 +142,7 @@ export class PvtPage implements OnInit, ViewWillEnter {
       }
 
       // run the timer, but only if the user neither reacted nor exited the game.
-      if (!(this.reacted || this.exited)) {
-        await this.runTimer();
-      }
+      await this.runTimer();
       await this.handleResult();
 
       // show the result for a bit
@@ -201,18 +200,20 @@ export class PvtPage implements OnInit, ViewWillEnter {
    * The timer will only be rendered if it is greater than 0 (see html).
    * */
   public async runInstructionTimer() {
-    this.instructionTimer = 0;
-    console.log('run instruction timer: ' + this.instructionTimer);
+    this.state = 'Instructions';
     while (this.state === 'Instructions') {
+      this.instructionTimer = 0;
       await this.sleep(this.min + Math.random() * (this.max - this.min));
       const maxTime = 250 + Math.random() * 100;
       const start = Date.now();
       do {
         this.instructionTimer = Date.now() - start; // update timer
         await this.sleep(0);
-      } while (this.instructionTimer < maxTime);
+      } while (this.instructionTimer < maxTime && this.state === 'Instructions');
+      if (this.state !== 'Instructions') {
+        break;
+      }
       await this.sleep(2000);
-      this.instructionTimer = 0;
     }
   }
 
@@ -297,7 +298,7 @@ export class PvtPage implements OnInit, ViewWillEnter {
   /**
    * Waits for a certain amount of milliseconds.
    *
-   * @param ms number of milliseconds that the function waits
+   * @param milliseconds number of milliseconds that the function waits
    * @returns a promise
    * */
   public sleep(milliseconds: number) {

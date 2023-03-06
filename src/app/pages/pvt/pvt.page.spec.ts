@@ -217,7 +217,7 @@ describe('PvtPage', () => {
     expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');
   });
 
-  it('should call countdown', fakeAsync(async () => {
+  it('should call Countdown', fakeAsync(async () => {
     const state = 'countdown';
     const from = 1;
     component.countdown(from);

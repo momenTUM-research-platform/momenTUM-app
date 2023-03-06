@@ -5,7 +5,7 @@ $timerFontSize: 30px;
 $countdownFontSize: 100px;
 $paragraphFontSize: large;
 
-/* Used for the countdown element */
+/* Used for the Countdown element */
 h1 {
   font-size: $countdownFontSize;
   font-weight: bolder;
@@ -35,7 +35,7 @@ p {
   }
 }
 
-/* Position the timer box and the countdown */
+/* Position the timer box and the Countdown */
 .center-abs {
   position: absolute;
   top: 50%;
