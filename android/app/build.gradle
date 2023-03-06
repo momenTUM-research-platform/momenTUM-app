@@ -6,8 +6,8 @@ android {
         applicationId "de.tum.sg.momentum"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
-        versionName "1.0.8 (pvt special)"
+        versionCode 9
+        versionName "1.0.8 (pvt special 5)"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

@@ -299,8 +299,8 @@ export class PvtPage implements OnInit, ViewWillLeave {
 
     // write file to filesystem
     await Filesystem.appendFile({
-      path: 'pvtdata.txt',
-      data: 'newpvt' + this.reactionTimes.toString(),
+      path: 'pvt-data.txt',
+      data: 'new pvt,' + this.reactionTimes.toString() + '\n',
       directory: Directory.Documents,
       encoding: Encoding.UTF8
     });
