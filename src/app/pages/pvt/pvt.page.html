@@ -52,7 +52,7 @@
   <!--Results Page-->
   <div *ngIf="state==='Results'">
     <ion-list inset="true">
-      <ion-item lines="none" *ngFor="let result of reactionTimes">
+      <ion-item *ngFor="let result of reactionTimes">
         <ion-label>{{result}} ms</ion-label>
       </ion-item>
     </ion-list>

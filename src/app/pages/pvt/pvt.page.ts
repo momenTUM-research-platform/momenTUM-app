@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
-import { ActivatedRoute } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {SurveyDataService} from '../../services/survey-data/survey-data.service';
+import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { StorageService } from '../../services/storage/storage.service';
-import { NavController, ViewWillLeave } from '@ionic/angular';
+import {StudyTasksService} from '../../services/study-task/study-tasks.service';
+import {StorageService} from '../../services/storage/storage.service';
+import {NavController, ViewWillLeave} from '@ionic/angular';
+import {Directory, Encoding, Filesystem} from "@capacitor/filesystem";
 
 @Component({
   selector: 'app-pvt',
@@ -294,6 +295,14 @@ export class PvtPage implements OnInit, ViewWillLeave {
       page: 'pvt',
       event: 'submit',
       module_index: this.moduleIndex,
+    });
+
+    // write file to filesystem
+    await Filesystem.appendFile({
+      path: 'pvtdata.txt',
+      data: 'newpvt' + this.reactionTimes.toString(),
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8
     });
   }
 
