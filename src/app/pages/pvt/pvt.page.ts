@@ -142,7 +142,9 @@ export class PvtPage implements OnInit, ViewWillLeave {
       }
 
       // run the timer, but only if the user neither reacted nor exited the game.
-      await this.runTimer();
+      if (!this.reacted && !this.exited) {
+        await this.runTimer();
+      }
       await this.handleResult();
 
       // show the result for a bit
