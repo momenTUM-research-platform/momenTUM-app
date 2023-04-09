@@ -1,50 +1,68 @@
-<ion-content scroll-y="false">
-  <!--Tutorial Page-->
-  <div *ngIf="state==='instructions'" class="pane">
-    <h1>TUTORIAL</h1>
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start" *ngIf="state === 'Instructions'">
+      <ion-button [routerLink]="'/'" routerDirection="back">
+        <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{state}}</ion-title>
+    <ion-buttons slot="end" *ngIf="enableExit && (state === 'PVT' || state === 'Countdown')">
+      <ion-button (click)="exit()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollY]="state === 'Instructions' || state === 'Results'">
+  <!--Instructions-->
+  <div *ngIf="state==='Instructions'">
     <p>
-      Welcome! Reaction-time-testing is easy: it's just a reflex game. Some
+      Welcome! Taking the PVT is easy. It's just a reflex game. Some
       numbers will flash onto the screen suddenly, and your job will be to
-      respond as soon as possible by touching the screen. When someone plays it,
-      the screen looks something like this:
+      respond as soon as possible by touching the screen. During the PVT,
+      the screen looks something like this
     </p>
     <div class="timer-box">
-      <h2 class="timer-font">{{instructionTimer}}</h2>
+      <ion-label class="ion-align-self-center timer-label">{{instructionTimer > 0 ? instructionTimer : ''}}</ion-label>
     </div>
-    <p>The game will last for {{trials}} trials.</p>
-    <p *ngIf="enableExit">
-      You can also end the game at any time by clicking the x in the upper right
-      corner.
+    <p>
+      The PVT will last for {{trials}} trials. Please complete all the trials.
+      <span>If you wan't to exit early, click the '<ion-icon name="close" color="primary"></ion-icon>' in the upper right corner.</span>
     </p>
-    <button (click)="start()">< start ></button>
-  </div>
-
-  <!--Countdown Page-->
-  <div *ngIf="state==='countdown'" class="pane">
-    <h1>Trial starts in {{counter}}</h1>
-  </div>
-
-  <!--RTT Page-->
-  <div *ngIf="state==='RTT'" (touchstart)="reacted = true" class="pane">
-    <ion-icon
-      class="top-right-position"
+    <ion-button
+      class="ion-margin"
+      (click)="startPVT()"
       size="large"
-      (click)="exit()"
-      name="close"
-      *ngIf="enableExit"
-      data-cy="exitbutton"
-    ></ion-icon>
-    <div class="timer-box center-abs"  data-cy="timerbox" >
-      <h2 *ngIf="timer >= 0">{{timer}}</h2>
-      <h2 *ngIf="reactedTooLate">{{tooLateMessage}}</h2>
-      <h2 *ngIf="reactedTooEarly">{{tooEarlyMessage}}</h2>
+      expand="block"
+      fill="outline"
+    >start</ion-button>
+  </div>
+
+  <!--Countdown-->
+  <h1 *ngIf="state==='Countdown'" class="center-abs">{{counter}}</h1>
+
+  <!--PVT-->
+  <div *ngIf="state==='PVT'" (touchstart)="reacted = true" style="width: 100%; height: 100%">
+    <div class="timer-box center-abs"  data-cy="timerbox">
+      <ion-label class="ion-align-self-center timer-label">{{timer >= 0 ? timer : reactedTooLate ? tooLateMessage : reactedTooEarly ? tooEarlyMessage : ''}}</ion-label>
     </div>
   </div>
 
   <!--Results Page-->
-  <div *ngIf="state==='results'" class="pane">
-    <h1>RESULTS</h1>
-    <p *ngIf="showResults" class="center-abs">{{reactionTimes}}</p>
-    <button (mousedown)="navHome()">< {{submitText}} ></button>
+  <div *ngIf="state==='Results'">
+    <ion-list inset="true">
+      <ion-item lines="none" *ngFor="let result of reactionTimes">
+        <ion-label>{{result}} ms</ion-label>
+      </ion-item>
+    </ion-list>
+    <ion-button
+      routerLink="/"
+      routerDirection="back"
+      class="ion-margin"
+      size="large"
+      expand="block"
+      fill="outline"
+    >{{submitText}}</ion-button>
   </div>
 </ion-content>
