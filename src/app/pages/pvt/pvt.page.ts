@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
-import { ActivatedRoute } from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {SurveyDataService} from '../../services/survey-data/survey-data.service';
+import {ActivatedRoute} from '@angular/router';
 import * as moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
-import { StorageService } from '../../services/storage/storage.service';
-import { NavController, ViewWillLeave } from '@ionic/angular';
+import {StudyTasksService} from '../../services/study-task/study-tasks.service';
+import {StorageService} from '../../services/storage/storage.service';
+import {NavController, ViewWillLeave} from '@ionic/angular';
+import {Directory, Encoding, Filesystem} from "@capacitor/filesystem";
 
 @Component({
   selector: 'app-pvt',
@@ -93,12 +94,51 @@ export class PvtPage implements OnInit, ViewWillLeave {
   async exit() {
     this.exited = true;
     if (this.showResults) {
-      this.state = 'Results';
       this.submit();
+      this.state = 'Results';
     } else {
       this.submit();
       this.navHome();
     }
+    this.save();
+  }
+
+  async save() {
+    const path = 'pvt-data.csv';
+    Filesystem.readdir({
+      path: '',
+      directory: Directory.Documents,
+    }).then((result) => {
+      for (const file of result.files) {
+        if (file.name === path) {
+          return true;
+        }
+      }
+      return false;
+    }).then(async (found) => {
+      let data = '';
+      for (let i = 0; i < this.reactionTimes.length; i++) {
+        data += `\n${i}, ${this.reactionTimes[i]}`;
+      }
+      data += '\n-, -';
+
+      if (!found) {
+        await Filesystem.writeFile({
+          path,
+          directory: Directory.Documents,
+          data: 'trial index, reaction time' + data,
+          encoding: Encoding.UTF8,
+        });
+      }
+      else {
+        await Filesystem.appendFile({
+          path,
+          directory: Directory.Documents,
+          data,
+          encoding: Encoding.UTF8,
+        });
+      }
+    });
   }
 
   /**
