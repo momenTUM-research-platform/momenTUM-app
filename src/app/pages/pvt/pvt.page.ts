@@ -1,11 +1,11 @@
-import {Component, OnInit} from '@angular/core';
-import {SurveyDataService} from '../../services/survey-data/survey-data.service';
-import {ActivatedRoute} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
-import {StudyTasksService} from '../../services/study-task/study-tasks.service';
-import {StorageService} from '../../services/storage/storage.service';
-import {NavController, ViewWillLeave} from '@ionic/angular';
-import {Directory, Encoding, Filesystem} from "@capacitor/filesystem";
+import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StorageService } from '../../services/storage/storage.service';
+import { NavController, ViewWillLeave } from '@ionic/angular';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 
 @Component({
   selector: 'app-pvt',
@@ -107,38 +107,39 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const path = 'pvt-data.csv';
     Filesystem.readdir({
       path: '',
-      directory: Directory.Documents,
-    }).then((result) => {
-      for (const file of result.files) {
-        if (file.name === path) {
-          return true;
+      directory: Directory.Data,
+    })
+      .then((result) => {
+        for (const file of result.files) {
+          if (file.name === path) {
+            return true;
+          }
         }
-      }
-      return false;
-    }).then(async (found) => {
-      let data = '';
-      for (let i = 0; i < this.reactionTimes.length; i++) {
-        data += `\n${i}, ${this.reactionTimes[i]}`;
-      }
-      data += '\n-, -';
+        return false;
+      })
+      .then(async (found) => {
+        let data = '';
+        for (let i = 0; i < this.reactionTimes.length; i++) {
+          data += `\n${i}, ${this.reactionTimes[i]}`;
+        }
+        data += '\n-, -';
 
-      if (!found) {
-        await Filesystem.writeFile({
-          path,
-          directory: Directory.Documents,
-          data: 'trial index, reaction time' + data,
-          encoding: Encoding.UTF8,
-        });
-      }
-      else {
-        await Filesystem.appendFile({
-          path,
-          directory: Directory.Documents,
-          data,
-          encoding: Encoding.UTF8,
-        });
-      }
-    });
+        if (!found) {
+          await Filesystem.writeFile({
+            path,
+            directory: Directory.Data,
+            data: 'trial index, reaction time' + data,
+            encoding: Encoding.UTF8,
+          });
+        } else {
+          await Filesystem.appendFile({
+            path,
+            directory: Directory.Data,
+            data,
+            encoding: Encoding.UTF8,
+          });
+        }
+      });
   }
 
   /**
@@ -251,7 +252,10 @@ export class PvtPage implements OnInit, ViewWillLeave {
       do {
         this.instructionTimer = Date.now() - start; // update timer
         await this.sleep(0);
-      } while (this.instructionTimer < maxTime && this.state === 'Instructions');
+      } while (
+        this.instructionTimer < maxTime &&
+        this.state === 'Instructions'
+      );
       if (this.state !== 'Instructions') {
         break;
       }
