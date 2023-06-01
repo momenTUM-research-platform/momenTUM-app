@@ -25,8 +25,6 @@ export class SurveyPage implements OnInit {
   num_sections: number;
   current_section_name: string;
 
-  // study object
-  study: Study;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Module = {
     type: '',
@@ -152,10 +150,10 @@ export class SurveyPage implements OnInit {
         });
 
         // extract the JSON from the study object
-        this.study = JSON.parse(studyObject);
+        const study = JSON.parse(studyObject);
 
         // get the correct module
-        this.survey = this.study.modules[this.module_index];
+        this.survey = study.modules[this.module_index];
 
         // shuffle modules if required
         if (this.survey.shuffle) {
