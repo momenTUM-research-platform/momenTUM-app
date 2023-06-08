@@ -3,7 +3,10 @@
     <ion-title> momenTUM </ion-title>
     <ion-buttons slot="start">
       <ion-button (click)="toggleTheme()">
-        <ion-icon slot="icon-only" [name]="darkMode ? 'moon' : 'sunny'"></ion-icon>
+        <ion-icon
+          slot="icon-only"
+          [name]="darkMode ? 'moon' : 'sunny'"
+        ></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -24,11 +27,11 @@
   </ion-refresher>
   <!-- Displayed if user is not enrolled in a study -->
   <ion-img
-  class="banner-image"
+    class="banner-image"
     [src]="'assets/imgs/logo-name.png'"
     [hidden]="hideEnrolOptions"
   ></ion-img>
-  <ion-text [hidden]="hideEnrolOptions" style="margin-top:5%">
+  <ion-text [hidden]="hideEnrolOptions" style="margin-top: 5%">
     <h1 style="text-align: center">Let's get started</h1>
     <p class="welcome-msg">
       Welcome to <ion-label color="primary">momenTUM</ion-label> - a platform to
@@ -45,7 +48,7 @@
       [src]="study.properties.banner_url"
     ></ion-img>
     <!--item list-->
-    <ng-container *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
+    <div *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
       <!--single item-->
       <ion-item
         lines="none"
@@ -63,7 +66,7 @@
       <ion-item *ngIf="task.type === 'header'" lines="none">
         <ion-label stacked class="title-label">{{task.label}}</ion-label>
       </ion-item>
-    </ng-container>
+    </div>
     <ion-item lines="none" class="ion-text-center" [hidden]="task_list.length">
       <ion-label *ngIf="study" class="ion-text-wrap">
         {{study.properties.empty_msg}}
@@ -81,10 +84,8 @@
 <ion-footer [hidden]="hideEnrolOptions">
   <ion-grid class="ion-margin-bottom">
     <ion-row class="ion-justify-content-center">
-      <ion-button
-        class="study-sign-in-button"
-        (click)="scanQR()"
-      >Scan QR Code</ion-button
+      <ion-button class="study-sign-in-button" (click)="scanQR()"
+        >Scan QR Code</ion-button
       >
     </ion-row>
     <ion-row class="ion-justify-content-center">
