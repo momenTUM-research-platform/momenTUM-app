@@ -5,6 +5,7 @@ import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
+import { Task } from 'src/app/interfaces/types';
 
 @Component({
   selector: 'app-pvt',
@@ -211,7 +212,10 @@ export class PvtPage implements OnInit, ViewWillLeave {
       do {
         this.instructionTimer = Date.now() - start; // update timer
         await this.sleep(0);
-      } while (this.instructionTimer < maxTime && this.state === 'Instructions');
+      } while (
+        this.instructionTimer < maxTime &&
+        this.state === 'Instructions'
+      );
       if (this.state !== 'Instructions') {
         break;
       }
