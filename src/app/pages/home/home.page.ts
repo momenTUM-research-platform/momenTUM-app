@@ -19,6 +19,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
+import { Translations } from 'src/app/interfaces/types';
+import { Study } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-home',
@@ -278,8 +280,6 @@ export class HomePage implements OnInit {
     try {
       const result = await this.surveyDataService.getRemoteData(url);
 
-
-
       // check if the data received from the URL contains JSON properties/modules
       // in order to determine if it's a schema study before continuing
       let validStudy = false;
@@ -293,7 +293,7 @@ export class HomePage implements OnInit {
       // some of the key fields used by schema so it can determine whether it is
       // actually a schema study URL
       // @ts-ignore
-     validStudy =
+      validStudy =
         study.properties !== undefined && // @ts-ignore
         study.modules !== undefined && // @ts-ignore
         study.properties.study_id !== undefined;
