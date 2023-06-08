@@ -6,6 +6,7 @@ import {
   FileDownloadResponse,
 } from 'capacitor-plugin-filedownload';
 import { StorageService } from '../storage/storage.service';
+import { Study } from 'src/app/interfaces/study';
 
 @Injectable({
   providedIn: 'root',
@@ -60,13 +61,14 @@ export class SurveyCacheService {
     for (const module of study.modules) {
       // Must check if the sections exist,
       // they don't for pvt modules
-      if (module.sections) {
-        for (const section of module.sections) {
-          const mediaQuestions = section.questions.filter(
-            (question): question is Media => question.type === 'media'
-          );
+      if (module.body.type === 'survey' && module.body.sections) {
+        for (const section of module.body.sections) {
+          const mediaQuestions = section.questions.filter((question) => {
+            question.body.type === 'media';
+          });
           for (const question of mediaQuestions) {
-            this.mediaToCache[question.id] = question.src;
+            // @ts-ignore
+            this.mediaToCache[question.id] = question.body.src;
           }
         }
       }
@@ -133,20 +135,22 @@ export class SurveyCacheService {
         // update the other media items to the corresponding local URL
         // get urls from media elements
         for (const module of studyObject.modules) {
-          if (module.sections) {
-            for (const section of module.sections) {
+          if (module.body.type === 'survey' && module.body.sections) {
+            for (const section of module.body.sections) {
               // Must check if the sections exist,
               // they don't for pvt modules
 
               const mediaQuestions = section.questions.filter(
-                (question): question is Media => question.type === 'media'
+                (question) => question.body.type === 'media'
               );
 
               for (const question of mediaQuestions) {
                 if (question.id in this.localMediaURLs) {
-                  question.src = this.localMediaURLs[question.id];
+                  // @ts-ignore
+                  question.body.src = this.localMediaURLs[question.id];
                 }
-                if (question.subtype === 'video') {
+                // @ts-ignore
+                if (question.body.subtype === 'video') {
                   // @ts-ignore
                   question.thumb = this.localMediaURLs.banner;
                 }
@@ -154,8 +158,6 @@ export class SurveyCacheService {
             }
           }
         }
-
-
 
         // update the study protocol in storage
         this.storage.set('current-study', JSON.stringify(studyObject));

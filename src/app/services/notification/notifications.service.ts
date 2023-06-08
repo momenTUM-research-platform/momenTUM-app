@@ -11,6 +11,7 @@ import {
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
 import { StudyTasksService } from '../study-task/study-tasks.service';
+import { Task } from 'src/app/interfaces/types';
 
 @Injectable({
   providedIn: 'root',

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { LoadingService } from '../loading/loading-service.service';
+import { Study } from 'src/app/interfaces/study';
+import { Task } from 'src/app/interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -60,7 +62,7 @@ export class StudyTasksService {
           info: 'bulb-outline',
           pvt: 'alarm-outline',
         };
-        const module_type = typeToIcon[mod.type] || 'default';
+        const module_type = typeToIcon[mod.body.type] || 'default';
 
         const module_name = mod.name;
         const module_index = i;

@@ -5,6 +5,7 @@ import { UuidService } from '../uuid/uuid.service';
 import { HttpClient } from '@angular/common/http';
 import { Http } from '@capacitor-community/http';
 import { StorageService } from '../storage/storage.service';
+import { LogEvent, SurveyData } from 'src/app/interfaces/types';
 
 @Injectable({
   providedIn: 'root',
@@ -86,7 +87,10 @@ export class SurveyDataService {
       bodyData.append('study_id', studyJSON?.properties.study_id);
       bodyData.append('module_index', String(surveyData.module_index));
       // Included module_id
-      bodyData.append('module_id', studyJSON?.modules[surveyData.module_index].id);
+      bodyData.append(
+        'module_id',
+        studyJSON?.modules[surveyData.module_index].id
+      );
       bodyData.append('module_name', surveyData.module_name);
       'responses' in surveyData &&
         bodyData.append('responses', JSON.stringify(surveyData.responses));
@@ -123,43 +127,50 @@ export class SurveyDataService {
     return Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
-    ]).then((values) => {
-      const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
-      const uuid = values[1];
-      const logUuid = this.uuidService.generateUUID('pending-log');
+    ])
+      .then((values) => {
+        const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
+        const uuid = values[1];
+        const logUuid = this.uuidService.generateUUID('pending-log');
 
-      // create form data to store the log data
-      const bodyData = new FormData();
-      bodyData.append('data_type', 'log');
-      bodyData.append('user_id', uuid.toString());
-      bodyData.append('study_id', studyJSON?.properties.study_id);
-      bodyData.append('module_index', logEvent.module_index);
-      // Included module_id
-      bodyData.append('module_id', studyJSON?.modules[Number(logEvent.module_index)].id);
-      bodyData.append('page', logEvent.page);
-      bodyData.append('event', logEvent.event);
-      bodyData.append('timestamp', logEvent.timestamp);
-      bodyData.append('timestamp_in_ms', String(logEvent.milliseconds));
-      bodyData.append('platform', this.platform.platforms()[0]);
+        // create form data to store the log data
+        const bodyData = new FormData();
+        bodyData.append('data_type', 'log');
+        bodyData.append('user_id', uuid.toString());
+        bodyData.append('study_id', studyJSON?.properties.study_id);
+        bodyData.append('module_index', logEvent.module_index);
+        // Included module_id
+        bodyData.append(
+          'module_id',
+          studyJSON?.modules[Number(logEvent.module_index)].id
+        );
+        bodyData.append('page', logEvent.page);
+        bodyData.append('event', logEvent.event);
+        bodyData.append('timestamp', logEvent.timestamp);
+        bodyData.append('timestamp_in_ms', String(logEvent.milliseconds));
+        bodyData.append('platform', this.platform.platforms()[0]);
 
-      return this.attemptHttpPost(
-        studyJSON?.properties.post_url + '/log',
-        bodyData
-      ).then((postSuccessful) => {
-        if (!postSuccessful) {
-          const object: { [key: string]: FormDataEntryValue } = {};
-          bodyData.forEach((value, key) => {
-            object[key] = value;
+        return this.attemptHttpPost(
+          studyJSON?.properties.post_url + '/log',
+          bodyData
+        )
+          .then((postSuccessful) => {
+            if (!postSuccessful) {
+              const object: { [key: string]: FormDataEntryValue } = {};
+              bodyData.forEach((value, key) => {
+                object[key] = value;
+              });
+              const json = JSON.stringify(object);
+              this.storage.set(logUuid, json);
+            }
+          })
+          .catch((error) => {
+            console.log('Error in attempt http post: ', error || '');
           });
-          const json = JSON.stringify(object);
-          this.storage.set(logUuid, json);
-        }
-      }).catch((error)=>{
-        console.log('Error in attempt http post: ', error || '');
+      })
+      .catch((error) => {
+        console.log('Error in log Page Visit To Server: ', error.message || '');
       });
-    }).catch((error)=>{
-      console.log('Error in log Page Visit To Server: ', error.message || '');
-    });
   }
 
   /**
