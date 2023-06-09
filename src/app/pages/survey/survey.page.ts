@@ -8,6 +8,8 @@ import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
+import Survey, { Question } from 'src/app/interfaces/survey';
+import { Task, Option, Responses } from 'src/app/interfaces/types';
 
 @Component({
   selector: 'app-survey',
@@ -26,45 +28,7 @@ export class SurveyPage implements OnInit {
   current_section_name: string;
 
   // survey template - load prior to data from storage ### This seems like the wrong survey format
-  survey: Module = {
-    type: '',
-    name: '',
-    submit_text: '',
-
-    condition: '',
-    alerts: {
-      title: '',
-      message: '',
-      start_offset: 0,
-      duration: 0,
-      times: [],
-      random: false,
-      random_interval: 0,
-      sticky: false,
-      sticky_label: '',
-      timeout: false,
-      timeout_after: 0,
-    },
-    graph: {
-      display: false,
-      variable: '',
-      title: '',
-      blurb: '',
-      type: 'bar',
-      max_points: 0,
-    },
-    sections: [
-      {
-        id: '',
-        name: '',
-        shuffle: false,
-        questions: [],
-      },
-    ],
-    id: '',
-    unlock_after: [],
-    shuffle: false,
-  };
+  survey: Survey;
 
   questions: any;
 
@@ -91,7 +55,6 @@ export class SurveyPage implements OnInit {
    * Initialises the survey and displays it on the screen
    */
   async ngOnInit() {
-
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
@@ -315,39 +278,43 @@ export class SurveyPage implements OnInit {
           question.hideSwitch = true;
 
           // for datetime questions, default to the current date/time
-          if (question.type === 'datetime') {
+          if (question.body.type === 'datetime') {
             // placeholder for dates
             question.model = moment().format();
 
             // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
           } else if (
-            question.type === 'media' &&
-            (question.subtype === 'audio' || question.subtype === 'video')
+            question.body.type === 'media' &&
+            (question.body.subtype === 'audio' ||
+              question.body.subtype === 'video')
           ) {
             // @ts-ignore
-            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.src
-            );
-            if (question.subtype === 'video') {
-              // @ts-ignore
-              question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
-                question.thumb
+            question.body.src =
+              this.domSanitizer.bypassSecurityTrustResourceUrl(
+                question.body.src
               );
+            if (question.body.subtype === 'video') {
+              // @ts-ignore
+              question.body.thumb =
+                this.domSanitizer.bypassSecurityTrustResourceUrl(
+                  question.body.thumb
+                );
             }
 
             // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
-          } else if (question.type === 'external') {
-            question.src = question.src + '?uuid=' + uuid;
+          } else if (question.body.type === 'external') {
+            question.body.src = question.body.src + '?uuid=' + uuid;
             // @ts-ignore
-            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.src
-            );
+            question.body.src =
+              this.domSanitizer.bypassSecurityTrustResourceUrl(
+                question.body.src
+              );
 
             // for slider questions, set the default value to be halfway between min and max
-          } else if (question.type === 'slider') {
+          } else if (question.body.type === 'slider') {
             // get min and max
-            const min = question.min;
-            const max = question.max;
+            const min = question.body.min;
+            const max = question.body.max;
 
             // set the default value of the slider to the middle value
             const model = min + (max - min) / 2;
@@ -357,24 +324,26 @@ export class SurveyPage implements OnInit {
             question.value = model;
 
             // for checkbox items, the response is set to an empty array
-          } else if (question.type === 'multi') {
+          } else if (question.body.type === 'multi') {
             // set up checked tracking for checkbox questions types
             const tempOptions: Option[] = [];
-            for (const option of question.options) {
+            for (const option of question.body.options) {
               tempOptions.push({
                 text: option,
                 checked: false,
               });
             }
-            question.optionsChecked = tempOptions;
+            question.body.optionsChecked = tempOptions;
 
             // counterbalance the choices if necessary
-            if (question.shuffle) {
-              question.optionsChecked = this.shuffle(question.optionsChecked);
+            if (question.body.shuffle) {
+              question.body.optionsChecked = this.shuffle(
+                question.body.optionsChecked
+              );
             }
 
             // set the empty response to an array for checkbox questions
-            if (!question.radio) {
+            if (!question.body.radio) {
               question.response = [];
             }
           }
@@ -469,9 +438,9 @@ export class SurveyPage implements OnInit {
           const hideValue = q.hide_value;
 
           if (
-            question.type === 'multi' ||
-            question.type === 'yesno' ||
-            question.type === 'text'
+            question.body.type === 'multi' ||
+            question.body.type === 'yesno' ||
+            question.body.type === 'text'
           ) {
             // determine whether to hide/show the element
             const hideIf = q.hide_if;
@@ -482,7 +451,7 @@ export class SurveyPage implements OnInit {
               q.hideSwitch = true;
             }
           } else if (
-            question.type === 'slider' &&
+            question.body.type === 'slider' &&
             typeof hideValue === 'string' &&
             question.response
           ) {
@@ -525,10 +494,9 @@ export class SurveyPage implements OnInit {
       ) {
         question.hideError = false;
         // Only works for question types other than instruction
-        if(question.type !== 'instruction'){
+        if (question.body.type !== 'instruction') {
           errorCount++;
         }
-
       } else {
         question.hideError = true;
       }
