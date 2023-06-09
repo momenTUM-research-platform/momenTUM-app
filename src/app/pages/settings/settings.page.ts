@@ -121,7 +121,7 @@ export class SettingsPage {
         },
         {
           text: 'Withdraw',
-          handler: () => {
+          handler: async () => {
             // log a withdraw event to the server
             this.surveyDataService.logPageVisitToServer({
               timestamp: moment().format(),
@@ -131,25 +131,12 @@ export class SettingsPage {
               module_index: -1,
             });
             // upload any pending logs and data
-            this.surveyDataService
-              .uploadPendingData('pending-log')
-              .then(() =>
-                this.surveyDataService.uploadPendingData('pending-data')
-              )
-              .then(
-                () => this.storage.removeItem('current-study')
-                // then remove all the pending study tasks from storage
-              )
-              .then(
-                () => this.storage.removeItem('study-tasks')
-                // then cancel all remaining notifications and navigate to home
-              )
-              .then(() => {
-                // cancel all notifications
-                this.notificationsService.cancelAll();
-                // navigate to the home tab
-                this.navController.navigateRoot('/');
-              });
+            await this.surveyDataService.uploadPendingData('pending-log');
+            await this.surveyDataService.uploadPendingData('pending-data');
+            await this.storage.removeItem('current-study');
+            await this.storage.removeItem('study-tasks');
+            await this.notificationsService.cancelAll();
+            await this.navController.navigateRoot('/');
           },
         },
       ],
