@@ -73,7 +73,6 @@ export class SurveyPage implements OnInit {
 
     // the id of the task to be displayed
     this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
-
     const studyObject: any = await this.storage.get('current-study');
     const uuid = await this.storage.get('uuid');
 
