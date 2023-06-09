@@ -76,147 +76,144 @@ export class SurveyPage implements OnInit {
     const studyObject: any = await this.storage.get('current-study');
     const uuid = await this.storage.get('uuid');
 
-    await this.studyTasksService.getAllTasks().then((tasks) => {
-      this.tasks = tasks;
+    this.tasks = await this.studyTasksService.getAllTasks();
+    for (let i = 0; i < this.tasks.length; i++) {
+      if (this.task_id === String(this.tasks[i].task_id)) {
+        this.module_name = this.tasks[i].name;
+        this.module_index = this.tasks[i].index;
+        this.task_index = i;
+        break;
+      }
+    }
 
-      for (let i = 0; i < this.tasks.length; i++) {
-        if (this.task_id === String(this.tasks[i].task_id)) {
-          this.module_name = this.tasks[i].name;
-          this.module_index = this.tasks[i].index;
-          this.task_index = i;
+    // check if this task is valid
+    this.studyTasksService.getTaskDisplayList().then((t) => {
+      let taskAvailable = false;
+      for (const task of t) {
+        if (String(task.task_id) === this.task_id) {
+          taskAvailable = true;
           break;
         }
       }
-
-      // check if this task is valid
-      this.studyTasksService.getTaskDisplayList().then((t) => {
-        let taskAvailable = false;
-        for (const task of t) {
-          if (String(task.task_id) === this.task_id) {
-            taskAvailable = true;
-            break;
-          }
-        }
-        if (!taskAvailable) {
-          this.showToast(
-            'This task had a time limit and is no longer available.',
-            'bottom'
-          );
-          this.navController.navigateRoot('/');
-        }
-      });
-
-      // extract the JSON from the study object
-      const study = JSON.parse(studyObject);
-
-      // get the correct module
-      this.survey = study.modules[this.module_index];
-
-      // shuffle modules if required
-      if (this.survey.shuffle) {
-        this.survey.sections = this.shuffle(this.survey.sections);
+      if (!taskAvailable) {
+        this.showToast(
+          'This task had a time limit and is no longer available.',
+          'bottom'
+        );
+        this.navController.navigateRoot('/');
       }
+    });
 
-      // shuffle questions if required
-      if (this.survey.sections !== undefined) {
-        for (const section of this.survey.sections) {
-          if (section.shuffle) {
-            section.questions = this.shuffle(section.questions);
-          }
+    // extract the JSON from the study object
+    const study = JSON.parse(studyObject);
+
+    // get the correct module
+    this.survey = study.modules[this.module_index];
+
+    // shuffle modules if required
+    if (this.survey.shuffle) {
+      this.survey.sections = this.shuffle(this.survey.sections);
+    }
+
+    // shuffle questions if required
+    if (this.survey.sections !== undefined) {
+      for (const section of this.survey.sections) {
+        if (section.shuffle) {
+          section.questions = this.shuffle(section.questions);
         }
       }
+    }
 
-      // get the name of the current section
-      this.num_sections = this.survey.sections.length;
-      this.current_section_name =
-        this.survey.sections[this.current_section - 1].name;
+    // get the name of the current section
+    this.num_sections = this.survey.sections.length;
+    this.current_section_name =
+      this.survey.sections[this.current_section - 1].name;
 
-      // get the user ID and then set up question variables
-      // initialise all of the questions to be displayed
-      this.setupQuestionVariables(uuid.toString());
+    // get the user ID and then set up question variables
+    // initialise all of the questions to be displayed
+    this.setupQuestionVariables(uuid.toString());
 
-      // set the submit text as appropriate
-      if (this.current_section < this.num_sections) {
-        this.submit_text = 'Next';
-      } else {
-        this.submit_text = this.survey.submit_text;
-      }
+    // set the submit text as appropriate
+    if (this.current_section < this.num_sections) {
+      this.submit_text = 'Next';
+    } else {
+      this.submit_text = this.survey.submit_text;
+    }
 
-      // set the current section of questions
-      this.questions = this.survey.sections[this.current_section - 1].questions;
+    // set the current section of questions
+    this.questions = this.survey.sections[this.current_section - 1].questions;
 
-      // toggle rand_group questions
-      // figure out which ones are grouped together, randomly show one and set its response value to 1
-      const randomGroups: { [rand_group: string]: string[] } = {};
-      if (this.survey.sections !== undefined) {
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (question.rand_group) {
-              // set a flag to indicate that this question shouldn't reappear via branching logic
-              question.noToggle = true;
+    // toggle rand_group questions
+    // figure out which ones are grouped together, randomly show one and set its response value to 1
+    const randomGroups: { [rand_group: string]: string[] } = {};
+    if (this.survey.sections !== undefined) {
+      for (const section of this.survey.sections) {
+        for (const question of section.questions) {
+          if (question.rand_group) {
+            // set a flag to indicate that this question shouldn't reappear via branching logic
+            question.noToggle = true;
 
-              // categorise questions by rand_group
-              if (!(question.rand_group in randomGroups)) {
-                randomGroups[question.rand_group] = [];
-                randomGroups[question.rand_group].push(question.id);
-              } else {
-                randomGroups[question.rand_group].push(question.id);
-              }
+            // categorise questions by rand_group
+            if (!(question.rand_group in randomGroups)) {
+              randomGroups[question.rand_group] = [];
+              randomGroups[question.rand_group].push(question.id);
+            } else {
+              randomGroups[question.rand_group].push(question.id);
             }
           }
         }
       }
+    }
 
-      // from each rand_group, select a random item to show
-      const showThese = [];
-      for (const key in randomGroups) {
-        if (randomGroups.hasOwnProperty(key)) {
-          // select a random value from each array and add it to the "showThese array"
-          showThese.push(
-            randomGroups[key][
-              Math.floor(Math.random() * randomGroups[key].length)
-            ]
-          );
+    // from each rand_group, select a random item to show
+    const showThese = [];
+    for (const key in randomGroups) {
+      if (randomGroups.hasOwnProperty(key)) {
+        // select a random value from each array and add it to the "showThese array"
+        showThese.push(
+          randomGroups[key][
+            Math.floor(Math.random() * randomGroups[key].length)
+          ]
+        );
+      }
+    }
+
+    // iterate back through and show the ones that have been randomly calculated
+    // while removing the branching attributes from those that are hidden
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        if (showThese.includes(question.id)) {
+          question.noToggle = false;
+          question.response = 1;
+          // hide any questions from the rand_group that were not made visible
+          // and remove any branching logic attributes
+          // ### How to do this in TS?
+        } else if (question.noToggle) {
+          question.hideSwitch = false;
+          // @ts-ignore
+          delete question.hide_id;
+          // @ts-ignore
+          delete question.hide_value;
+          // @ts-ignore
+          delete question.hide_if;
         }
       }
+    }
 
-      // iterate back through and show the ones that have been randomly calculated
-      // while removing the branching attributes from those that are hidden
-      for (const section of this.survey.sections) {
-        for (const question of section.questions) {
-          if (showThese.includes(question.id)) {
-            question.noToggle = false;
-            question.response = 1;
-            // hide any questions from the rand_group that were not made visible
-            // and remove any branching logic attributes
-            // ### How to do this in TS?
-          } else if (question.noToggle) {
-            question.hideSwitch = false;
-            // @ts-ignore
-            delete question.hide_id;
-            // @ts-ignore
-            delete question.hide_value;
-            // @ts-ignore
-            delete question.hide_if;
-          }
-        }
+    // toggle dynamic question setup
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        this.toggleDynamicQuestions(question);
       }
+    }
 
-      // toggle dynamic question setup
-      for (const section of this.survey.sections) {
-        for (const question of section.questions) {
-          this.toggleDynamicQuestions(question);
-        }
-      }
-
-      // log the user visiting this tab
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'survey',
-        event: 'entry',
-        module_index: this.module_index,
-      });
+    // log the user visiting this tab
+    this.surveyDataService.logPageVisitToServer({
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page: 'survey',
+      event: 'entry',
+      module_index: this.module_index,
     });
   }
 
