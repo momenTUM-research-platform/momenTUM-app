@@ -18,7 +18,7 @@
       <span class="text">{{this.current_section}}/{{this.num_sections}}</span>
     </ion-item>
     <ion-progress-bar
-      [value]="this.current_section/num_sections"
+      [value]="(this.current_section - 1)/(num_sections - 1)"
     ></ion-progress-bar>
   </ion-toolbar>
 </ion-header>

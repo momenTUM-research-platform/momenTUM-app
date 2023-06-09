@@ -104,7 +104,7 @@ export class SurveyPage implements OnInit {
     // extract the JSON from the study object
     const studyObject: any = await this.storage.get('current-study');
     const study = JSON.parse(studyObject);
-    this.survey = study.modules[this.module_index];
+    this.survey = study.modules[this.module_index].body;
 
     // shuffle modules if required
     if (this.survey.shuffle) {
