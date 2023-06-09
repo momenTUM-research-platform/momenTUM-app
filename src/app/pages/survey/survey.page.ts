@@ -73,9 +73,6 @@ export class SurveyPage implements OnInit {
 
     // the id of the task to be displayed
     this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
-    const studyObject: any = await this.storage.get('current-study');
-    const uuid = await this.storage.get('uuid');
-
     this.tasks = await this.studyTasksService.getAllTasks();
     for (let i = 0; i < this.tasks.length; i++) {
       if (this.task_id === String(this.tasks[i].task_id)) {
@@ -105,9 +102,8 @@ export class SurveyPage implements OnInit {
     });
 
     // extract the JSON from the study object
+    const studyObject: any = await this.storage.get('current-study');
     const study = JSON.parse(studyObject);
-
-    // get the correct module
     this.survey = study.modules[this.module_index];
 
     // shuffle modules if required
@@ -131,6 +127,7 @@ export class SurveyPage implements OnInit {
 
     // get the user ID and then set up question variables
     // initialise all of the questions to be displayed
+    const uuid = await this.storage.get('uuid');
     this.setupQuestionVariables(uuid.toString());
 
     // set the submit text as appropriate
