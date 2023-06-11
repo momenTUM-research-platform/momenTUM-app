@@ -11,16 +11,17 @@ interface Task {
   sticky: boolean;
   sticky_label: string;
   alert_title: string;
-  alert_time?: string;
-  response_time?: string;
-  response_time_ms?: number;
   alert_message: string;
   timeout: boolean;
   timeout_after: number;
-  responses?: Responses;
   time: string;
   locale: string;
   completed: boolean;
+  alert_time?: string;
+  response_time?: string;
+  response_time_ms?: number;
+  responses?: Responses;
+  moment?: string;
 }
 
 declare interface Option {

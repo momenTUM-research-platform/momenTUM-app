@@ -37,7 +37,7 @@ export class HomePage implements OnInit {
   // stores the details of the study
   study: Study | null = null;
   // stores the list of tasks to be completed by the user
-  task_list: Array<any> = new Array();
+  task_list: Task[] = [];
   // dark mode
   darkMode = false;
 
