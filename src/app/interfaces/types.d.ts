@@ -47,9 +47,6 @@ type SurveyData =
       alert_time: string;
     };
 
-interface Responses {
-  [id: string]: Question['response'];
-}
 interface LogEvent {
   timestamp: string;
   milliseconds: number;
@@ -69,4 +66,20 @@ interface Translations {
   label_loading: string;
   msg_caching: string;
   msg_camera: string;
+}
+
+interface Response {
+  module_name: string;
+  module_id: number;
+  alert_time: string;
+  submission_time: string;
+  data: SurveyResponse | PvtResponse;
+}
+
+interface SurveyResponse {
+  [id: string]: Question['response'];
+}
+
+interface PvtResponse {
+  reaction_times: number[];
 }
