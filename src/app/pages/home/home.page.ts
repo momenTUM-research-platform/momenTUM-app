@@ -40,8 +40,6 @@ export class HomePage implements OnInit {
   task_list: Array<any> = new Array();
   // dark mode
   darkMode = false;
-  //image
-  tum_image = 'assets/imgs/icon.png';
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
