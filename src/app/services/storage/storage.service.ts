@@ -42,7 +42,7 @@ export class StorageService {
   }
 
   /**
-   * Saves a Task Response to the local storage.
+   * Saves a Response to the local storage.
    * @param response The response to be saved.
    * @returns A Promise that resolves when the response is stored.
    */
