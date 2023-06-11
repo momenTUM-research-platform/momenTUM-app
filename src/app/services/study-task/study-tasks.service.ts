@@ -14,19 +14,16 @@ export class StudyTasksService {
   ) {}
 
   /**
-   * Creates a list of tasks (e.g. surveys, interventions) based on their
+   * Creates a list of tasks (interventions) based on their
    * alert schedules
    *
-   * @param studyObject A JSON object that contains all data about a study
+   * @param study A JSON object that contains all data about a study
    */
-  async generateStudyTasks(studyObject: Study) {
+  async generateStudyTasks(study: Study) {
     // allocate the participant to a study condition
-    const min = 1;
-    const max: number = studyObject.properties.conditions.length;
-    const condition_index: number =
-      Math.floor(Math.random() * (max - min + 1)) + min - 1;
-    const condition: string =
-      studyObject.properties.conditions[condition_index];
+    const conditions = study.properties.conditions;
+    const random_index = Math.floor(Math.random() * conditions.length);
+    const condition: string = conditions[random_index];
 
     const study_tasks: Task[] = new Array();
 
@@ -36,7 +33,7 @@ export class StudyTasksService {
     // loop through all of the modules in this study
     // and create the associated study tasks based
     // on the alert schedule
-    for (const [i, mod] of studyObject.modules.entries()) {
+    for (const [i, mod] of study.modules.entries()) {
       // if the module is assigned to the participant's condition
       // add it to the list, otherwise just skip it
       if (mod.condition === condition || mod.condition === '*') {
@@ -148,12 +145,12 @@ export class StudyTasksService {
     });
 
     // save tasks and condition to storage
-    this.storageService.set('condition', condition);
-    // show loading bar
     this.loadingService.isCaching = false;
     this.loadingService.present('Loading...');
+    await this.storageService.set('condition', condition);
     await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
     this.loadingService.dismiss();
+
     return study_tasks;
   }
 
