@@ -7,7 +7,7 @@ import { LogEvent, Response } from 'src/app/interfaces/types';
   providedIn: 'root',
 })
 export class StorageService {
-  private nStorage: Storage | null = null;
+  private nStorage: Storage;
 
   constructor(private storage: Storage) {
     this.init();
@@ -73,5 +73,14 @@ export class StorageService {
     const logs = await this.nStorage.get(key);
     logs.push(log);
     return await this.nStorage.set(key, logs);
+  }
+
+  /**
+   * Saves the participants condition to the local storage.
+   * @param condition The condition to be stored
+   */
+  async saveCondition(condition: string) {
+    const key = 'condition';
+    this.nStorage.set(key, condition);
   }
 }

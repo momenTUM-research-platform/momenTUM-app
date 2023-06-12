@@ -20,7 +20,7 @@ interface Task {
   alert_time?: string;
   response_time?: string;
   response_time_ms?: number;
-  responses?: Responses;
+  responses?: SurveyResponse;
   moment?: string;
 }
 
@@ -33,7 +33,7 @@ type SurveyData =
   | {
       module_index: number;
       module_name: string;
-      responses: Responses;
+      responses: SurveyResponse;
       response_time: string;
       response_time_in_ms: number;
       alert_time: string;
@@ -79,6 +79,7 @@ interface Response {
 interface SurveyResponse {
   [id: string]: Question['response'];
 }
+
 
 interface PvtResponse {
   reaction_times: number[];

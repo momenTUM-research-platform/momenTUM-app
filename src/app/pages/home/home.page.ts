@@ -19,7 +19,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { Translations } from 'src/app/interfaces/types';
+import { Task, Translations } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
 
 @Component({
@@ -105,49 +105,20 @@ export class HomePage implements OnInit {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     // Initialize theme, toggle icon, and StatusBar accordingly
     ChangeTheme.initializeTheme();
-    if (ChangeTheme.getTheme() === 'light') {
-      StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
+    this.darkMode = ChangeTheme.getTheme() === 'dark';
+    try {
+      await StatusBar.setBackgroundColor({
+        color: this.darkMode ? '#000000' : '#FFFFFF',
       });
-      StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
+      await StatusBar.setStyle({
+        style: this.darkMode ? Style.Dark : Style.Light,
       });
-      this.darkMode = false;
-    } else {
-      StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
-      });
-      StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
-      });
-      this.darkMode = true;
+    } catch (e) {
+      console.log(e);
     }
-
-    // need to subscribe to this event in order
-    // to ensure that the page will refresh every
-    // time it is navigated to because ionViewWillEnter()
-    // is not called when navigating here from other pages
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        if (event.url === '/') {
-          if (!this.loadingService.isLoading) {
-            this.ionViewWillEnter();
-          }
-        }
-      }
-    });
-
-    // trigger this to run every time the app is resumed from the background
-    this.resumeEvent = this.platform.resume.subscribe(() => {
-      if (this.router.url === '/tabs/tab1') {
-        if (!this.loadingService.isLoading) {
-          this.ionViewWillEnter();
-        }
-      }
-    });
 
     // Need to make sure data from QR code scanner arrived or not
     this.route.queryParams.subscribe(async (params) => {
@@ -160,63 +131,48 @@ export class HomePage implements OnInit {
 
   async ionViewWillEnter() {
     this.darkMode = ChangeTheme.getTheme() === 'dark';
-    // translate
     let key: keyof Translations;
-    // eslint-disable-next-line guard-for-in
     for (key in this.translations) {
       this.translate.get(key).subscribe((translated_text) => {
         this.translations[key] = translated_text;
       });
     }
-
     this.notificationsService.requestPermissions();
-
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
-
     this.hideEnrolOptions = true;
     this.isEnrolledInStudy = false;
-
-    // check if user is currently enrolled in study
     try {
       await this.storageService.get('uuid');
     } catch {
       console.log('Storage did not exist, creating');
       await this.storageService.init();
     }
-    Promise.all([this.storageService.get('current-study')]).then((values) => {
-      const studyObject: any = values[0];
-      if (studyObject !== null) {
-        // convert the study to a JSON object
-
-        this.study = JSON.parse(studyObject);
-
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'home',
-          event: 'entry',
-          module_index: -1,
-        });
-
-        // attempt to upload any pending logs and survey data
-        this.surveyDataService.uploadPendingData('pending-log');
-        this.surveyDataService.uploadPendingData('pending-data');
-
-        // set up next round of notifications
-        this.notificationsService.setNext30Notifications();
-
-        // load the study tasks
-        this.loadStudyDetails();
-      } else {
-        this.hideEnrolOptions = false;
-        if (this.loadingService) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
+    const studyObject: any = await this.storageService.get('current-study');
+    if (studyObject === null) {
+      this.hideEnrolOptions = false;
+      if (this.loadingService) {
+        this.loadingService.dismiss();
       }
+      return;
+    }
+    // convert the study to a JSON object
+    this.study = JSON.parse(studyObject);
+
+    // log the user visiting this tab
+    this.surveyDataService.logPageVisitToServer({
+      timestamp: moment().format(),
+      milliseconds: moment().valueOf(),
+      page: 'home',
+      event: 'entry',
+      module_index: -1,
     });
+
+    // set up next round of notifications
+    this.notificationsService.setNext30Notifications();
+
+    // load the study tasks
+    this.loadStudyDetails();
 
     // on first run, generate a UUID for the user
     // and set the notifications-enabled to true
@@ -246,10 +202,6 @@ export class HomePage implements OnInit {
         event: 'exit',
         module_index: -1,
       });
-
-      // attempt to upload any pending logs and survey data
-      this.surveyDataService.uploadPendingData('pending-log');
-      this.surveyDataService.uploadPendingData('pending-data');
     }
   }
 
