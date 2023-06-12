@@ -34,6 +34,7 @@ export interface Question {
   hide_id: string;
   hide_value: string;
   hide_if: boolean;
+  rand_group?: string;
 
   hideSwitch?: boolean;
   hideError?: boolean;
