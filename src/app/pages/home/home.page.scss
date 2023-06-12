@@ -13,20 +13,8 @@
   --border-radius: 15px;
 }
 
-// study-image
-.study-image::part(image) {
-  border-radius: 10px;
-}
-
-
 // Name suggests the designs of the title labels
-.title-label{
+.title-label {
   font-size: 17px;
   font-weight: bold;
-}
-
-// banner-image
-.banner-image {
-  padding: 16px 32px;
-  margin-top: 32px;
 }

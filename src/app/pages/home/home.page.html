@@ -47,9 +47,8 @@
       [hidden]="!hideEnrolOptions"
       [src]="study.properties.banner_url"
     ></ion-img>
-    <!--item list-->
+    <!--tasks-->
     <div *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
-      <!--single item-->
       <ion-item
         lines="none"
         *ngIf="task.type !== 'header'"
