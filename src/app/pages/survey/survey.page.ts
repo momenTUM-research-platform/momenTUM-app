@@ -183,10 +183,8 @@ export class SurveyPage implements OnInit {
           // ### How to do this in TS?
         } else if (question.noToggle) {
           question.hideSwitch = false;
-          // @ts-ignore
           delete question.hide_id;
           delete question.hide_value;
-          // @ts-ignore
           delete question.hide_if;
         }
       }
