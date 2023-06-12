@@ -113,7 +113,7 @@
           rows="3"
         ></ion-textarea>
         <!--multi input-->
-        <ion-list *ngIf="question.body.type === 'multi'" inset="true">
+        <ion-list *ngIf="question.body.type === 'multi'">
           <!--no modal, radio-->
           <ion-radio-group
             *ngIf="!question.body.modal && question.body.radio"
@@ -122,10 +122,12 @@
           >
             <ion-item
               *ngFor="let option of question.body.optionsChecked"
-              class="radio-button-style"
+              class="ion-margin radio-button-style"
               lines="none"
             >
-              <ion-label style="font-size: medium">{{option.text}}</ion-label>
+              <ion-label class="ion-text-wrap" style="font-size: medium"
+                >{{option.text}}</ion-label
+              >
               <ion-radio
                 slot="start"
                 color="light"

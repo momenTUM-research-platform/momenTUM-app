@@ -1,8 +1,12 @@
+@import "../../../global.scss";
+
 /* input required error */
-.showError:before { content:" *"; }
+.showError:before {
+  content: " *";
+}
 .showError {
-  font-weight:bold;
-  color:#F44336 !important;
+  font-weight: bold;
+  color: #f44336 !important;
 }
 
 .videoPlayer {
@@ -46,7 +50,6 @@ ion-select {
   color: var(--ion-color-tertiary-contrast);
 }
 
-
 /* For the card design */
 ion-card,
 .card-ios,
@@ -78,11 +81,9 @@ ion-icon {
 }
 
 .radio-button-style {
-  margin-top: 10px !important;
-  margin-bottom: 10px !important;
-  border-radius: 50px !important;
-  --border-radius: 50px !important;
+  border-radius: 50px;
 }
+
 .item-radio-checked {
   background: var(--ion-color-tertiary-contrast);
   color: var(--ion-color-tertiary-contrast);
@@ -98,7 +99,7 @@ ion-list {
 }
 
 /* For file button alignment */
-.center{
+.center {
   width: 60%;
   margin-left: auto;
   margin-right: auto;
