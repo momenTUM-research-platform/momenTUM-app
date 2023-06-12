@@ -30,8 +30,6 @@ export class SurveyPage implements OnInit {
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Survey;
 
-  questions: any;
-
   // task objects
   tasks: Task[];
   task_id: string;
@@ -135,9 +133,6 @@ export class SurveyPage implements OnInit {
       this.submit_text = this.survey.submit_text;
     }
 
-    // set the current section of questions
-    this.questions = this.survey.sections[this.current_section - 1].questions;
-
     // toggle rand_group questions
     // figure out which ones are grouped together, randomly show one and set its response value to 1
     const randomGroups: { [rand_group: string]: string[] } = {};
@@ -221,8 +216,6 @@ export class SurveyPage implements OnInit {
         this.current_section--;
         this.current_section_name =
           this.survey.sections[this.current_section - 1].name;
-        this.questions =
-          this.survey.sections[this.current_section - 1].questions;
         this.submit_text = 'Next';
       });
     } else {
@@ -470,7 +463,8 @@ export class SurveyPage implements OnInit {
    */
   async submit() {
     let errorCount = 0;
-    for (const question of this.questions) {
+    for (const question of this.survey.sections[this.current_section - 1]
+      .questions) {
       if (
         question.required === true &&
         (question.response === '' || question.response === undefined) &&
@@ -543,8 +537,6 @@ export class SurveyPage implements OnInit {
       } else {
         this.ngZone.run(() => {
           this.current_section++;
-          this.questions =
-            this.survey.sections[this.current_section - 1].questions;
           this.current_section_name =
             this.survey.sections[this.current_section - 1].name;
 
