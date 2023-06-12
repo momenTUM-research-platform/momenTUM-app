@@ -413,7 +413,7 @@ export class SurveyPage implements OnInit {
   toggleDynamicQuestions(question: Question) {
     // if a question was hidden by rand_group
     // don't do any branching
-    if (question.noToggle !== undefined && question.noToggle) {
+    if (question.noToggle) {
       return;
     }
 
