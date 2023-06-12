@@ -177,7 +177,7 @@ export class SurveyPage implements OnInit {
           // and remove any branching logic attributes
           // ### How to do this in TS?
         } else if (question.noToggle) {
-          question.hideSwitch = false;
+          question.hidden = true;
           delete question.hide_id;
           delete question.hide_value;
           delete question.hide_if;
@@ -247,7 +247,7 @@ export class SurveyPage implements OnInit {
           question.response = '';
           question.model = '';
           question.hideError = true;
-          question.hideSwitch = true;
+          question.hidden = false;
 
           // for datetime questions, default to the current date/time
           if (question.body.type === 'datetime') {
@@ -401,56 +401,14 @@ export class SurveyPage implements OnInit {
    * @returns
    */
   toggleDynamicQuestions(question: Question) {
-    // if a question was hidden by rand_group
-    // don't do any branching
-    if (question.noToggle) {
-      return;
-    }
-
-    const id = question.id;
-    // hide anything with the id as long as the value is equal
     for (const section of this.survey.sections) {
       for (const q of section.questions) {
-        if ('hide_id' in q && q.hide_id === id) {
-          const hideValue = q.hide_value;
-
-          if (
-            question.body.type === 'multi' ||
-            question.body.type === 'yesno' ||
-            question.body.type === 'text'
-          ) {
-            // determine whether to hide/show the element
-            const hideIf = q.hide_if;
-            const valueEquals = hideValue === question.response;
-            if (valueEquals === hideIf) {
-              q.hideSwitch = false;
-            } else {
-              q.hideSwitch = true;
-            }
-          } else if (
-            question.body.type === 'slider' &&
-            typeof hideValue === 'string' &&
-            question.response
-          ) {
-            const direction = hideValue.substring(0, 1);
-            const cutoff = parseInt(
-              hideValue.substring(1, hideValue.length),
-              10
-            );
-            const lessThan = direction === '<';
-            if (lessThan) {
-              if (question.response <= cutoff) {
-                q.hideSwitch = true;
-              } else {
-                q.hideSwitch = false;
-              }
-            } else {
-              if (question.response >= cutoff) {
-                q.hideSwitch = true;
-              } else {
-                q.hideSwitch = false;
-              }
-            }
+        if (q.hide_id === question.id) {
+          if ((q.hide_value === question.response) === q.hide_if) {
+            this.hideQuestion(q);
+          } else {
+            q.hidden = false;
+            this.toggleDynamicQuestions(q);
           }
         }
       }
@@ -468,7 +426,7 @@ export class SurveyPage implements OnInit {
       if (
         question.required === true &&
         (question.response === '' || question.response === undefined) &&
-        question.hideSwitch === true
+        question.hidden === true
       ) {
         question.hideError = false;
         // Only works for question types other than instruction
@@ -575,6 +533,20 @@ export class SurveyPage implements OnInit {
     });
 
     toast?.present().catch(() => {});
+  }
+
+  /**
+   * Hides a question and all the questions whose visibility depends on the question.
+   */
+  hideQuestion(question: Question) {
+    question.hidden = true;
+    for (const section of this.survey.sections) {
+      for (const q of section.questions) {
+        if (q.hide_id === question.id) {
+          this.hideQuestion(q);
+        }
+      }
+    }
   }
 
   /**

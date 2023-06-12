@@ -28,7 +28,7 @@
     <!--questions-->
     <ion-card
       *ngFor="let question of survey.sections[this.current_section-1].questions"
-      [hidden]="!question.hideSwitch"
+      [hidden]="question.hidden"
       color="tertiary"
     >
       <!--instructions (careful: this is used in every question type, not only instructions)-->
