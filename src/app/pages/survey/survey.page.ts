@@ -112,11 +112,9 @@ export class SurveyPage implements OnInit {
     }
 
     // shuffle questions if required
-    if (this.survey.sections !== undefined) {
-      for (const section of this.survey.sections) {
-        if (section.shuffle) {
-          section.questions = this.shuffle(section.questions);
-        }
+    for (const section of this.survey.sections) {
+      if (section.shuffle) {
+        section.questions = this.shuffle(section.questions);
       }
     }
 
@@ -143,20 +141,18 @@ export class SurveyPage implements OnInit {
     // toggle rand_group questions
     // figure out which ones are grouped together, randomly show one and set its response value to 1
     const randomGroups: { [rand_group: string]: string[] } = {};
-    if (this.survey.sections !== undefined) {
-      for (const section of this.survey.sections) {
-        for (const question of section.questions) {
-          if (question.rand_group) {
-            // set a flag to indicate that this question shouldn't reappear via branching logic
-            question.noToggle = true;
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        if (question.rand_group) {
+          // set a flag to indicate that this question shouldn't reappear via branching logic
+          question.noToggle = true;
 
-            // categorise questions by rand_group
-            if (!(question.rand_group in randomGroups)) {
-              randomGroups[question.rand_group] = [];
-              randomGroups[question.rand_group].push(question.id);
-            } else {
-              randomGroups[question.rand_group].push(question.id);
-            }
+          // categorise questions by rand_group
+          if (!(question.rand_group in randomGroups)) {
+            randomGroups[question.rand_group] = [];
+            randomGroups[question.rand_group].push(question.id);
+          } else {
+            randomGroups[question.rand_group].push(question.id);
           }
         }
       }
@@ -409,6 +405,11 @@ export class SurveyPage implements OnInit {
     }
   }
 
+  /**
+   *
+   * @param question
+   * @returns
+   */
   toggleDynamicQuestions(question: Question) {
     // if a question was hidden by rand_group
     // don't do any branching
