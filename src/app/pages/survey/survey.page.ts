@@ -185,7 +185,6 @@ export class SurveyPage implements OnInit {
           question.hideSwitch = false;
           // @ts-ignore
           delete question.hide_id;
-          // @ts-ignore
           delete question.hide_value;
           // @ts-ignore
           delete question.hide_if;
