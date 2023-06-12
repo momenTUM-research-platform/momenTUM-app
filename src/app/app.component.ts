@@ -30,7 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   async ngOnInit() {
-
     await this.barcodeScannerService.checkPermission().catch((err) => {
       console.log(err);
     });
@@ -77,11 +76,10 @@ export class AppComponent implements OnInit {
   }
 
   async initializeApp() {
-    this.platform.ready().then(async () => {
-      await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
-        console.log('StatusBar error with setOverlaysWebView(): ' + e);
-      });
-      SplashScreen.hide();
+    await this.platform.ready();
+    await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
+      console.log(e);
     });
+    await SplashScreen.hide();
   }
 }
