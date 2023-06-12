@@ -26,11 +26,17 @@
     </ion-refresher-content>
   </ion-refresher>
   <!-- Displayed if user is not enrolled in a study -->
-  <ion-img
-    class="banner-image"
-    [src]="'assets/imgs/logo-name.png'"
-    [hidden]="hideEnrolOptions"
-  ></ion-img>
+  <div style="display: flex; justify-content: center" class="ion-margin">
+    <ion-img
+      style="
+        width: 60%;
+        height: auto;
+        background-color: var(--ion-secondary-color);
+      "
+      [src]="'assets/imgs/logo.svg'"
+      [hidden]="hideEnrolOptions"
+    ></ion-img>
+  </div>
   <ion-text [hidden]="hideEnrolOptions" style="margin-top: 5%">
     <h1 style="text-align: center">Let's get started</h1>
     <p class="welcome-msg">
@@ -42,7 +48,6 @@
   <!-- Displays if user is enrolled in a study -->
   <div [hidden]="!hideEnrolOptions">
     <ion-img
-      class="study-image"
       *ngIf="study"
       [hidden]="!hideEnrolOptions"
       [src]="study.properties.banner_url"
@@ -61,7 +66,7 @@
           <p *ngIf="!task.sticky" class="moment">{{task.moment}}</p>
         </ion-label>
       </ion-item>
-      <!--item group title-->
+      <!--task group title-->
       <ion-item *ngIf="task.type === 'header'" lines="none">
         <ion-label stacked class="title-label">{{task.label}}</ion-label>
       </ion-item>
