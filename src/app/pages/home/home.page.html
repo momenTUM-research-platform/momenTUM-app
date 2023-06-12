@@ -12,7 +12,6 @@
   </ion-toolbar>
 </ion-header>
 
-<!-- Check to make sure the isHidden property is in the right place -->
 <ion-content class="ion-no-padding">
   <ion-refresher
     *ngIf="hideEnrolOptions"
@@ -34,7 +33,6 @@
         background-color: var(--ion-secondary-color);
       "
       [src]="'assets/imgs/logo.svg'"
-      [hidden]="hideEnrolOptions"
     ></ion-img>
   </div>
   <ion-text [hidden]="hideEnrolOptions" style="margin-top: 5%">
