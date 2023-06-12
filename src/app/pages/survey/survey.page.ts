@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';

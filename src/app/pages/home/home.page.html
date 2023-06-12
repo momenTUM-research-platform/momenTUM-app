@@ -25,7 +25,11 @@
     </ion-refresher-content>
   </ion-refresher>
   <!-- Displayed if user is not enrolled in a study -->
-  <div style="display: flex; justify-content: center" class="ion-margin">
+  <div
+    [hidden]="hideEnrolOptions"
+    style="display: flex; justify-content: center"
+    class="ion-margin"
+  >
     <ion-img
       style="
         width: 60%;

@@ -16,7 +16,7 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { BarcodeService } from '../../services/barcode/barcode.service';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
-import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
+import { SurveyDataService } from 'src/app/services/survey-data/data.service';
 
 describe('ProgressPage', () => {
   let component: ProgressPage;

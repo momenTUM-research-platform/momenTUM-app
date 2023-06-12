@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import * as moment from 'moment';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
 import { StorageService } from '../../services/storage/storage.service';
@@ -141,7 +141,6 @@ export class ProgressPage {
 
           // get all graphs
           for (const module of this.studyJSON.modules) {
-
             const graph = module.graph;
             const study_name = module.name;
             const graph_header = module.name;
@@ -169,9 +168,9 @@ export class ProgressPage {
                     for (const k in task.responses) {
                       if (k === variableToGraph) {
                         // format the response time
-                        const response_time = moment(new Date(task.response_time)).format(
-                          'MMM Do, h:mma'
-                        );
+                        const response_time = moment(
+                          new Date(task.response_time)
+                        ).format('MMM Do, h:mma');
                         task_labels.push(response_time);
                         task_data.push(task.responses[k]);
                         break;

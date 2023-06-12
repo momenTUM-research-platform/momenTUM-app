@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file/ngx';
 import { RouterTestingModule } from '@angular/router/testing';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -366,8 +366,6 @@ describe('HomePage', () => {
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
     });
   });
-
-
 
   it('should call attempt display enrol error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(

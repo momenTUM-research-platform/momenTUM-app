@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';

@@ -26,7 +26,7 @@ import moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;

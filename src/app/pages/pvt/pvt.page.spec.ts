@@ -19,7 +19,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import moment from 'moment';
-import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
+import { SurveyDataService } from 'src/app/services/survey-data/data.service';
 
 describe('PvtPage', () => {
   let component: PvtPage;
@@ -271,14 +271,13 @@ describe('PvtPage', () => {
     const end = Date.now();
     expect(end - start).toBeGreaterThanOrEqual(ms);
   }));
-  it('should return a number greater than or equal to the min argument and less than or equal to the max argument', async() => {
+  it('should return a number greater than or equal to the min argument and less than or equal to the max argument', async () => {
     const min = 0;
     const max = 1;
     const result = component.getUniformRand(min, max);
     expect(result).toBeGreaterThanOrEqual(min);
     expect(result).toBeLessThanOrEqual(max);
   });
-
 });
 /**
  * startPVT

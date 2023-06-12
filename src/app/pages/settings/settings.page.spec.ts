@@ -16,7 +16,7 @@ import { LanguageLoader } from '../../app.module';
 import { SettingsPage } from './settings.page';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
-import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
+import { SurveyDataService } from 'src/app/services/survey-data/data.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { NotificationsService } from 'src/app/services/notification/notifications.service';
 import { Browser } from '@capacitor/browser';
@@ -203,8 +203,6 @@ describe('SettingsPage', () => {
       expect(spyStorageSet).toHaveBeenCalledTimes(1);
     });
   });
-
-
 });
 
 /**

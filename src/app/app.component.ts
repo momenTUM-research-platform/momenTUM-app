@@ -3,7 +3,7 @@ import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
-import { SurveyDataService } from './services/survey-data/survey-data.service';
+import { SurveyDataService } from './services/survey-data/data.service';
 import * as moment from 'moment';
 import { StorageService } from './services/storage/storage.service';
 import { NotificationsService } from './services/notification/notifications.service';

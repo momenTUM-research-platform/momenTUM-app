@@ -7,7 +7,7 @@ import {
   RefresherCustomEvent,
 } from '@ionic/angular';
 
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { SurveyDataService } from '../../services/survey-data/data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
 import { UuidService } from '../../services/uuid/uuid.service';
