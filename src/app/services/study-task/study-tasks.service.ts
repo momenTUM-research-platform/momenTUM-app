@@ -25,10 +25,8 @@ export class StudyTasksService {
     const random_index = Math.floor(Math.random() * conditions.length);
     const condition: string = conditions[random_index];
 
-    const study_tasks: Task[] = new Array();
-
-    // the ID for a task. Is this a sensible starting point?
-    let task_ID = 101;
+    const study_tasks: Task[] = [];
+    let task_id = 101;
 
     // loop through all of the modules in this study
     // and create the associated study tasks based
@@ -106,7 +104,7 @@ export class StudyTasksService {
             const task_obj: Task = {
               uuid: module_uuid,
               index: module_index,
-              task_id: task_ID,
+              task_id: task_id,
               name: module_name,
               type: module_type,
               hidden: !(module_sticky && sticky_count === 0),
@@ -125,7 +123,7 @@ export class StudyTasksService {
             study_tasks.push(task_obj);
 
             // increment task id
-            task_ID++;
+            task_id++;
 
             // increment the sticky count
             sticky_count++;
