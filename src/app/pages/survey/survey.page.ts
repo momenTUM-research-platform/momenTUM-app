@@ -9,7 +9,7 @@ import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import Survey, { Question } from 'src/app/interfaces/survey';
-import { Task, Option, Responses } from 'src/app/interfaces/types';
+import { Task, Option, SurveyResponse } from 'src/app/interfaces/types';
 
 @Component({
   selector: 'app-survey',
@@ -508,7 +508,7 @@ export class SurveyPage implements OnInit {
         this.tasks[this.task_index].completed = true;
 
         // add all of the responses to an object in the task to be sent to server
-        const responses: Responses = {};
+        const responses: SurveyResponse = {};
         for (const section of this.survey.sections) {
           for (const question of section.questions) {
             responses[question.id] = question.response;
