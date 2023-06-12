@@ -38,7 +38,6 @@ export interface Question {
   hideSwitch?: boolean;
   hideError?: boolean;
   model?: any;
-  rand_group?: string;
   noToggle?: boolean;
   response?: any;
   value?: any;
