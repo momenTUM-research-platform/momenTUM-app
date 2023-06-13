@@ -82,7 +82,9 @@ export class HomePage implements OnInit {
     private translate: TranslateService
   ) {}
 
-  // Async method because every method that is called from the status bar are also Asynchronus methods
+  /**
+   * Handles the ion-icon button responsible for toggling the theme.
+   */
   async toggleTheme() {
     if (ChangeTheme.getTheme() === 'light') {
       await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
