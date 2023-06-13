@@ -1,4 +1,4 @@
-import { Question } from './survey';
+import { Question } from './study';
 
 interface Task {
   uuid: string;
@@ -22,11 +22,6 @@ interface Task {
   response_time_ms?: number;
   responses?: SurveyResponse;
   moment?: string;
-}
-
-declare interface Option {
-  text: string;
-  checked: boolean;
 }
 
 type SurveyData =
@@ -54,6 +49,7 @@ interface LogEvent {
   event: string;
   module_index: any;
 }
+
 interface Translations {
   btn_cancel: string;
   btn_dismiss: string;
@@ -79,7 +75,6 @@ interface Response {
 interface SurveyResponse {
   [id: string]: Question['response'];
 }
-
 
 interface PvtResponse {
   reaction_times: number[];

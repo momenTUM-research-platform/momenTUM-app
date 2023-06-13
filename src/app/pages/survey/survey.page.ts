@@ -8,8 +8,8 @@ import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
-import Survey, { Question } from 'src/app/interfaces/survey';
-import { Task, Option, SurveyResponse } from 'src/app/interfaces/types';
+import { Survey, Question, Option } from 'src/app/interfaces/study';
+import { Task, SurveyResponse } from 'src/app/interfaces/types';
 
 @Component({
   selector: 'app-survey',
