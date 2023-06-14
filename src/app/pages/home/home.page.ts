@@ -82,7 +82,7 @@ export class HomePage implements OnInit {
   ) {}
 
   /**
-   * Handles the theme toggle button.
+   * Handles the "Theme Toggle" button.
    */
   async toggleTheme() {
     document.body.classList.toggle('dark');
@@ -177,9 +177,8 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * ScanQR Code router
+   * Handles the "Scan QR Code" button.
    */
-
   async scanQR() {
     return this.navController.navigateForward('/scanner');
   }
