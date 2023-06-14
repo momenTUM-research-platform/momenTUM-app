@@ -22,6 +22,7 @@ interface Task {
   response_time_ms?: number;
   responses?: SurveyResponse;
   moment?: string;
+  label?: string;
 }
 
 type SurveyData =
