@@ -40,18 +40,16 @@ export class HomePage implements OnInit {
   // the name of the theme toggle icon
   themeIconName: 'sunny' | 'moon';
 
-  //translations loaded from the appropriate language file
-  // defaults are provided but will be overridden if language file
   // is loaded successfully
   translations: Translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
     btn_enrol: 'Enrol',
-    'btn_enter-url': 'Enter URL',
-    'btn_study-id': 'Study ID',
-    'error_loading-qr-code':
+    btn_enter_url: 'Enter URL',
+    btn_study_id: 'Study ID',
+    error_loading_qr_code:
       "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.",
-    'error_loading-study':
+    error_loading_study:
       "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL.",
     heading_error: 'Oops...',
     label_loading: 'Loading...',
@@ -116,25 +114,28 @@ export class HomePage implements OnInit {
    * Executed only once upon creation of the component during rendering of the component.
    *
    * It performs the following tasks:
+   * - Assign the right strings according to the chosen language.
+   * -
    */
   async ionViewWillEnter() {
+    // translate
     let key: keyof Translations;
     for (key in this.translations) {
       this.translate.get(key).subscribe((translated_text) => {
         this.translations[key] = translated_text;
       });
     }
+
+    // Check notification permission
     this.notificationsService.requestPermissions();
+
+    // set the isCaching flag to false
     this.loadingService.isCaching = false;
+
+    // Present the loading dialog
     this.loadingService.present(this.translations.label_loading);
-    this.hideEnrolOptions = true;
-    this.isEnrolledInStudy = false;
-    try {
-      await this.storageService.get('uuid');
-    } catch {
-      console.log('Storage did not exist, creating');
-      await this.storageService.init();
-    }
+
+    // Check if a study exists
     const studyObject: any = await this.storageService.get('current-study');
     if (studyObject === null) {
       this.hideEnrolOptions = false;
@@ -143,6 +144,7 @@ export class HomePage implements OnInit {
       }
       return;
     }
+
     // convert the study to a JSON object
     this.study = JSON.parse(studyObject);
 
@@ -278,7 +280,7 @@ export class HomePage implements OnInit {
    */
   async enterURL() {
     const alert = await this.alertController.create({
-      header: this.translations['btn_enter-url'],
+      header: this.translations.btn_enter_url,
       inputs: [
         {
           name: 'url',
@@ -311,7 +313,7 @@ export class HomePage implements OnInit {
    */
   async enterStudyID() {
     const alert = await this.alertController.create({
-      header: this.translations['btn_study-id'],
+      header: this.translations.btn_study_id,
       inputs: [
         {
           name: 'id',

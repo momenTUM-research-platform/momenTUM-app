@@ -78,6 +78,9 @@ export class AppComponent implements OnInit {
     this.initializeTheme();
   }
 
+  /**
+   * Sets the theme to the systems preference.
+   */
   initializeTheme() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     document.body.classList.toggle('dark', prefersDark.matches);
