@@ -10,17 +10,6 @@
 </ion-header>
 
 <ion-content class="ion-no-padding">
-  <ion-refresher
-    *ngIf="hideEnrolOptions"
-    slot="fixed"
-    (ionRefresh)="doRefresh($event)"
-  >
-    <ion-refresher-content
-      pullingIcon="chevron-down-circle-outline"
-      refreshingSpinner="crescent"
-    >
-    </ion-refresher-content>
-  </ion-refresher>
   <!-- Displayed if user is not enrolled in a study -->
   <div
     [hidden]="hideEnrolOptions"
@@ -45,6 +34,17 @@
   </ion-text>
 
   <!-- Displays if user is enrolled in a study -->
+  <ion-refresher
+    *ngIf="hideEnrolOptions"
+    slot="fixed"
+    (ionRefresh)="doRefresh($event)"
+  >
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      refreshingSpinner="crescent"
+    >
+    </ion-refresher-content>
+  </ion-refresher>
   <div [hidden]="!hideEnrolOptions">
     <ion-img
       *ngIf="study"

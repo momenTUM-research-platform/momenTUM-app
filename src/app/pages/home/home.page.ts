@@ -519,7 +519,7 @@ export class HomePage implements OnInit {
   /**
    * Refreshes the list of tasks
    */
-  async doRefresh(refresher: RefresherCustomEvent) {
+  async doRefresh(refresher) {
     if (!this.loadingService.isLoading) {
       this.ionViewWillEnter();
     }
