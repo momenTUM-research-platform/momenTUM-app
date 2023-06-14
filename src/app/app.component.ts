@@ -81,5 +81,11 @@ export class AppComponent implements OnInit {
       console.log(e);
     });
     await SplashScreen.hide();
+    this.initializeTheme();
+  }
+
+  initializeTheme() {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    document.body.classList.toggle('dark', prefersDark.matches);
   }
 }

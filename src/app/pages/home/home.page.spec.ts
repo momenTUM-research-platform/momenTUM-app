@@ -255,7 +255,7 @@ describe('HomePage', () => {
     it('should call ionViewWillEnter', async () => {
       // Check assignment
       await component.ionViewWillEnter();
-      expect(component.darkMode).toBeDefined();
+      expect(component.themeIconName).toBeDefined();
       expect(spyrequestPermissions).toHaveBeenCalledTimes(1);
       expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
       expect(component.hideEnrolOptions).toBe(true);

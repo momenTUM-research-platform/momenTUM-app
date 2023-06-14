@@ -3,10 +3,7 @@
     <ion-title> momenTUM </ion-title>
     <ion-buttons slot="start">
       <ion-button (click)="toggleTheme()">
-        <ion-icon
-          slot="icon-only"
-          [name]="darkMode ? 'moon' : 'sunny'"
-        ></ion-icon>
+        <ion-icon slot="icon-only" [name]="themeIconName"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

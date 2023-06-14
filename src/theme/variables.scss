@@ -93,7 +93,7 @@
 /*
  ************* Ionic CSS variables, DARK theme ******************
  */
-body[color-theme="dark"] {
+body.dark {
   /*
    * Ionic general variables
    *-------------------------------------------------------------
@@ -144,7 +144,7 @@ body[color-theme="dark"] {
 /*
  ************* Ionic variables for iOS Dark Theme ***************
  */
-.ios body[color-theme="dark"] {
+.ios body.dark {
   /*
    * Ionic colors
    *-------------------------------------------------------------
@@ -184,7 +184,7 @@ body[color-theme="dark"] {
 /*
  ************* Material Design Dark Theme ***********************
  */
-.md body[color-theme="dark"] {
+.md body.dark {
   /*
    * Ionic colors
    *-------------------------------------------------------------

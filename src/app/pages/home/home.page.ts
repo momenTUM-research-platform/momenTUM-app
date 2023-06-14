@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Event, NavigationStart, Router } from '@angular/router';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import {
   AlertController,
@@ -14,7 +14,6 @@ import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import * as moment from 'moment';
-import { ChangeTheme } from '../../shared/change-theme';
 import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController } from '@ionic/angular';
@@ -38,8 +37,8 @@ export class HomePage implements OnInit {
   study: Study | null = null;
   // stores the list of tasks to be completed by the user
   task_list: Task[] = [];
-  // dark mode
-  darkMode = false;
+  // the name of the theme toggle icon
+  themeIconName: 'sunny' | 'moon';
 
   //translations loaded from the appropriate language file
   // defaults are provided but will be overridden if language file
@@ -83,45 +82,16 @@ export class HomePage implements OnInit {
   ) {}
 
   /**
-   * Handles the ion-icon button responsible for toggling the theme.
+   * Handles the theme toggle button.
    */
   async toggleTheme() {
-    if (ChangeTheme.getTheme() === 'light') {
-      await StatusBar.setBackgroundColor({ color: '#000000' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
-      });
-      await StatusBar.setStyle({ style: Style.Dark }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
-      });
-      ChangeTheme.setTheme(true);
-      this.darkMode = true;
-    } else {
-      await StatusBar.setBackgroundColor({ color: '#FFFFFF' }).catch((e) => {
-        console.log('StatusBar.setBackgroundColor(): ' + e);
-      });
-      await StatusBar.setStyle({ style: Style.Light }).catch((e) => {
-        console.log('StatusBar.setStyle(): ' + e);
-      });
-      ChangeTheme.setTheme(false);
-      this.darkMode = false;
-    }
+    document.body.classList.toggle('dark');
+    this.themeIconName = this.themeIconName === 'sunny' ? 'moon' : 'sunny';
   }
 
   async ngOnInit() {
-    // Initialize theme, toggle icon, and StatusBar accordingly
-    ChangeTheme.initializeTheme();
-    this.darkMode = ChangeTheme.getTheme() === 'dark';
-    try {
-      await StatusBar.setBackgroundColor({
-        color: this.darkMode ? '#000000' : '#FFFFFF',
-      });
-      await StatusBar.setStyle({
-        style: this.darkMode ? Style.Dark : Style.Light,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
     // Need to make sure data from QR code scanner arrived or not
     this.route.queryParams.subscribe(async (params) => {
       if (this.router.getCurrentNavigation()?.extras.state) {
@@ -132,7 +102,6 @@ export class HomePage implements OnInit {
   }
 
   async ionViewWillEnter() {
-    this.darkMode = ChangeTheme.getTheme() === 'dark';
     let key: keyof Translations;
     for (key in this.translations) {
       this.translate.get(key).subscribe((translated_text) => {
