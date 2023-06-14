@@ -89,10 +89,20 @@ export class HomePage implements OnInit {
     this.themeIconName = this.themeIconName === 'sunny' ? 'moon' : 'sunny';
   }
 
+  /**
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   * Executed only once upon creation of the component but before rendering of the component.
+   *
+   * It performs the following tasks:
+   * - Initialization of the theme toggle icon to match the current theme.
+   * - Subscription to query params in the route to directly download a study if a study-link is present.
+   */
   async ngOnInit() {
+    // initialize theme toggle icon
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
-    // Need to make sure data from QR code scanner arrived or not
+
+    // Subscribe to any query parameters
     this.route.queryParams.subscribe(async (params) => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
@@ -101,6 +111,12 @@ export class HomePage implements OnInit {
     });
   }
 
+  /**
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   * Executed only once upon creation of the component during rendering of the component.
+   *
+   * It performs the following tasks:
+   */
   async ionViewWillEnter() {
     let key: keyof Translations;
     for (key in this.translations) {
