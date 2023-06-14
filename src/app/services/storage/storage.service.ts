@@ -59,8 +59,13 @@ export class StorageService {
    * @returns A Promise that resolves when the study is stored
    */
   async saveStudy(study: Study) {
-    const key = 'study';
-    return await this.nStorage.set(key, study);
+    // save the study object as JSON string
+    const key = 'current-study';
+    const value = JSON.stringify(study);
+    await this.nStorage.set(key, value);
+
+    // save the enrolment-date
+    await this.nStorage.set('enrolment-date', new Date());
   }
 
   /**

@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Http } from '@capacitor-community/http';
 import { StorageService } from '../storage/storage.service';
 import { LogEvent, SurveyData } from 'src/app/interfaces/types';
+import { Study } from 'src/app/interfaces/study';
 
 @Injectable({
   providedIn: 'root',
@@ -20,27 +21,31 @@ export class SurveyDataService {
   ) {}
 
   /**
-   * Downloads a survey from a remote URL
+   * Downloads a study from a remote URL.
+   * Checks if the downloaded object is a valid study.
    *
-   * @param surveyURL The web URL where a survey is hosted.
+   * @param url The web URL where a study is hosted.
+   * @returns A Promise that resolves if the study is valid.
+   * If the study is invalid it throws an InvalidStudyError.
+   * If the link is invalid it throws an HTTP error.
    */
-  getRemoteData(surveyURL: string): any {
-    return new Promise((resolve, reject) => {
-      const options = {
-        url: surveyURL,
-        headers: {},
-        connectTimeout: 60000,
-      };
-      // Now a get request
-      Http.get(options)
-        .then((data) => {
-          resolve(data.data);
-        })
-        .catch((error) => {
-          console.log('Error in getting remote data: ' + error);
-          reject(error);
-        });
-    });
+  async downloadStudy(url: string): Promise<Study> {
+    // TODO: implement this function
+    function isValidStudy(object: any): object is Study {
+      return true;
+    }
+
+    const options = {
+      url: url,
+      headers: {},
+      connectTimeout: 60000,
+    };
+
+    // HTTP GET request
+    const result = await Http.get(options);
+    const object = result.data;
+    if (isValidStudy(object)) return object;
+    else throw Error('InvalidStudyError');
   }
 
   /**

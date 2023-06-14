@@ -67,7 +67,7 @@ describe('SurveyDataService', () => {
 
   it('should get remote data from a URL', async () => {
     const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
-    const data: any = await service.getRemoteData(localURL);
+    const data: any = await service.downloadStudy(localURL);
     const parsedData: Study = JSON.parse(JSON.stringify(data));
     const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
     expect(parsedData.properties.study_id)

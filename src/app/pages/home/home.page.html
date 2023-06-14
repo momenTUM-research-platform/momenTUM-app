@@ -12,7 +12,7 @@
 <ion-content class="ion-no-padding">
   <!-- Displayed if user is not enrolled in a study -->
   <div
-    [hidden]="hideEnrolOptions"
+    *ngIf="!isEnrolledInStudy"
     style="display: flex; justify-content: center"
     class="ion-margin"
   >
@@ -21,7 +21,7 @@
       [src]="'assets/imgs/logo.png'"
     ></ion-img>
   </div>
-  <ion-text [hidden]="hideEnrolOptions" style="margin-top: 5%">
+  <ion-text *ngIf="!isEnrolledInStudy" style="margin-top: 5%">
     <h1 style="text-align: center">Let's get started</h1>
     <p class="welcome-msg">
       Welcome to <ion-label color="primary">momenTUM</ion-label> - a platform to
@@ -31,7 +31,7 @@
 
   <!-- Displays if user is enrolled in a study -->
   <ion-refresher
-    *ngIf="hideEnrolOptions"
+    *ngIf="isEnrolledInStudy"
     slot="fixed"
     (ionRefresh)="doRefresh($event)"
   >
@@ -41,14 +41,10 @@
     >
     </ion-refresher-content>
   </ion-refresher>
-  <div [hidden]="!hideEnrolOptions">
-    <ion-img
-      *ngIf="study"
-      [hidden]="!hideEnrolOptions"
-      [src]="study.properties.banner_url"
-    ></ion-img>
+  <div *ngIf="isEnrolledInStudy">
+    <ion-img [src]="study.properties.banner_url"></ion-img>
     <!--tasks-->
-    <div *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
+    <div *ngFor="let task of task_list">
       <ion-item
         lines="none"
         *ngIf="task.type !== 'header'"
@@ -80,7 +76,7 @@
   </div>
 </ion-content>
 
-<ion-footer [hidden]="hideEnrolOptions">
+<ion-footer *ngIf="!isEnrolledInStudy">
   <ion-grid class="ion-margin-bottom">
     <ion-row class="ion-justify-content-center">
       <ion-button class="study-sign-in-button" (click)="scanQR()"

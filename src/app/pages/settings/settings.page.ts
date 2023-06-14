@@ -8,6 +8,7 @@ import { TranslateConfigService } from '../../translate-config.service';
 import { SurveyDataService } from '../../services/survey-data/data.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
+import { LoadingService } from 'src/app/services/loading/loading-service.service';
 
 @Component({
   selector: 'app-settings',
@@ -46,7 +47,8 @@ export class SettingsPage {
     private alertController: AlertController,
     private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
-    private surveyDataService: SurveyDataService
+    private surveyDataService: SurveyDataService,
+    private loadingService: LoadingService
   ) {
     // get the default language of the device
     this.selectedLanguage =
@@ -123,6 +125,7 @@ export class SettingsPage {
           text: 'Withdraw',
           handler: async () => {
             // log a withdraw event to the server
+            this.loadingService.present('Withdrawing...');
             this.surveyDataService.logPageVisitToServer({
               timestamp: moment().format(),
               milliseconds: moment().valueOf(),
@@ -131,11 +134,13 @@ export class SettingsPage {
               module_index: -1,
             });
             // upload any pending logs and data
-            await this.surveyDataService.uploadPendingData('pending-log');
-            await this.surveyDataService.uploadPendingData('pending-data');
-            await this.storage.removeItem('current-study');
-            await this.storage.removeItem('study-tasks');
+            try {
+              await this.surveyDataService.uploadPendingData('pending-log');
+              await this.surveyDataService.uploadPendingData('pending-data');
+            } catch {}
+            await this.storage.clear();
             await this.notificationsService.cancelAll();
+            await this.loadingService.dismiss();
             await this.navController.navigateRoot('/');
           },
         },

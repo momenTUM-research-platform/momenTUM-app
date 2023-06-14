@@ -274,7 +274,7 @@ describe('HomePage', () => {
       );
       // Check assignment
       const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
-      await component.attemptToDownloadStudy(localURL, false, false);
+      await component.enrolInStudy(localURL, false, false);
       await fixture.whenStable();
       expect(component.isEnrolledInStudy).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);

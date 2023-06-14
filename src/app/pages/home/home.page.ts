@@ -20,6 +20,7 @@ import { NavController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
 import { Task, Translations } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
+import { reject } from 'cypress/types/bluebird';
 
 @Component({
   selector: 'app-home',
@@ -27,14 +28,10 @@ import { Study } from 'src/app/interfaces/study';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  // resume event subscription
-  resumeEvent: any;
-  // flag to display enrol options
-  hideEnrolOptions = true;
-  // track whether the user is currently enrolled in a study
+  // Tracks whether the user is currently enrolled in a study, used for hiding DOM elements.
   isEnrolledInStudy = false;
   // stores the details of the study
-  study: Study | null = null;
+  study: Study;
   // stores the list of tasks to be completed by the user
   task_list: Task[] = [];
   // the name of the theme toggle icon
@@ -57,11 +54,6 @@ export class HomePage implements OnInit {
     msg_camera:
       'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
   };
-
-  safeURL: string;
-
-  // the current language of the device
-  selectedLanguage: string;
 
   constructor(
     private surveyDataService: SurveyDataService,
@@ -96,17 +88,17 @@ export class HomePage implements OnInit {
     this.route.queryParams.subscribe(async (params) => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
-        await this.attemptToDownloadStudy(url, true, false);
+        await this.enrolInStudy(url);
       }
     });
   }
 
   /**
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
-   * Executed only once upon creation of the component during rendering of the component.
+   * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
-   * - Assign the right strings according to the chosen language.
+   * - Translates all text according to the chosen language.
    * -
    */
   async ionViewWillEnter() {
@@ -130,12 +122,10 @@ export class HomePage implements OnInit {
     // Check if a study exists
     const studyObject: any = await this.storageService.get('current-study');
     if (studyObject === null) {
-      this.hideEnrolOptions = false;
-      if (this.loadingService) {
-        this.loadingService.dismiss();
-      }
+      this.loadingService.dismiss();
       return;
     }
+    this.isEnrolledInStudy = true;
 
     // convert the study to a JSON object
     this.study = JSON.parse(studyObject);
@@ -171,7 +161,8 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Lifecycle event called when the current page is about to become paused/closed
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   * Executed each time the view of the home page is exited.
    */
   ionViewWillLeave() {
     if (this.isEnrolledInStudy) {
@@ -203,84 +194,60 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Handles the "Scan QR Code" button.
+   * Handles the "QR Code" button.
    */
   async scanQR() {
     return this.navController.navigateForward('/scanner');
   }
 
   /**
-   * Attempt to download a study from the URL scanned/entered by a user
+   * Attempt to download a study JSON object from the URL.
    *
    * @param url The URL to attempt to download a study from
    */
-  async attemptToDownloadStudy(
-    url: string,
-    isQRCode: boolean,
-    isStudyID: boolean
-  ) {
+  async enrolInStudy(url: string) {
     // show loading bar
     this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading);
+    await this.loadingService.present(this.translations.label_loading);
 
     try {
-      const result = await this.surveyDataService.getRemoteData(url);
+      // download the study
+      const study: Study = await this.surveyDataService.downloadStudy(url);
+      await this.storageService.saveStudy(study);
 
-      // check if the data received from the URL contains JSON properties/modules
-      // in order to determine if it's a schema study before continuing
-      let validStudy = false;
+      // log the enrolment event
+      this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'home',
+        event: 'enrol',
+        module_index: -1,
+      });
 
-      // Major check here, because some downloaded data need to be converted to a JSON String
-      // then parased, since they may already be a JSON, where as, URLs ending in JSON, they
-      // already contain Stringifyed JSON, so they only need to be parsed.
-
-      const study: Study = JSON.parse(JSON.stringify(result));
-      // checks if the returned text is parseable as JSON, and whether it contains
-      // some of the key fields used by schema so it can determine whether it is
-      // actually a schema study URL
-      // @ts-ignore
-      validStudy =
-        study.properties !== undefined && // @ts-ignore
-        study.modules !== undefined && // @ts-ignore
-        study.properties.study_id !== undefined;
-
-      if (validStudy) {
-        this.enrolInStudy(study);
-      } else {
-        if (this.loadingService) {
-          // Added this condition
-          this.loadingService.dismiss();
-        }
-
-        this.displayEnrolError(isQRCode, true, true, isStudyID);
+      // cache all media files if this study has set this property to true
+      if (study.properties.cache) {
+        this.loadingService.dismiss().then(() => {
+          this.loadingService.isCaching = true;
+          this.loadingService.present(this.translations.msg_caching);
+        });
+        this.surveyCacheService.cacheAllMedia(this.study);
       }
-    } catch (e: any) {
-      console.log('Enrolling exception: ' + e);
-      if (this.loadingService) {
-        // Added this condition
-        this.loadingService.dismiss();
-      }
-      switch (e.name) {
-        // ERROR in the JSON
-        case 'SyntaxError':
-          this.displayEnrolError(isQRCode, true, false, isStudyID);
-          break;
-        // Error in the URL and request
-        case 'HttpErrorResponse':
-          this.displayEnrolError(isQRCode, false, true, isStudyID);
-          break;
 
-        // Error in the URL and request
-        case 'TypeError':
-          this.displayEnrolError(isQRCode, true, true, isStudyID);
-          break;
-
-        default:
-          this.displayEnrolError(isQRCode, true, true, isStudyID);
-          break;
-      }
-      // This means invalid URL
+      await this.studyTasksService.generateStudyTasks(this.study);
+      await this.notificationsService.setNext30Notifications();
+      await this.loadStudyDetails();
+      await this.loadingService.dismiss();
+      this.isEnrolledInStudy = true;
+    } catch (error) {
+      // handle download errors
+      await this.loadingService.dismiss();
+      const invalidJSONError = error === 'InvalidStudyError';
+      const invalidHTTPError = !invalidJSONError;
+      this.displayEnrolError(invalidJSONError, invalidHTTPError);
+      return;
     }
+
+    // setup the study task objects
   }
 
   /**
@@ -305,7 +272,7 @@ export class HomePage implements OnInit {
         {
           text: this.translations.btn_enrol,
           handler: (response) => {
-            this.attemptToDownloadStudy(response.url, false, false);
+            this.enrolInStudy(response.url);
           },
         },
       ],
@@ -341,7 +308,7 @@ export class HomePage implements OnInit {
             const url =
               'https://tuspl22-momentum.srv.mwn.de/api/v1/studies/' +
               response.id;
-            this.attemptToDownloadStudy(url, false, true);
+            this.enrolInStudy(url);
           },
         },
       ],
@@ -351,65 +318,15 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Enrols the user in the study, sets up notifications and tasks
-   *
-   * @param data A data object returned from the server to represent a study object
-   */
-  async enrolInStudy(study: Study) {
-    this.isEnrolledInStudy = true;
-    this.hideEnrolOptions = true;
-
-    // convert received data to JSON object
-    this.study = study;
-
-    // set the enrolled date
-    this.storageService.set('enrolment-date', new Date());
-
-    // set an enrolled flag and save the JSON for the current study
-    this.storageService
-      .set('current-study', JSON.stringify(this.study))
-      .then(async () => {
-        // log the enrolment event
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'home',
-          event: 'enrol',
-          module_index: -1,
-        });
-
-        // cache all media files if this study has set this property to true
-        if (this.study?.properties.cache) {
-          this.loadingService.dismiss().then(() => {
-            this.loadingService.isCaching = true;
-            this.loadingService.present(this.translations.msg_caching);
-          });
-          this.surveyCacheService.cacheAllMedia(this.study);
-        }
-        // setup the study task objects
-        const tasks = this.study
-          ? await this.studyTasksService.generateStudyTasks(this.study)
-          : [];
-        // setup the notifications
-        await this.notificationsService.setNext30Notifications();
-        await this.loadStudyDetails();
-      });
-  }
-
-  /**
    * Loads the details of the current study, including overdue tasks
    */
   async loadStudyDetails() {
-    this.studyTasksService.getTaskDisplayList().then((tasks) => {
+    await this.studyTasksService.getTaskDisplayList().then((tasks) => {
       this.task_list = tasks;
 
       for (const task of this.task_list) {
         task.moment = moment(new Date(task.time)).fromNow();
       }
-
-      // show the study tasks
-      this.isEnrolledInStudy = true;
-      this.hideEnrolOptions = true;
 
       // reverse the order of the tasks list to show oldest first
       this.sortTasksList();
@@ -431,91 +348,20 @@ export class HomePage implements OnInit {
    *
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
    */
-  async displayEnrolError(
-    isQRCode: boolean,
-    isJSONinvalid: boolean,
-    isURLproblem: boolean,
-    isStudyID: boolean
-  ) {
-    let msg = "We couldn't load your study.";
+  async displayEnrolError(isJSONinvalid: boolean, isURLproblem: boolean) {
+    let message = "We couldn't load your study.";
 
-    /**
-     * Is Only QRCode
-     */
-    if (isQRCode && !isJSONinvalid && !isURLproblem) {
-      msg =
-        "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.";
-    }
-    /**
-     * Is QRCode and JSON Invalid format
-     */
-    if (isQRCode && isJSONinvalid && !isURLproblem) {
-      msg =
-        "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are scanning the correct code.";
-    }
-    /**
-     * Is Only JSON Invalid format
-     */
-    if (!isQRCode && isJSONinvalid && !isURLproblem) {
-      if (isStudyID) {
-        msg =
-          "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are entering the correct ID.";
-      } else {
-        msg =
-          "We couldn't load your study. The downloaded study is an invalid format. Please ensure you are entering the correct URL.";
-      }
-    }
-    /**
-     * Is JSON Invalid format and is URL Problem
-     */
-    if (!isQRCode && isJSONinvalid && isURLproblem) {
-      if (isStudyID) {
-        msg =
-          "We couldn't load your study. The URL is the problem or the downloaded study is an invalid format.\
-       Please ensure you are entering the correct ID.";
-      } else {
-        msg =
-          "We couldn't load your study. The URL is the problem or the downloaded study is an invalid format.\
-       Please ensure you are entering the correct URL.";
-      }
-    }
-    /**
-     * Is only URL Problem
-     */
-    if (!isQRCode && !isJSONinvalid && isURLproblem) {
-      if (isStudyID) {
-        msg =
-          "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct ID.";
-      } else {
-        msg =
-          "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL.";
-      }
-    }
-    /**
-     * Is URL Problem and QRCode
-     */
-    if (isQRCode && !isJSONinvalid && isURLproblem) {
-      msg =
-        "We couldn't load your study. The URL is invalid. Please ensure you are scanning the correct code.";
-    }
-    /**
-     * All three is the problem
-     */
-    if (isQRCode && isJSONinvalid && isURLproblem) {
-      msg =
-        "We couldn't load your study. The downloaded study is invalid. Please check your internet connection and ensure \
-      you are scanning the correct code.";
-    }
-
-    if (isStudyID) {
-      msg =
-        "We couldn't load your study. The study ID is an invalid or doesn't exist. Please check your internet connection and ensure \
-      you entered the correct study ID.";
+    if (isJSONinvalid && !isURLproblem) {
+      message =
+        "We couldn't load your study. The downloaded study has an invalid format.";
+    } else if (!isJSONinvalid && isURLproblem) {
+      message =
+        "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL.";
     }
 
     const alert = await this.alertController.create({
       header: 'Oops...',
-      message: msg,
+      message: message,
       buttons: ['Dismiss'],
     });
     await alert.present();
