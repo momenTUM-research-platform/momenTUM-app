@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@capacitor/splash-screen';
-import { StatusBar } from '@capacitor/status-bar';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { SurveyDataService } from './services/survey-data/data.service';
 import * as moment from 'moment';
@@ -84,5 +84,10 @@ export class AppComponent implements OnInit {
   initializeTheme() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     document.body.classList.toggle('dark', prefersDark.matches);
+    StatusBar.setStyle({
+      style: prefersDark.matches ? Style.Dark : Style.Light,
+    }).catch((e) => {
+      console.log(e);
+    });
   }
 }

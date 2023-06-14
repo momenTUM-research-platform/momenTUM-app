@@ -83,8 +83,14 @@ export class HomePage implements OnInit {
    * Handles the "Theme Toggle" button.
    */
   async toggleTheme() {
-    document.body.classList.toggle('dark');
-    this.themeIconName = this.themeIconName === 'sunny' ? 'moon' : 'sunny';
+    const toDark = this.themeIconName === 'sunny'; // Check if toggle from light to dark
+    document.body.classList.toggle('dark'); // toggle
+    this.themeIconName = toDark ? 'moon' : 'sunny'; // Update icon
+    StatusBar.setStyle({ style: toDark ? Style.Dark : Style.Light }).catch(
+      (e) => {
+        console.log(e);
+      }
+    ); // Update statusbar
   }
 
   /**
