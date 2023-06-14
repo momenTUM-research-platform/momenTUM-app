@@ -40,7 +40,7 @@ export class HomePage implements OnInit {
   // the name of the theme toggle icon
   themeIconName: 'sunny' | 'moon';
 
-  // is loaded successfully
+  // Translatable text
   translations: Translations = {
     btn_cancel: 'Cancel',
     btn_dismiss: 'Dismiss',
