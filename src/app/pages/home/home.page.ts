@@ -80,20 +80,6 @@ export class HomePage implements OnInit {
   ) {}
 
   /**
-   * Handles the "Theme Toggle" button.
-   */
-  async toggleTheme() {
-    const toDark = this.themeIconName === 'sunny'; // Check if toggle from light to dark
-    document.body.classList.toggle('dark'); // toggle
-    this.themeIconName = toDark ? 'moon' : 'sunny'; // Update icon
-    StatusBar.setStyle({ style: toDark ? Style.Dark : Style.Light }).catch(
-      (e) => {
-        console.log(e);
-      }
-    ); // Update statusbar
-  }
-
-  /**
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
    * Executed only once upon creation of the component but before rendering of the component.
    *
@@ -198,6 +184,22 @@ export class HomePage implements OnInit {
         module_index: -1,
       });
     }
+  }
+
+  /**
+   * Handles the "Theme Toggle" button.
+   * Performs a theme change,
+   * read the [ionic docs](https://ionicframework.com/docs/theming/dark-mode) for how theme changes work in ionic.
+   */
+  async toggleTheme() {
+    const toDark = this.themeIconName === 'sunny'; // Check if toggle from light to dark
+    document.body.classList.toggle('dark'); // toggle
+    this.themeIconName = toDark ? 'moon' : 'sunny'; // Update icon
+    StatusBar.setStyle({ style: toDark ? Style.Dark : Style.Light }).catch(
+      (e) => {
+        console.log(e);
+      }
+    ); // Update statusbar
   }
 
   /**
