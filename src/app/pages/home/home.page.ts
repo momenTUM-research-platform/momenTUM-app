@@ -294,7 +294,6 @@ export class HomePage implements OnInit {
           name: 'url',
           type: 'url',
           placeholder: 'e.g. https://bit.ly/2Q4O9jI',
-          value: 'https://',
         },
       ],
       buttons: [
