@@ -33,23 +33,17 @@ export class AppComponent implements OnInit {
     await this.barcodeScannerService.checkPermission().catch((err) => {
       console.log(err);
     });
-
     await this.platform.ready();
-
     await this.storage.init();
-
     this.platform.pause.subscribe(() => {
       this.isAppInForeground = new Promise((resolve) => {
         this.readyApp = resolve;
       });
     });
-
     this.platform.resume.subscribe(() => {
       this.readyApp();
     });
-
     this.notificationsService.addListenerOnClick(this.listenerFunc);
-
     // wait for device ready and then fire any pending click events
     await this.isAppInForeground;
     this.notificationsService.fireQueuedEvents().catch(() => {
