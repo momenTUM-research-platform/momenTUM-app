@@ -10,6 +10,7 @@ import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import { Survey, Question, Option } from 'src/app/interfaces/study';
 import { Task, SurveyResponse } from 'src/app/interfaces/types';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-survey',
@@ -200,6 +201,7 @@ export class SurveyPage implements OnInit {
       event: 'entry',
       module_index: this.module_index,
     });
+    SplashScreen.hide();
   }
 
   /**
