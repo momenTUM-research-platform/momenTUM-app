@@ -34,24 +34,6 @@ export class HomePage implements OnInit {
   tasks: Task[]; // stores the list of tasks to be completed by the user
   themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
 
-  // Translatable text
-  translations: Translations = {
-    btn_cancel: 'Cancel',
-    btn_dismiss: 'Dismiss',
-    btn_enrol: 'Enrol',
-    btn_enter_url: 'Enter URL',
-    btn_study_id: 'Study ID',
-    error_loading_qr_code:
-      "We couldn't load your study. Please check your internet connection and ensure you are scanning the correct code.",
-    error_loading_study:
-      "We couldn't load your study. Please check your internet connection and ensure you are entering the correct URL.",
-    heading_error: 'Oops...',
-    label_loading: 'Loading...',
-    msg_caching: 'Downloading media for offline use - please wait!',
-    msg_camera:
-      'Camera permission is required to scan QR codes. You can allow this permission in Settings.',
-  };
-
   constructor(
     private surveyDataService: SurveyDataService,
     private notificationsService: NotificationsService,
@@ -95,20 +77,11 @@ export class HomePage implements OnInit {
    * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
-   * - Translates all text according to the chosen language.
    * - Hides the SplashScreen if it's present.
    * - Requests permission for notifications.
    * - Checks if a study is present and if yes loads all the study tasks
    */
   async ionViewWillEnter() {
-    // translate
-    let key: keyof Translations;
-    for (key in this.translations) {
-      this.translate.get(key).subscribe((translated_text) => {
-        this.translations[key] = translated_text;
-      });
-    }
-
     SplashScreen.hide();
 
     // Check notification permission
@@ -120,7 +93,9 @@ export class HomePage implements OnInit {
 
     // load the tasks
     this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading);
+    this.loadingService.present(
+      await this.translate.get('label_loading').toPromise()
+    );
     this.showLogin = false;
     this.notificationsService.setNext30Notifications();
     this.tasks = await this.studyTasksService.getTaskDisplayList();
@@ -184,7 +159,9 @@ export class HomePage implements OnInit {
   async enrolInStudy(url: string) {
     // show loading bar
     this.loadingService.isCaching = false;
-    await this.loadingService.present(this.translations.label_loading);
+    await this.loadingService.present(
+      await this.translate.get('label_loading').toPromise()
+    );
 
     try {
       // download the study
@@ -202,9 +179,11 @@ export class HomePage implements OnInit {
 
       // cache all media files if this study has set this property to true
       if (study.properties.cache) {
-        this.loadingService.dismiss().then(() => {
+        this.loadingService.dismiss().then(async () => {
           this.loadingService.isCaching = true;
-          this.loadingService.present(this.translations.msg_caching);
+          this.loadingService.present(
+            await this.translate.get('label_loading').toPromise()
+          );
         });
         this.surveyCacheService.cacheAllMedia(study);
       }
@@ -231,7 +210,7 @@ export class HomePage implements OnInit {
    */
   async enterURL() {
     const alert = await this.alertController.create({
-      header: this.translations.btn_enter_url,
+      header: await this.translate.get('btn_enter_url').toPromise(),
       inputs: [
         {
           name: 'url',
@@ -241,12 +220,12 @@ export class HomePage implements OnInit {
       ],
       buttons: [
         {
-          text: this.translations.btn_cancel,
+          text: await this.translate.get('btn_cancel').toPromise(),
           role: 'cancel',
           cssClass: 'secondary',
         },
         {
-          text: this.translations.btn_enrol,
+          text: await this.translate.get('btn_enrol').toPromise(),
           handler: (response) => {
             this.enrolInStudy(response.url);
           },
@@ -263,7 +242,7 @@ export class HomePage implements OnInit {
    */
   async enterStudyID() {
     const alert = await this.alertController.create({
-      header: this.translations.btn_study_id,
+      header: await this.translate.get('btn_study_id').toPromise(),
       inputs: [
         {
           name: 'id',
@@ -273,12 +252,12 @@ export class HomePage implements OnInit {
       ],
       buttons: [
         {
-          text: this.translations.btn_cancel,
+          text: await this.translate.get('btn_cancel').toPromise(),
           role: 'cancel',
           cssClass: 'secondary',
         },
         {
-          text: this.translations.btn_enrol,
+          text: await this.translate.get('btn_enrol').toPromise(),
           handler: (response) => {
             // create URL for study
             const url =
@@ -323,7 +302,7 @@ export class HomePage implements OnInit {
   async displayBarcodeError() {
     const alert: HTMLIonAlertElement = await this.alertController.create({
       header: 'Permission Required',
-      message: this.translations.msg_camera,
+      message: await this.translate.get('msg_camera').toPromise(),
       buttons: ['Dismiss'],
     });
     await alert.present();
