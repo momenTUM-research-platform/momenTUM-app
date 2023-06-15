@@ -156,9 +156,7 @@ export class NotificationsService {
   async requestPermissions() {
     const status: string = (await LocalNotifications.checkPermissions())
       .display;
-    if (status.endsWith('granted')) {
-      // Do nothing
-    } else {
+    if (!status.endsWith('granted')) {
       await LocalNotifications.requestPermissions();
     }
   }

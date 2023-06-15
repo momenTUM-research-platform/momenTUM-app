@@ -1,11 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Event, NavigationStart, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import {
-  AlertController,
-  Platform,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+import { AlertController, Platform } from '@ionic/angular';
 
 import { SurveyDataService } from '../../services/survey-data/data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
@@ -18,9 +14,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { Task, Translations } from 'src/app/interfaces/types';
+import { Task } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
-import { reject } from 'cypress/types/bluebird';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
@@ -83,13 +78,8 @@ export class HomePage implements OnInit {
    */
   async ionViewWillEnter() {
     SplashScreen.hide();
-
-    // Check notification permission
     this.notificationsService.requestPermissions();
-
-    // Check if a study exists
-    const study: any = await this.storageService.getStudy();
-    if (study === null) return;
+    if ((await this.storageService.getStudy()) === null) return;
 
     // load the tasks
     this.loadingService.isCaching = false;
