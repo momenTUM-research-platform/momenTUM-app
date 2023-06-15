@@ -203,12 +203,12 @@ export class StudyTasksService {
    * A task is unlocked, once all the required tasks are completed.
    *
    * @param task
-   * @param study_tasks
+   * @param taskList
    */
-  checkTaskIsUnlocked(task: Task, study_tasks: Task[]) {
+  checkTaskIsUnlocked(task: Task, taskList: Task[]) {
     // get a set of completed task uuids
     const completedUUIDs = new Set();
-    for (const study_task of study_tasks) {
+    for (const study_task of taskList) {
       if (study_task.completed) {
         completedUUIDs.add(study_task.uuid);
       }

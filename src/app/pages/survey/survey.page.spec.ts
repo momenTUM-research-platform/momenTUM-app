@@ -133,7 +133,7 @@ describe('SurveyPage', () => {
         expect(component.num_sections).toEqual(
           stubStudy.modules[stubValueTasks[0].index].sections.length
         );
-        expect(component.current_section).toEqual(current_section);
+        expect(component.currentSection).toEqual(current_section);
         expect(component.current_section_name).toBe(
           stubStudy.modules[stubValueTasks[0].index].sections[
             current_section - 1
@@ -321,7 +321,7 @@ describe('SurveyPage', () => {
         .then(() => {
           component.back();
 
-          if (component.current_section > 1) {
+          if (component.currentSection > 1) {
             expect(component.submit_text).toBe('Next');
           } else {
             expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');

@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { AlertController, Platform } from '@ionic/angular';
+import {
+  AlertController,
+  Platform,
+  RefresherCustomEvent,
+} from '@ionic/angular';
 
 import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
@@ -51,6 +55,7 @@ export class HomePage implements OnInit {
    * Subscribes to a queryParameter event, such that when the Barcode page sends the URL it logs into the study.
    */
   async ngOnInit() {
+    // needed for the barcode page to communicate a study link
     this.route.queryParams.subscribe(async () => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
@@ -64,34 +69,12 @@ export class HomePage implements OnInit {
    * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
-   * - Initializes the state variables
-   * - Hides the SplashScreen if it's present.
-   * - Requests permission for notifications.
-   * - Checks if a study is present and if yes loads all the study tasks
    */
   async ionViewWillEnter() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
-    this.notificationsService.requestPermissions();
-    const study = await this.storageService.getStudy();
-    if (study === null) {
-      this.showLogin = true;
-      this.tasks = [];
-      this.bannerURL = '';
-      this.emptyMessage = '';
-      return;
-    }
-    this.bannerURL = study.properties.banner_url;
-    this.emptyMessage = study.properties.empty_msg;
-    this.loadingService.isCaching = false;
-    this.loadingService.present(
-      await this.translate.get('label_loading').toPromise()
-    );
-    this.showLogin = false;
-    this.tasks = await this.studyTasksService.getToDos();
-    await this.loadingService.dismiss();
+    console.log('ionViewWIllEnter');
+    await this.notificationsService.requestPermissions();
+    this.initialize();
     SplashScreen.hide();
-
     // log the user visiting this tab
     this.surveyDataService.logPageVisitToServer({
       timestamp: moment().format(),
@@ -119,6 +102,35 @@ export class HomePage implements OnInit {
         module_index: -1,
       });
     }
+  }
+
+  /**
+   * Initializes the variables.
+   */
+  async initialize() {
+    // set theme
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
+
+    // check whether enrolled or not
+    const study = await this.storageService.getStudy();
+    if (study === null) {
+      this.showLogin = true;
+      this.tasks = [];
+      this.bannerURL = '';
+      this.emptyMessage = '';
+      return;
+    }
+
+    this.bannerURL = study.properties.banner_url;
+    this.emptyMessage = study.properties.empty_msg;
+    this.loadingService.isCaching = false;
+    this.loadingService.present(
+      await this.translate.get('label_loading').toPromise()
+    );
+    this.showLogin = false;
+    this.tasks = await this.studyTasksService.getToDos();
+    await this.loadingService.dismiss();
   }
 
   /**
@@ -302,14 +314,12 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Refreshes the list of tasks
+   * Refreshes the state variables.
    */
-  async doRefresh(refresher) {
-    if (!this.loadingService.isLoading) {
-      this.ionViewWillEnter();
-    }
-    setTimeout(() => {
-      refresher.target.complete();
-    }, 250);
+  async refresh(event: any) {
+    setTimeout(async () => {
+      await this.initialize();
+      event.target.complete();
+    }, 500);
   }
 }

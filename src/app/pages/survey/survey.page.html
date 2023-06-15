@@ -15,10 +15,10 @@
     </ion-buttons>
 
     <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
-      <span class="text">{{this.current_section}}/{{this.num_sections}}</span>
+      <span class="text">{{this.currentSection}}/{{this.num_sections}}</span>
     </ion-item>
     <ion-progress-bar
-      [value]="(this.current_section - 1)/(num_sections - 1)"
+      [value]="(this.currentSection - 1)/(num_sections - 1)"
     ></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
@@ -27,7 +27,7 @@
   <div *ngIf="survey">
     <!--questions-->
     <ion-card
-      *ngFor="let question of survey.sections[this.current_section-1].questions"
+      *ngFor="let question of survey.sections[this.currentSection-1].questions"
       [hidden]="question.hidden"
       color="tertiary"
     >

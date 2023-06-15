@@ -424,7 +424,7 @@ describe('HomePage', () => {
     const refresher = new MockRefresher(myRefresherElement);
     spyOn(component, 'ionViewWillEnter');
 
-    component.doRefresh(refresher);
+    component.refresh(refresher);
     expect(component.ionViewWillEnter).toHaveBeenCalled();
 
     setTimeout(() => {

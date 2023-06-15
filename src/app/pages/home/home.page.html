@@ -27,11 +27,7 @@
   </ion-text>
 
   <!-- Displays if user is enrolled in a study -->
-  <ion-refresher
-    *ngIf="!showLogin"
-    slot="fixed"
-    (ionRefresh)="doRefresh($event)"
-  >
+  <ion-refresher *ngIf="!showLogin" slot="fixed" (ionRefresh)="refresh($event)">
     <ion-refresher-content
       pullingIcon="chevron-down-circle-outline"
       refreshingSpinner="crescent"

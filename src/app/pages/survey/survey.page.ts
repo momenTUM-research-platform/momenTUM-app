@@ -23,7 +23,7 @@ export class SurveyPage implements OnInit {
   submit_text = 'Submit';
 
   // variables to handle the sections
-  current_section = 1;
+  currentSection = 1;
   num_sections: number;
   current_section_name: string;
 
@@ -119,7 +119,7 @@ export class SurveyPage implements OnInit {
     // get the name of the current section
     this.num_sections = this.survey.sections.length;
     this.current_section_name =
-      this.survey.sections[this.current_section - 1].name;
+      this.survey.sections[this.currentSection - 1].name;
 
     // get the user ID and then set up question variables
     // initialise all of the questions to be displayed
@@ -127,7 +127,7 @@ export class SurveyPage implements OnInit {
     this.setupQuestionVariables(uuid.toString());
 
     // set the submit text as appropriate
-    if (this.current_section < this.num_sections) {
+    if (this.currentSection < this.num_sections) {
       this.submit_text = 'Next';
     } else {
       this.submit_text = this.survey.submit_text;
@@ -203,19 +203,14 @@ export class SurveyPage implements OnInit {
   }
 
   /**
-   * Called on ngOnInIt to set the variabled of the task
-   *
-   */
-
-  /**
    * Handles the back button behaviour
    */
   back() {
-    if (this.current_section > 1) {
+    if (this.currentSection > 1) {
       this.ngZone.run(() => {
-        this.current_section--;
+        this.currentSection--;
         this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
+          this.survey.sections[this.currentSection - 1].name;
         this.submit_text = 'Next';
       });
     } else {
@@ -416,20 +411,96 @@ export class SurveyPage implements OnInit {
   }
 
   /**
-   * Triggered whenever the submit button is called
-   * Checks if all required questions have been answered and then moves to the next section/saves the response
+   * Handles the submit/next button in each section.
+   * Checks if all required questions have been answered and then moves to the next section/saves the response.
    */
   async submit() {
+    // check if section has errors
+    const valid = !this.checkErrors();
+    if (!valid) {
+      this.content.scrollToTop(500);
+      this.showToast('You must answer all required (*) questions', 'bottom');
+      return;
+    }
+
+    if (this.currentSection === this.num_sections) {
+      // add the alert time to the response
+      this.tasks[this.task_index].alert_time = moment(
+        new Date(this.tasks[this.task_index].time).toISOString()
+      ).format();
+
+      // get a timestmap of submission time in both readable and ms format
+      const response_time = moment().format();
+      this.tasks[this.task_index].response_time = response_time;
+      const response_time_ms = moment().valueOf();
+      this.tasks[this.task_index].response_time_ms = response_time_ms;
+
+      // indicate that the current task is completed
+      this.tasks[this.task_index].completed = true;
+
+      // add all of the responses to an object in the task to be sent to server
+      const responses: SurveyResponse = {};
+      for (const section of this.survey.sections) {
+        for (const question of section.questions) {
+          responses[question.id] = question.response;
+        }
+      }
+      this.tasks[this.task_index].responses = responses;
+
+      // attempt to post surveyResponse to server
+      this.surveyDataService
+        .sendSurveyDataToServer({
+          module_index: this.module_index,
+          module_name: this.module_name,
+          responses,
+          response_time,
+          response_time_in_ms: response_time_ms,
+          alert_time: this.tasks[this.task_index].alert_time || '',
+        })
+        .catch(() => {});
+
+      // write tasks back to storage
+      await this.storage.saveTasks(this.tasks);
+      await this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'survey',
+        event: 'submit',
+        module_index: this.module_index,
+      });
+      this.navController.back();
+    } else {
+      this.ngZone.run(() => {
+        this.currentSection++;
+        this.current_section_name =
+          this.survey.sections[this.currentSection - 1].name;
+
+        if (this.currentSection === this.num_sections) {
+          this.submit_text = this.survey.submit_text;
+        }
+
+        this.content.scrollToTop(0);
+      });
+    }
+  }
+
+  /**
+   * Checks, whether there are any errors in the current section.
+   *
+   * @returns A boolean value indicating whether the section has errors (true) or not (false)
+   */
+  checkErrors(): boolean {
+    const currentQuestions =
+      this.survey.sections[this.currentSection - 1].questions;
     let errorCount = 0;
-    for (const question of this.survey.sections[this.current_section - 1]
-      .questions) {
-      if (
-        question.required === true &&
+    for (const question of currentQuestions) {
+      const error =
+        question.required &&
         (question.response === '' || question.response === undefined) &&
-        question.hidden === true
-      ) {
+        question.hidden === false;
+
+      if (error) {
         question.hideError = false;
-        // Only works for question types other than instruction
         if (question.body.type !== 'instruction') {
           errorCount++;
         }
@@ -438,77 +509,7 @@ export class SurveyPage implements OnInit {
       }
     }
 
-    if (errorCount === 0) {
-      // if user on last page and there are no errors, fine to submit
-      if (this.current_section === this.num_sections) {
-        // add the alert time to the response
-
-        this.tasks[this.task_index].alert_time = moment(
-          new Date(this.tasks[this.task_index].time).toISOString()
-        ).format();
-
-        // get a timestmap of submission time in both readable and ms format
-        const response_time = moment().format();
-        this.tasks[this.task_index].response_time = response_time;
-
-        const response_time_ms = moment().valueOf();
-        this.tasks[this.task_index].response_time_ms = response_time_ms;
-
-        // indicate that the current task is completed
-        this.tasks[this.task_index].completed = true;
-
-        // add all of the responses to an object in the task to be sent to server
-        const responses: SurveyResponse = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            responses[question.id] = question.response;
-          }
-        }
-        this.tasks[this.task_index].responses = responses;
-
-        // attempt to post surveyResponse to server
-        this.surveyDataService
-          .sendSurveyDataToServer({
-            module_index: this.module_index,
-            module_name: this.module_name,
-            responses,
-            response_time,
-            response_time_in_ms: response_time_ms,
-            alert_time: this.tasks[this.task_index].alert_time || '',
-          })
-          .catch(() => {});
-
-        // write tasks back to storage
-        await this.storage
-          .set('study-tasks', JSON.stringify(this.tasks))
-          .then(async () => {
-            // save an exit log
-            this.surveyDataService.logPageVisitToServer({
-              timestamp: moment().format(),
-              milliseconds: moment().valueOf(),
-              page: 'survey',
-              event: 'submit',
-              module_index: this.module_index,
-            });
-            this.navController.navigateRoot('/');
-          });
-      } else {
-        this.ngZone.run(() => {
-          this.current_section++;
-          this.current_section_name =
-            this.survey.sections[this.current_section - 1].name;
-
-          if (this.current_section === this.num_sections) {
-            this.submit_text = this.survey.submit_text;
-          }
-
-          this.content.scrollToTop(0);
-        });
-      }
-    } else {
-      this.content.scrollToTop(500);
-      this.showToast('You must answer all required (*) questions', 'bottom');
-    }
+    return errorCount !== 0;
   }
 
   /**
