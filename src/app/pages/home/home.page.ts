@@ -88,12 +88,10 @@ export class HomePage implements OnInit {
   /**
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
    * Executed each time the view of the home page is exited.
-   *
-   * It logs the page exit event if currently enrolled.
    */
   ionViewWillLeave() {
+    // Log page exit
     if (!this.showLogin) {
-      // log the user exiting this tab
       this.surveyDataService.logPageVisitToServer({
         timestamp: moment().format(),
         milliseconds: moment().valueOf(),
