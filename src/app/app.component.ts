@@ -30,7 +30,10 @@ export class AppComponent implements OnInit {
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
    * Executed only once upon creation of the component but before rendering of the component.
    *
-   * Initializes the app.
+   * Initializes the app by performing the following tasks:
+   * - waiting until the platform is ready
+   * - initializing the storage
+   * - initializing the theme
    */
   async ngOnInit() {
     await this.platform.ready();
@@ -40,14 +43,15 @@ export class AppComponent implements OnInit {
       this.isAppInForeground = new Promise((resolve) => {
         this.readyApp = resolve;
       });
-    });
+    }); // what's the usecase of this?
     this.platform.resume.subscribe(() => {
       this.readyApp();
-    });
+    }); // what?'
     this.notificationsService.addListenerOnClick(this.notificationClick);
     await this.isAppInForeground;
   }
 
+  // should this function be moved to the notifications service?
   /**
    * Handler function for when a user clicks on a task notification.
    * Navigates the user to the right task.

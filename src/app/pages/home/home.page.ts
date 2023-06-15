@@ -95,9 +95,10 @@ export class HomePage implements OnInit {
    * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
-   * - Hides the SplashScreen if it's present.
    * - Translates all text according to the chosen language.
-   * -
+   * - Hides the SplashScreen if it's present.
+   * - Requests permission for notifications.
+   * - Checks if a study is present and if yes loads all the study tasks
    */
   async ionViewWillEnter() {
     // translate
@@ -117,7 +118,7 @@ export class HomePage implements OnInit {
     const study: any = await this.storageService.getStudy();
     if (study === null) return;
 
-    // load the study
+    // load the tasks
     this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
     this.showLogin = false;
