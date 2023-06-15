@@ -16,7 +16,7 @@ import {
 } from '@angular/router';
 import { Storage } from '@ionic/storage-angular';
 import { HttpClient, HttpHandler } from '@angular/common/http';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
+import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import moment from 'moment';
 import { DataService } from 'src/app/services/data/data.service';

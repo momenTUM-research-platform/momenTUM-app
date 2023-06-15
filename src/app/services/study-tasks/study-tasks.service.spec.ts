@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { StudyTasksService } from './study-tasks.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
-import { BarcodeService } from '../../services/barcode/barcode.service';
+import { BarcodeService } from '../barcode/barcode.service';
+import { Task } from 'src/app/interfaces/types';
 
 describe('StudyTasksService', () => {
   let service: StudyTasksService;
@@ -35,11 +36,10 @@ describe('StudyTasksService', () => {
 
   it('should generate study tasks', async () => {
     await StorageServiceSpy.init();
-    const study: Study = JSON.parse(JSON.stringify(study_tasks.study));
     const tasks: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
 
     // returns a study task and also stores it in the storage
-    const response: Task[] = await service.generateStudyTasks(study);
+    const response: Task[] = await service.generateStudyTasks();
 
     //jasmine.objectContaining()
     expect(response.length)

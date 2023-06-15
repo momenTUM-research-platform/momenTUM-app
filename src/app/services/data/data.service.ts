@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Platform } from '@ionic/angular';
-import { StudyTasksService } from '../study-task/study-tasks.service';
+import { StudyTasksService } from '../study-tasks/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 import { HttpClient } from '@angular/common/http';
 import { Http } from '@capacitor-community/http';

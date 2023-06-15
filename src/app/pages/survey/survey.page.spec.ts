@@ -23,7 +23,7 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { NavMock, ToastMock } from '../../../../test-config/mocks-ionic';
 import moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DataService } from '../../services/data/data.service';

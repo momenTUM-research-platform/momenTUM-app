@@ -11,7 +11,7 @@ import {
   ActionPerformed,
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
-import { StudyTasksService } from '../study-task/study-tasks.service';
+import { StudyTasksService } from '../study-tasks/study-tasks.service';
 import { Task } from 'src/app/interfaces/types';
 import moment from 'moment';
 import { Route, Router } from '@angular/router';

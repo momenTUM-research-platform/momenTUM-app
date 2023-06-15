@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import * as moment from 'moment';
 import { DataService } from '../../services/data/data.service';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
 import { StorageService } from '../../services/storage/storage.service';
 

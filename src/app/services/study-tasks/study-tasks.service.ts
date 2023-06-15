@@ -14,42 +14,32 @@ export class StudyTasksService {
   ) {}
 
   /**
-   * Creates a list of tasks (interventions) based on their
-   * alert schedules
+   * Generates all the tasks (interventions) from the study.
+   * - assigns the current participant to one of the random conditions.
+   * - iterates through all modules and
    *
    * @param study A JSON object that contains all data about a study
    */
-  async generateStudyTasks(study: Study) {
+  async generateStudyTasks() {
+    // get study from storage
+    const study = await this.storageService.getStudy();
+    if (study === null) return;
+
     // allocate the participant to a study condition
     const conditions = study.properties.conditions;
     const random_index = Math.floor(Math.random() * conditions.length);
     const condition: string = conditions[random_index];
 
-    const study_tasks: Task[] = [];
+    const tasks: Task[] = [];
     let task_id = 101;
 
-    // loop through all of the modules in this study
-    // and create the associated study tasks based
-    // on the alert schedule
     for (const [i, mod] of study.modules.entries()) {
-      // if the module is assigned to the participant's condition
-      // add it to the list, otherwise just skip it
       if (mod.condition === condition || mod.condition === '*') {
-        const module_uuid = mod.id;
         const module_duration = mod.alerts.duration;
         const module_offset = mod.alerts.start_offset;
-        const module_unlock_after =
-          mod.unlock_after === undefined ? [] : mod.unlock_after;
         const module_random = mod.alerts.random;
-        const module_sticky = mod.alerts.sticky;
-        const module_sticky_label = mod.alerts.sticky_label;
-        const module_timeout = mod.alerts.timeout;
-        const module_timeout_after = mod.alerts.timeout_after;
         const module_randomInterval = mod.alerts.random_interval;
         const module_times = mod.alerts.times;
-        const alert_title = mod.alerts.title;
-        const alert_message = mod.alerts.message;
-
         const typeToIcon: { [type: string]: string } = {
           survey: 'checkmark-circle-outline',
           video: 'film-outline',
@@ -57,11 +47,6 @@ export class StudyTasksService {
           info: 'bulb-outline',
           pvt: 'alarm-outline',
         };
-        const module_type = typeToIcon[mod.body.type] || 'default';
-
-        const module_name = mod.name;
-        const module_index = i;
-
         const startDay = new Date(); // set a date object for today
         startDay.setHours(0, 0, 0, 0); // set the time to midnight
 
@@ -101,26 +86,28 @@ export class StudyTasksService {
               hour: 'numeric',
               minute: 'numeric',
             } as const;
+
             const task_obj: Task = {
-              uuid: module_uuid,
-              index: module_index,
+              uuid: mod.id,
+              index: i,
               task_id: task_id,
-              name: module_name,
-              type: module_type,
-              hidden: !(module_sticky && sticky_count === 0),
-              unlock_after: module_unlock_after,
-              sticky: module_sticky,
-              sticky_label: module_sticky_label,
-              alert_title,
-              alert_message,
-              timeout: module_timeout,
-              timeout_after: module_timeout_after,
+              name: mod.name,
+              type: typeToIcon[mod.body.type] || 'default',
+              hidden: !(mod.alerts.sticky && sticky_count === 0),
+              unlock_after:
+                mod.unlock_after === undefined ? [] : mod.unlock_after,
+              sticky: mod.alerts.sticky,
+              sticky_label: mod.alerts.sticky_label,
+              alert_title: mod.alerts.title,
+              alert_message: mod.alerts.message,
+              timeout: mod.alerts.timeout,
+              timeout_after: mod.alerts.timeout_after,
               time: taskTime.toString(),
               locale: taskTime.toLocaleString('en-US', options),
               completed: false,
             };
 
-            study_tasks.push(task_obj);
+            tasks.push(task_obj);
 
             // increment task id
             task_id++;
@@ -135,7 +122,7 @@ export class StudyTasksService {
       }
     }
 
-    study_tasks.sort((a: Task, b: Task) => {
+    tasks.sort((a: Task, b: Task) => {
       const dateA = new Date(a.time);
       const dateB = new Date(b.time);
 
@@ -146,10 +133,10 @@ export class StudyTasksService {
     this.loadingService.isCaching = false;
     this.loadingService.present('Loading...');
     await this.storageService.set('condition', condition);
-    await this.storageService.set('study-tasks', JSON.stringify(study_tasks));
+    await this.storageService.set('study-tasks', JSON.stringify(tasks));
     this.loadingService.dismiss();
 
-    return study_tasks;
+    return tasks;
   }
 
   /**

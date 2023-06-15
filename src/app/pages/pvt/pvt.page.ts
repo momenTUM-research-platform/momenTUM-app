@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
 import { Task } from 'src/app/interfaces/types';

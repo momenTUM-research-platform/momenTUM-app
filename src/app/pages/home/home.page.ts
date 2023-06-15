@@ -4,7 +4,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { AlertController, Platform } from '@ionic/angular';
 
 import { DataService } from '../../services/data/data.service';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
 import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
@@ -178,7 +178,7 @@ export class HomePage implements OnInit {
         this.surveyCacheService.cacheAllMedia(study);
       }
 
-      await this.studyTasksService.generateStudyTasks(study);
+      await this.studyTasksService.generateStudyTasks();
       await this.notificationsService.setNext30Notifications();
       this.tasks = await this.studyTasksService.getTaskDisplayList();
       await this.loadingService.dismiss();

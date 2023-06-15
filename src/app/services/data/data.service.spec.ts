@@ -13,7 +13,7 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { BarcodeService } from '../barcode/barcode.service';
-import { StudyTasksService } from '../study-task/study-tasks.service';
+import { StudyTasksService } from '../study-tasks/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 
 describe('SurveyDataService', () => {

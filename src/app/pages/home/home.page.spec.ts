@@ -30,7 +30,7 @@ import { StorageService } from 'src/app/services/storage/storage.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { EmptyError } from 'rxjs';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from 'src/app/services/survey-cache/survey-cache.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';

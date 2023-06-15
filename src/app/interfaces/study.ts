@@ -59,7 +59,6 @@ export interface Time {
 
 export interface Pvt {
   type: 'pvt';
-  id: string;
   trials: number;
   min_waiting: number;
   max_waiting: number;
@@ -70,8 +69,6 @@ export interface Pvt {
 
 export interface Survey {
   type: 'survey';
-  id: string;
-  name: string;
   shuffle: boolean;
   sections: Section[];
   submit_text: string;

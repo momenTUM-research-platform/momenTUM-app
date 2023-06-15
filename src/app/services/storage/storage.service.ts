@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { Study } from 'src/app/interfaces/study';
-import { LogEvent, Response } from 'src/app/interfaces/types';
+import { LogEvent, Response, Task } from 'src/app/interfaces/types';
 import { UuidService } from '../uuid/uuid.service';
 
 @Injectable({
@@ -40,6 +40,16 @@ export class StorageService {
 
   async keys() {
     return await this.nStorage.keys();
+  }
+
+  /**
+   * Saves the complete task list to the local storage.
+   * @param tasks The tasks to be stored.
+   */
+  async saveTasks(tasks: Task[]) {
+    const key = 'study-tasks';
+    const value = JSON.stringify(tasks);
+    await this.nStorage.set(key, value);
   }
 
   /**
@@ -98,13 +108,12 @@ export class StorageService {
 
   /**
    * Retrieves the currently enrolled in study object from the storage.
-   * @returns The study in which the participant is currently enrolled in. If there is none,
+   * @returns The study in which the participant is currently enrolled in.
+   * If there is none, it returns null.
    */
   async getStudy(): Promise<Study> {
     const str = await this.nStorage.get('current-study');
-    if (str === null) {
-      return null;
-    }
+    if (str === null) return null;
     const study = JSON.parse(str);
     return study as Study;
   }

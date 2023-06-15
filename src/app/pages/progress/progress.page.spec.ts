@@ -14,7 +14,7 @@ import {
 import { LanguageLoader } from '../../app.module';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { BarcodeService } from '../../services/barcode/barcode.service';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
+import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import { DataService } from 'src/app/services/data/data.service';
 

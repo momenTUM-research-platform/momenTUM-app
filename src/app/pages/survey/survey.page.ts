@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
+import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
 import { DataService } from '../../services/data/data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser } from '@capacitor/browser';
