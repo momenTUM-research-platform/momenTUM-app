@@ -67,15 +67,13 @@ export class HomePage implements OnInit {
   /**
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
    * Executed every time the component's view is entered.
-   *
-   * It performs the following tasks:
    */
   async ionViewWillEnter() {
-    console.log('ionViewWillEnter');
     await this.notificationsService.requestPermissions();
-    this.initialize();
+    await this.initialize();
     SplashScreen.hide();
-    // log the user visiting this tab
+
+    // Log page visit
     this.surveyDataService.logPageVisitToServer({
       timestamp: moment().format(),
       milliseconds: moment().valueOf(),
@@ -155,7 +153,7 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Attempt to download a study JSON object from the URL.
+   * Handles the enrol buttons.
    *
    * @param url The URL to attempt to download a study from
    */
@@ -169,7 +167,6 @@ export class HomePage implements OnInit {
     try {
       // download the study
       const study: Study = await this.surveyDataService.downloadStudy(url);
-      this.bannerURL = study.properties.banner_url;
       await this.storageService.saveStudy(study);
 
       // log the enrolment event
@@ -193,9 +190,8 @@ export class HomePage implements OnInit {
       }
       await this.studyTasksService.generateStudyTasks();
       await this.notificationsService.setNext30Notifications();
-      this.tasks = await this.studyTasksService.getToDos();
+      await this.initialize();
       await this.loadingService.dismiss();
-      this.showLogin = false;
     } catch (error) {
       // handle download errors
       await this.loadingService.dismiss();

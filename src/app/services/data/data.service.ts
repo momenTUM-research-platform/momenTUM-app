@@ -49,27 +49,6 @@ export class DataService {
   }
 
   /**
-   * Saves data to local storage
-   *
-   * @param key
-   * @param data
-   */
-  async saveToLocalStorage(key: string, data: string) {
-    return await this.storage.set(key, data);
-  }
-
-  /**
-   * Saves data to local storage
-   *
-   * @param key
-   * @param data
-   */
-  async getFromLocalStorage(key: string): Promise<any> {
-    const data = await this.storage.get(key);
-    return data;
-  }
-
-  /**
    * Attempts to submit a survey response to the server, and if unsuccessful saves it for later attempts
    *
    * @param surveyData An object containing all metadata about a survey response
