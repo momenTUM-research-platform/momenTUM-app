@@ -82,7 +82,7 @@ export class SurveyPage implements OnInit {
     }
 
     // check if this task is valid
-    this.studyTasksService.getTaskDisplayList().then((t) => {
+    this.studyTasksService.getToDos().then((t) => {
       let taskAvailable = false;
       for (const task of t) {
         if (String(task.task_id) === this.task_id) {

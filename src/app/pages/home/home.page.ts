@@ -88,7 +88,7 @@ export class HomePage implements OnInit {
       await this.translate.get('label_loading').toPromise()
     );
     this.showLogin = false;
-    this.tasks = await this.studyTasksService.getTaskDisplayList();
+    this.tasks = await this.studyTasksService.getToDos();
     await this.loadingService.dismiss();
     SplashScreen.hide();
 
@@ -181,10 +181,9 @@ export class HomePage implements OnInit {
         });
         this.surveyCacheService.cacheAllMedia(study);
       }
-
       await this.studyTasksService.generateStudyTasks();
       await this.notificationsService.setNext30Notifications();
-      this.tasks = await this.studyTasksService.getTaskDisplayList();
+      this.tasks = await this.studyTasksService.getToDos();
       await this.loadingService.dismiss();
       this.showLogin = false;
     } catch (error) {

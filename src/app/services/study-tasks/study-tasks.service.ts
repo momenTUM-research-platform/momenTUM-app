@@ -29,7 +29,9 @@ export class StudyTasksService {
     const conditions = study.properties.conditions;
     const random_index = Math.floor(Math.random() * conditions.length);
     const condition: string = conditions[random_index];
+    this.storageService.saveCondition(condition);
 
+    // generate study tasks
     const tasks: Task[] = [];
     let task_id = 101;
 
@@ -122,6 +124,7 @@ export class StudyTasksService {
       }
     }
 
+    // sort the tasks
     tasks.sort((a: Task, b: Task) => {
       const dateA = new Date(a.time);
       const dateB = new Date(b.time);
@@ -129,38 +132,30 @@ export class StudyTasksService {
       return dateA.getTime() - dateB.getTime();
     });
 
-    // save tasks and condition to storage
-    this.loadingService.isCaching = false;
-    this.loadingService.present('Loading...');
-    await this.storageService.set('condition', condition);
-    await this.storageService.set('study-tasks', JSON.stringify(tasks));
-    this.loadingService.dismiss();
-
-    return tasks;
+    // save the tasks
+    await this.storageService.saveTasks(tasks);
   }
 
   /**
    * Returns all the tasks that have been created for a study
    */
   async getAllTasks(): Promise<Task[]> {
-    const tasks: any = await this.storageService.get('study-tasks');
-    const task_list: Task[] = JSON.parse(tasks);
-    return task_list;
+    const tasks: Task[] = await this.storageService.getTasks();
+    return tasks;
   }
 
   /**
    * Gets the tasks that are currently available for the user to complete
    */
-  async getTaskDisplayList(): Promise<Task[]> {
-    const storage_tasks: any = await this.storageService.get('study-tasks');
-    const study_tasks: Task[] = JSON.parse(storage_tasks);
-    let tasks_to_display = [];
+  async getToDos(): Promise<Task[]> {
+    const tasks: Task[] = await this.storageService.getTasks();
+    let todos = [];
     const sticky_tasks = [];
     const time_tasks = [];
     let last_header = '';
-    for (const task of study_tasks) {
+    for (const task of tasks) {
       // check if task has a pre_req
-      const unlocked = this.checkTaskIsUnlocked(task, study_tasks);
+      const unlocked = this.checkTaskIsUnlocked(task, tasks);
       const alertTime = new Date(Date.parse(task.time));
       const now = new Date();
 
@@ -198,12 +193,14 @@ export class StudyTasksService {
       time_tasks.unshift(header_1);
     }
     // merge the time_tasks array with the sticky_tasks array
-    tasks_to_display = time_tasks.concat(sticky_tasks);
+    todos = time_tasks.concat(sticky_tasks);
     // return the tasks list reversed to ensure correct order
-    return tasks_to_display.reverse();
+    return todos.reverse();
   }
 
   /**
+   * Checks if this task has already been unlocked.
+   * A task is unlocked, once all the required tasks are completed.
    *
    * @param task
    * @param study_tasks

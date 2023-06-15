@@ -70,7 +70,7 @@ describe('StudyTasksService', () => {
     );
     // Making the return value of the get function call to be stubValue
     StorageServiceSpy.get.and.returnValue(Promise.resolve(stubValue));
-    const response: Task[] = await service.getTaskDisplayList();
+    const response: Task[] = await service.getToDos();
     expect(StorageServiceSpy.get.calls.count())
       .withContext('spy method was called once')
       .toBe(1);

@@ -20,8 +20,6 @@ export class StorageService {
     this.nStorage = storage;
   }
 
-  // Create and expose methods that users of this service can
-  // call, for example:
   public async set(key: string, value: any) {
     return await this.nStorage.set(key, value);
   }
@@ -116,5 +114,12 @@ export class StorageService {
     if (str === null) return null;
     const study = JSON.parse(str);
     return study as Study;
+  }
+
+  async getTasks(): Promise<Task[]> {
+    const str = await this.nStorage.get('study-tasks');
+    if (str === null) return null;
+    const tasks = JSON.parse(str);
+    return tasks as Task[];
   }
 }
