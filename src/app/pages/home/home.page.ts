@@ -95,11 +95,11 @@ export class HomePage implements OnInit {
    * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
+   * - Hides the SplashScreen if it's present.
    * - Translates all text according to the chosen language.
    * -
    */
   async ionViewWillEnter() {
-    SplashScreen.hide();
     // translate
     let key: keyof Translations;
     for (key in this.translations) {
@@ -108,20 +108,22 @@ export class HomePage implements OnInit {
       });
     }
 
+    SplashScreen.hide();
+
     // Check notification permission
     this.notificationsService.requestPermissions();
 
-    // Present the loading dialog
-    this.loadingService.isCaching = false;
-    this.loadingService.present(this.translations.label_loading);
-
     // Check if a study exists
     const study: any = await this.storageService.getStudy();
-    if (study === null) {
-      this.loadingService.dismiss();
-      return;
-    }
+    if (study === null) return;
+
+    // load the study
+    this.loadingService.isCaching = false;
+    this.loadingService.present(this.translations.label_loading);
     this.showLogin = false;
+    this.notificationsService.setNext30Notifications();
+    this.tasks = await this.studyTasksService.getTaskDisplayList();
+    this.loadingService.dismiss();
 
     // log the user visiting this tab
     this.surveyDataService.logPageVisitToServer({
@@ -131,13 +133,6 @@ export class HomePage implements OnInit {
       event: 'entry',
       module_index: -1,
     });
-
-    // set up next round of notifications
-    this.notificationsService.setNext30Notifications();
-
-    // load the study tasks
-    this.tasks = await this.studyTasksService.getTaskDisplayList();
-    this.loadingService.dismiss();
   }
 
   /**
@@ -210,10 +205,10 @@ export class HomePage implements OnInit {
           this.loadingService.isCaching = true;
           this.loadingService.present(this.translations.msg_caching);
         });
-        this.surveyCacheService.cacheAllMedia(this.study);
+        this.surveyCacheService.cacheAllMedia(study);
       }
 
-      await this.studyTasksService.generateStudyTasks(this.study);
+      await this.studyTasksService.generateStudyTasks(study);
       await this.notificationsService.setNext30Notifications();
       this.tasks = await this.studyTasksService.getTaskDisplayList();
       await this.loadingService.dismiss();
