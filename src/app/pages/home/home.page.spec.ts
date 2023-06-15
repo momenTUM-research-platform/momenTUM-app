@@ -259,7 +259,7 @@ describe('HomePage', () => {
       expect(spyrequestPermissions).toHaveBeenCalledTimes(1);
       expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
       expect(component.hideEnrolOptions).toBe(true);
-      expect(component.isEnrolledInStudy).toBe(false);
+      expect(component.showLogin).toBe(false);
       expect(spyStorageGet).toHaveBeenCalledTimes(3);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
@@ -276,7 +276,7 @@ describe('HomePage', () => {
       const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
       await component.enrolInStudy(localURL, false, false);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
       expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
@@ -295,7 +295,7 @@ describe('HomePage', () => {
       );
       await component.enrolInStudy(stubValueStudy);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(component.study).toEqual(stubValueStudy);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
@@ -308,8 +308,8 @@ describe('HomePage', () => {
     });
     it('should call ionViewWillLeave', async () => {
       // Check assignment
-      component.isEnrolledInStudy = true;
-      expect(component.isEnrolledInStudy).toBe(true);
+      component.showLogin = true;
+      expect(component.showLogin).toBe(true);
       await component.ionViewWillLeave();
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyUploadPendingData).toHaveBeenCalledTimes(2);
@@ -334,7 +334,7 @@ describe('HomePage', () => {
       const [alertArg] = alertControllerStub.calls.mostRecent().args;
       alertArg.buttons[1].handler(localURL);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
       expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
@@ -361,7 +361,7 @@ describe('HomePage', () => {
     });
     it('should call load Study Details', async () => {
       await component.loadStudyDetails();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
     });
@@ -411,10 +411,10 @@ describe('HomePage', () => {
   it('should call attempt to sort Task List', async () => {
     const stubValueTask: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
 
-    component.task_list = stubValueTask;
-    expect(component.task_list).toEqual(stubValueTask);
+    component.tasks = stubValueTask;
+    expect(component.tasks).toEqual(stubValueTask);
     component.sortTasksList();
-    expect(component.task_list[0].index).toEqual(stubValueTask[0].index);
+    expect(component.tasks[0].index).toEqual(stubValueTask[0].index);
   });
 
   it('should call ionViewWillEnter and complete the refresher after a delay', (done) => {

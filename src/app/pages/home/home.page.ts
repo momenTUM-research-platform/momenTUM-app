@@ -21,6 +21,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Task, Translations } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
 import { reject } from 'cypress/types/bluebird';
+import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-home',
@@ -28,14 +29,10 @@ import { reject } from 'cypress/types/bluebird';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  // Tracks whether the user is currently enrolled in a study, used for hiding DOM elements.
-  isEnrolledInStudy = false;
-  // stores the details of the study
-  study: Study;
-  // stores the list of tasks to be completed by the user
-  task_list: Task[] = [];
-  // the name of the theme toggle icon
-  themeIconName: 'sunny' | 'moon';
+  showLogin = true; // Used for showing / hiding elements depending on whether the user is enrolled in a study or not
+  study: Study; // stores the details of the study
+  tasks: Task[]; // stores the list of tasks to be completed by the user
+  themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
 
   // Translatable text
   translations: Translations = {
@@ -85,7 +82,7 @@ export class HomePage implements OnInit {
     this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
 
     // Subscribe to any query parameters
-    this.route.queryParams.subscribe(async (params) => {
+    this.route.queryParams.subscribe(async () => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
         await this.enrolInStudy(url);
@@ -102,6 +99,7 @@ export class HomePage implements OnInit {
    * -
    */
   async ionViewWillEnter() {
+    SplashScreen.hide();
     // translate
     let key: keyof Translations;
     for (key in this.translations) {
@@ -113,22 +111,17 @@ export class HomePage implements OnInit {
     // Check notification permission
     this.notificationsService.requestPermissions();
 
-    // set the isCaching flag to false
-    this.loadingService.isCaching = false;
-
     // Present the loading dialog
+    this.loadingService.isCaching = false;
     this.loadingService.present(this.translations.label_loading);
 
     // Check if a study exists
-    const studyObject: any = await this.storageService.get('current-study');
-    if (studyObject === null) {
+    const study: any = await this.storageService.getStudy();
+    if (study === null) {
       this.loadingService.dismiss();
       return;
     }
-    this.isEnrolledInStudy = true;
-
-    // convert the study to a JSON object
-    this.study = JSON.parse(studyObject);
+    this.showLogin = false;
 
     // log the user visiting this tab
     this.surveyDataService.logPageVisitToServer({
@@ -143,21 +136,8 @@ export class HomePage implements OnInit {
     this.notificationsService.setNext30Notifications();
 
     // load the study tasks
-    this.loadStudyDetails();
-
-    // on first run, generate a UUID for the user
-    // and set the notifications-enabled to true
-    this.storageService.get('uuid-set').then((uuidSet) => {
-      if (!uuidSet) {
-        // set a UUID
-        const uuid = this.uuidService.generateUUID('');
-        this.storageService.set('uuid', uuid);
-        // set a flag that UUID was set
-        this.storageService.set('uuid-set', true);
-        // set a flag that notifications are enabled
-        this.storageService.set('notifications-enabled', true);
-      }
-    });
+    this.tasks = await this.studyTasksService.getTaskDisplayList();
+    this.loadingService.dismiss();
   }
 
   /**
@@ -165,7 +145,7 @@ export class HomePage implements OnInit {
    * Executed each time the view of the home page is exited.
    */
   ionViewWillLeave() {
-    if (this.isEnrolledInStudy) {
+    if (!this.showLogin) {
       // log the user exiting this tab
       this.surveyDataService.logPageVisitToServer({
         timestamp: moment().format(),
@@ -235,9 +215,9 @@ export class HomePage implements OnInit {
 
       await this.studyTasksService.generateStudyTasks(this.study);
       await this.notificationsService.setNext30Notifications();
-      await this.loadStudyDetails();
+      this.tasks = await this.studyTasksService.getTaskDisplayList();
       await this.loadingService.dismiss();
-      this.isEnrolledInStudy = true;
+      this.showLogin = false;
     } catch (error) {
       // handle download errors
       await this.loadingService.dismiss();
@@ -318,32 +298,6 @@ export class HomePage implements OnInit {
   }
 
   /**
-   * Loads the details of the current study, including overdue tasks
-   */
-  async loadStudyDetails() {
-    await this.studyTasksService.getTaskDisplayList().then((tasks) => {
-      this.task_list = tasks;
-
-      for (const task of this.task_list) {
-        task.moment = moment(new Date(task.time)).fromNow();
-      }
-
-      // reverse the order of the tasks list to show oldest first
-      this.sortTasksList();
-
-      // hide loading controller if not caching
-      if (!this.loadingService.isCaching) {
-        setTimeout(() => {
-          if (this.loadingService) {
-            // Added this condition
-            this.loadingService.dismiss();
-          }
-        }, 1000);
-      }
-    });
-  }
-
-  /**
    * Displays an alert to indicate that something went wrong during study enrolment
    *
    * @param isQRCode Denotes whether the error was caused via QR code enrolment
@@ -377,13 +331,6 @@ export class HomePage implements OnInit {
       buttons: ['Dismiss'],
     });
     await alert.present();
-  }
-
-  /**
-   * Reverses the list of tasks for sorting purposes
-   */
-  sortTasksList() {
-    this.task_list.reverse();
   }
 
   /**

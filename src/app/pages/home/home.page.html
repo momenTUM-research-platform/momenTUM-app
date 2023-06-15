@@ -12,7 +12,7 @@
 <ion-content class="ion-no-padding">
   <!-- Displayed if user is not enrolled in a study -->
   <div
-    *ngIf="!isEnrolledInStudy"
+    *ngIf="showLogin"
     style="display: flex; justify-content: center"
     class="ion-margin"
   >
@@ -21,7 +21,7 @@
       [src]="'assets/imgs/logo.png'"
     ></ion-img>
   </div>
-  <ion-text *ngIf="!isEnrolledInStudy" style="margin-top: 5%">
+  <ion-text *ngIf="showLogin" style="margin-top: 5%">
     <h1 style="text-align: center">Let's get started</h1>
     <p class="welcome-msg">
       Welcome to <ion-label color="primary">momenTUM</ion-label> - a platform to
@@ -31,7 +31,7 @@
 
   <!-- Displays if user is enrolled in a study -->
   <ion-refresher
-    *ngIf="isEnrolledInStudy"
+    *ngIf="!showLogin"
     slot="fixed"
     (ionRefresh)="doRefresh($event)"
   >
@@ -41,10 +41,10 @@
     >
     </ion-refresher-content>
   </ion-refresher>
-  <div *ngIf="isEnrolledInStudy">
+  <div *ngIf="!showLogin">
     <ion-img [src]="study.properties.banner_url"></ion-img>
     <!--tasks-->
-    <div *ngFor="let task of task_list">
+    <div *ngFor="let task of tasks">
       <ion-item
         lines="none"
         *ngIf="task.type !== 'header'"
@@ -62,7 +62,7 @@
         <ion-label stacked class="title-label">{{task.label}}</ion-label>
       </ion-item>
     </div>
-    <ion-item lines="none" class="ion-text-center" [hidden]="task_list.length">
+    <ion-item lines="none" class="ion-text-center" [hidden]="tasks.length">
       <ion-label *ngIf="study" class="ion-text-wrap">
         {{study.properties.empty_msg}}
         <br />
@@ -76,7 +76,7 @@
   </div>
 </ion-content>
 
-<ion-footer *ngIf="!isEnrolledInStudy">
+<ion-footer *ngIf="showLogin">
   <ion-grid class="ion-margin-bottom">
     <ion-row class="ion-justify-content-center">
       <ion-button class="study-sign-in-button" (click)="scanQR()"

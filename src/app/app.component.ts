@@ -23,18 +23,19 @@ export class AppComponent implements OnInit {
     private notificationsService: NotificationsService,
     private surveyDataService: SurveyDataService,
     private router: Router,
-    private barcodeScannerService: BarcodeService,
     private storage: StorageService
-  ) {
-    this.initializeApp();
-  }
+  ) {}
 
+  /**
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   * Executed only once upon creation of the component but before rendering of the component.
+   *
+   * Initializes the app.
+   */
   async ngOnInit() {
-    await this.barcodeScannerService.checkPermission().catch((err) => {
-      console.log(err);
-    });
     await this.platform.ready();
     await this.storage.init();
+    await this.initializeTheme();
     this.platform.pause.subscribe(() => {
       this.isAppInForeground = new Promise((resolve) => {
         this.readyApp = resolve;
@@ -43,15 +44,17 @@ export class AppComponent implements OnInit {
     this.platform.resume.subscribe(() => {
       this.readyApp();
     });
-    this.notificationsService.addListenerOnClick(this.listenerFunc);
-    // wait for device ready and then fire any pending click events
+    this.notificationsService.addListenerOnClick(this.notificationClick);
     await this.isAppInForeground;
-    this.notificationsService.fireQueuedEvents().catch(() => {
-      console.log('ERROR caught: fireQueuedEvents is not yet implemented.');
-    });
   }
 
-  async listenerFunc(notificationAction: ActionPerformed) {
+  /**
+   * Handler function for when a user clicks on a task notification.
+   * Navigates the user to the right task.
+   * Logs the noticification-click.
+   * @param notificationAction The event that triggered this handler function.
+   */
+  async notificationClick(notificationAction: ActionPerformed) {
     await this.isAppInForeground;
     // log that the user clicked on this notification
     const logEvent = {
@@ -69,22 +72,13 @@ export class AppComponent implements OnInit {
     ]);
   }
 
-  async initializeApp() {
-    await this.platform.ready();
-    await StatusBar.setOverlaysWebView({ overlay: false }).catch((e) => {
-      console.log(e);
-    });
-    await SplashScreen.hide();
-    this.initializeTheme();
-  }
-
   /**
-   * Sets the theme to the systems preference.
+   * Initializes the theme to the systems preference.
    */
-  initializeTheme() {
+  async initializeTheme() {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     document.body.classList.toggle('dark', prefersDark.matches);
-    StatusBar.setStyle({
+    await StatusBar.setStyle({
       style: prefersDark.matches ? Style.Dark : Style.Light,
     }).catch((e) => {
       console.log(e);

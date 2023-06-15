@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { Study } from 'src/app/interfaces/study';
 import { LogEvent, Response } from 'src/app/interfaces/types';
+import { UuidService } from '../uuid/uuid.service';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +10,7 @@ import { LogEvent, Response } from 'src/app/interfaces/types';
 export class StorageService {
   private nStorage: Storage;
 
-  constructor(private storage: Storage) {
+  constructor(private storage: Storage, private uuidService: UuidService) {
     this.init();
   }
 
@@ -66,6 +67,12 @@ export class StorageService {
 
     // save the enrolment-date
     await this.nStorage.set('enrolment-date', new Date());
+
+    // generate and save UUID for user
+    const uuid = this.uuidService.generateUUID('');
+    await this.nStorage.set('uuid', uuid);
+    await this.nStorage.set('uuid-set', true);
+    await this.nStorage.set('notifications-enabled', true);
   }
 
   /**
@@ -87,5 +94,18 @@ export class StorageService {
   async saveCondition(condition: string) {
     const key = 'condition';
     this.nStorage.set(key, condition);
+  }
+
+  /**
+   * Retrieves the currently enrolled in study object from the storage.
+   * @returns The study in which the participant is currently enrolled in. If there is none,
+   */
+  async getStudy(): Promise<Study> {
+    const str = await this.nStorage.get('current-study');
+    if (str === null) {
+      return null;
+    }
+    const study = JSON.parse(str);
+    return study as Study;
   }
 }

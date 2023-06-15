@@ -141,7 +141,7 @@ describe('AppComponent', () => {
       notification,
     } as ActionPerformed;
 
-    await component.listenerFunc(notificationAction);
+    await component.notificationClick(notificationAction);
     await fixture.detectChanges();
     await fixture.whenStable().then(() => {
       expect(spylogPageVisitToServer).toHaveBeenCalled();
