@@ -483,7 +483,7 @@ export class SurveyPage implements OnInit {
       event: 'submit',
       module_index: this.module_index,
     });
-    this.navController.back();
+    this.navController.navigateRoot('/');
   }
 
   /**

@@ -71,7 +71,7 @@ export class HomePage implements OnInit {
    * It performs the following tasks:
    */
   async ionViewWillEnter() {
-    console.log('ionViewWIllEnter');
+    console.log('ionViewWillEnter');
     await this.notificationsService.requestPermissions();
     this.initialize();
     SplashScreen.hide();
@@ -311,6 +311,19 @@ export class HomePage implements OnInit {
       buttons: ['Dismiss'],
     });
     await alert.present();
+  }
+
+  /**
+   * Handler for when a user clicks on a specific task.
+   * Opens the task page for a specific task.
+   * @param task
+   */
+  async openTask(task: Task) {
+    const route =
+      task.type === 'alarm-outline'
+        ? '/pvt/' + task.task_id
+        : '/survey/' + task.task_id;
+    this.navController.navigateRoot(route);
   }
 
   /**
