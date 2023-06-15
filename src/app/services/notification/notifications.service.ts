@@ -8,10 +8,14 @@ import {
   CancelOptions,
   PendingLocalNotificationSchema,
   ListChannelsResult,
+  ActionPerformed,
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
 import { StudyTasksService } from '../study-task/study-tasks.service';
 import { Task } from 'src/app/interfaces/types';
+import moment from 'moment';
+import { Route, Router } from '@angular/router';
+import { DataService } from '../data/data.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,76 +23,37 @@ import { Task } from 'src/app/interfaces/types';
 export class NotificationsService {
   constructor(
     private storage: StorageService,
-    private studyTasksService: StudyTasksService
+    private studyTasksService: StudyTasksService,
+    private router: Router,
+    private dataService: DataService
   ) {}
 
-  async createChannel(channel: Channel): Promise<void> {
-    return await LocalNotifications.createChannel(channel);
-  }
-
-  async deleteChannel(channel: Channel): Promise<void> {
-    return await LocalNotifications.deleteChannel(channel);
-  }
-
-  async listChannels(): Promise<ListChannelsResult> {
-    return await LocalNotifications.listChannels();
-  }
-
-  async fireQueuedEvents() {
-    // To be implmented
-    // Fire queued events once the device is ready and all listeners are registered.
-    // throw new Error('Feature to fire queued events not available.');
-  }
-
-  async addListenerOnClick(listenerFunction: any) {
+  /**
+   * Adds a listener to a notification click.
+   * Navigates the user to the right task.
+   * Logs the noticification-click.
+   * @param notificationAction The event that triggered this handler function.
+   */
+  async addListenerOnClick() {
     LocalNotifications.addListener(
       'localNotificationActionPerformed',
-      listenerFunction
+      (notificationAction: ActionPerformed) => {
+        // log that the user clicked on this notification
+        const logEvent = {
+          timestamp: moment().format(),
+          milliseconds: moment().valueOf(),
+          page:
+            'notification-' +
+            moment(notificationAction.notification.extra.task_time).format(),
+          event: 'click',
+          module_index: notificationAction.notification.extra.task_index,
+        };
+        this.dataService.logPageVisitToServer(logEvent);
+        this.router.navigate([
+          'survey/' + notificationAction.notification.extra.task_id,
+        ]);
+      }
     );
-  }
-
-  showLocalNotification(
-    title: string,
-    body: string,
-    at: Date,
-    smallIcon: string,
-    largeIcon: string,
-    largeBody: string,
-    summaryText: string,
-    attachments: Attachment[],
-    extra: any,
-    ongoing: boolean,
-    autoCancel: boolean,
-    id: number = Math.floor(Math.random() * 1000) + 1,
-    repeats: boolean,
-    every: ScheduleEvery,
-    count: number,
-    on: any
-  ): void {
-    LocalNotifications.schedule({
-      notifications: [
-        {
-          title,
-          body,
-          id,
-          smallIcon,
-          largeIcon,
-          largeBody,
-          summaryText,
-          attachments,
-          extra,
-          ongoing,
-          autoCancel,
-          schedule: {
-            at,
-            repeats,
-            every,
-            count,
-            on,
-          },
-        },
-      ],
-    });
   }
 
   /**

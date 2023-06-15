@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
@@ -42,7 +42,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
   readonly tooEarlyMessage = 'too early';
 
   constructor(
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private navController: NavController,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,

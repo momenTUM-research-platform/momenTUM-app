@@ -19,7 +19,7 @@ import { HttpClient, HttpHandler } from '@angular/common/http';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import moment from 'moment';
-import { SurveyDataService } from 'src/app/services/survey-data/data.service';
+import { DataService } from 'src/app/services/data/data.service';
 
 describe('PvtPage', () => {
   let component: PvtPage;
@@ -85,8 +85,7 @@ describe('PvtPage', () => {
         fixture.debugElement.injector.get(StudyTasksService);
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       spySendSurveyDataToServer = spyOn(
         surveyDataService,
         'sendSurveyDataToServer'

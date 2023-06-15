@@ -5,7 +5,7 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import { LoadingService } from 'src/app/services/loading/loading-service.service';
@@ -47,7 +47,7 @@ export class SettingsPage {
     private alertController: AlertController,
     private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private loadingService: LoadingService
   ) {
     // get the default language of the device

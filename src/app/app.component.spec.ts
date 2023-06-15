@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Storage } from '@ionic/storage-angular';
-import { SurveyDataService } from './services/survey-data/data.service';
+import { DataService } from './services/data/data.service';
 import { Router } from '@angular/router';
 import { BarcodeService } from './services/barcode/barcode.service';
 import study_tasks from '../../cypress/fixtures/study_tasks.json';
@@ -104,8 +104,7 @@ describe('AppComponent', () => {
   });
 
   it('should add a listener to the Functions', async () => {
-    const surveyDataService =
-      fixture.debugElement.injector.get(SurveyDataService);
+    const surveyDataService = fixture.debugElement.injector.get(DataService);
     const barcodeService = fixture.debugElement.injector.get(BarcodeService);
     spyOn(barcodeService, 'checkPermission').and.returnValue(Promise.resolve());
     const spylogPageVisitToServer = spyOn(

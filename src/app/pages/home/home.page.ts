@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AlertController, Platform } from '@ionic/angular';
 
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
 import { UuidService } from '../../services/uuid/uuid.service';
@@ -30,7 +30,7 @@ export class HomePage implements OnInit {
   themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
 
   constructor(
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private notificationsService: NotificationsService,
     private surveyCacheService: SurveyCacheService,
     private studyTasksService: StudyTasksService,
@@ -80,8 +80,6 @@ export class HomePage implements OnInit {
     SplashScreen.hide();
     this.notificationsService.requestPermissions();
     if ((await this.storageService.getStudy()) === null) return;
-
-    // load the tasks
     this.loadingService.isCaching = false;
     this.loadingService.present(
       await this.translate.get('label_loading').toPromise()

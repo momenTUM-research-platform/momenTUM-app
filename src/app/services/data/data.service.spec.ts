@@ -8,7 +8,7 @@ import {
   HttpClientTestingModule,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { SurveyDataService } from './data.service';
+import { DataService } from './data.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { StorageService } from '../storage/storage.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -17,7 +17,7 @@ import { StudyTasksService } from '../study-task/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 
 describe('SurveyDataService', () => {
-  let service: SurveyDataService;
+  let service: DataService;
   let httpClientSpy: Spy<HttpClient>;
   let httpTestingController: HttpTestingController;
   let StorageServiceSpy: jasmine.SpyObj<StorageService>;
@@ -45,7 +45,7 @@ describe('SurveyDataService', () => {
         { provide: HttpClient, useValue: createSpyFromClass(HttpClient) },
       ],
     });
-    service = TestBed.inject(SurveyDataService);
+    service = TestBed.inject(DataService);
     httpTestingController = TestBed.inject(HttpTestingController);
     StorageServiceSpy = TestBed.inject(
       StorageService

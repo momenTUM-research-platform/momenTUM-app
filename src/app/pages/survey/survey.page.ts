@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
@@ -43,7 +43,7 @@ export class SurveyPage implements OnInit {
     private domSanitizer: DomSanitizer,
     private navController: NavController,
     private studyTasksService: StudyTasksService,
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private toastController: ToastController,
     private ngZone: NgZone
   ) {}

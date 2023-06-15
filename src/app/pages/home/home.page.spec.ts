@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
 import { File } from '@ionic-native/file/ngx';
 import { RouterTestingModule } from '@angular/router/testing';
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -158,8 +158,7 @@ describe('HomePage', () => {
         fixture.debugElement.injector.get(StudyTasksService);
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       const surveyCacheService =
         fixture.debugElement.injector.get(SurveyCacheService);
       const notificationService =

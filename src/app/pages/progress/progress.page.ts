@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import * as moment from 'moment';
-import { SurveyDataService } from '../../services/survey-data/data.service';
+import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-task/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
 import { StorageService } from '../../services/storage/storage.service';
@@ -84,7 +84,7 @@ export class ProgressPage {
   constructor(
     private storage: StorageService,
     private studyTasksService: StudyTasksService,
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private translateConfigService: TranslateConfigService
   ) {
     // get the default language of the device

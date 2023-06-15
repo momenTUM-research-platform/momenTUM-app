@@ -11,7 +11,7 @@ import { Study } from 'src/app/interfaces/study';
 @Injectable({
   providedIn: 'root',
 })
-export class SurveyDataService {
+export class DataService {
   constructor(
     private httpClient: HttpClient,
     private storage: StorageService,
