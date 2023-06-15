@@ -195,7 +195,7 @@ export class StudyTasksService {
     // merge the time_tasks array with the sticky_tasks array
     todos = time_tasks.concat(sticky_tasks);
     // return the tasks list reversed to ensure correct order
-    return todos.reverse();
+    return todos;
   }
 
   /**
