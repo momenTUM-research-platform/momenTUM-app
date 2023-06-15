@@ -9,6 +9,7 @@ import { DataService } from '../../services/data/data.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import { LoadingService } from 'src/app/services/loading/loading-service.service';
+import { Study } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-settings',
@@ -30,16 +31,7 @@ export class SettingsPage {
 
   // store a reference to the study object
   // empty template used prior to loading data
-  study: any = {
-    properties: {
-      study_name: '',
-      instructions: '',
-      support_email: '',
-      support_url: '',
-      ethics: '',
-      pls: '',
-    },
-  };
+  study: Study;
 
   constructor(
     private storage: StorageService,
@@ -55,46 +47,38 @@ export class SettingsPage {
       this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
-  ionViewWillEnter() {
+  /**
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   *
+   */
+  async ionViewWillEnter() {
     this.isEnrolled = false;
+    this.study = await this.storage.getStudy();
+    this.uuid = await this.storage.get('uuid');
+    const notificationsEnabled = await this.storage.get(
+      'notifications-enabled'
+    );
+    if (this.study === null) {
+      this.isEnrolled = false;
+      return;
+    }
+    this.isEnrolled = true;
 
-    Promise.all([
-      this.storage.get('current-study'),
-      this.storage.get('uuid'),
-      this.storage.get('notifications-enabled'),
-    ]).then((values) => {
-      // check if user is currently enrolled in study
-      // to show/hide additional options
-      const studyObject: string = values[0];
-
-      if (studyObject !== null) {
-        this.isEnrolled = true;
-        this.study = JSON.parse(studyObject);
-      } else {
-        this.isEnrolled = false;
-      }
-
-      // get the uuid from storage to display in the list
-      this.uuid = values[1].toString();
-
-      // get the status of the notifications
-      const notificationsEnabled = values[2] as unknown as boolean;
-      if (notificationsEnabled === null) {
-        this.notificationsEnabled = false;
-      } else {
-        this.notificationsEnabled = notificationsEnabled;
-      }
-      if (this.isEnrolled) {
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'settings',
-          event: 'entry',
-          module_index: -1,
-        });
-      }
-    });
+    // get the status of the notifications
+    if (notificationsEnabled === null) {
+      this.notificationsEnabled = false;
+    } else {
+      this.notificationsEnabled = notificationsEnabled;
+    }
+    if (this.isEnrolled) {
+      this.surveyDataService.logPageVisitToServer({
+        timestamp: moment().format(),
+        milliseconds: moment().valueOf(),
+        page: 'settings',
+        event: 'entry',
+        module_index: -1,
+      });
+    }
   }
 
   ionViewWillLeave() {

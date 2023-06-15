@@ -39,7 +39,7 @@
     </ion-refresher-content>
   </ion-refresher>
   <div *ngIf="!showLogin">
-    <ion-img [src]="study.properties.banner_url"></ion-img>
+    <ion-img [src]="bannerURL"></ion-img>
     <!--tasks-->
     <div *ngFor="let task of tasks">
       <ion-item
@@ -60,8 +60,8 @@
       </ion-item>
     </div>
     <ion-item lines="none" class="ion-text-center" [hidden]="tasks.length">
-      <ion-label *ngIf="study" class="ion-text-wrap">
-        {{study.properties.empty_msg}}
+      <ion-label class="ion-text-wrap">
+        {{emptyMessage}}
         <br />
         <ion-icon
           style="font-size: 3em"

@@ -25,8 +25,9 @@ import { SplashScreen } from '@capacitor/splash-screen';
 })
 export class HomePage implements OnInit {
   showLogin = true; // Used for showing / hiding elements depending on whether the user is enrolled in a study or not
-  study: Study; // stores the details of the study
-  tasks: Task[]; // stores the list of tasks to be completed by the user
+  tasks: Task[] = []; // Stores the list of tasks to be completed by the user
+  bannerURL: string; // The URL from which the banner is loaded
+  emptyMessage: string; // A message that is shown if no tasks are available
   themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
 
   constructor(
@@ -34,11 +35,9 @@ export class HomePage implements OnInit {
     private notificationsService: NotificationsService,
     private surveyCacheService: SurveyCacheService,
     private studyTasksService: StudyTasksService,
-    private uuidService: UuidService,
     private navController: NavController,
     private route: ActivatedRoute,
     private router: Router,
-    private platform: Platform,
     private loadingService: LoadingService,
     private alertController: AlertController,
     private storageService: StorageService,
@@ -49,16 +48,9 @@ export class HomePage implements OnInit {
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
    * Executed only once upon creation of the component but before rendering of the component.
    *
-   * It performs the following tasks:
-   * - Initialization of the theme toggle icon to match the current theme.
-   * - Subscription to query params in the route to directly download a study if a study-link is present.
+   * Subscribes to a queryParameter event, such that when the Barcode page sends the URL it logs into the study.
    */
   async ngOnInit() {
-    // initialize theme toggle icon
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
-
-    // Subscribe to any query parameters
     this.route.queryParams.subscribe(async () => {
       if (this.router.getCurrentNavigation()?.extras.state) {
         const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
@@ -72,22 +64,33 @@ export class HomePage implements OnInit {
    * Executed every time the component's view is entered.
    *
    * It performs the following tasks:
+   * - Initializes the state variables
    * - Hides the SplashScreen if it's present.
    * - Requests permission for notifications.
    * - Checks if a study is present and if yes loads all the study tasks
    */
   async ionViewWillEnter() {
-    SplashScreen.hide();
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
     this.notificationsService.requestPermissions();
-    if ((await this.storageService.getStudy()) === null) return;
+    const study = await this.storageService.getStudy();
+    if (study === null) {
+      this.showLogin = true;
+      this.tasks = [];
+      this.bannerURL = '';
+      this.emptyMessage = '';
+      return;
+    }
+    this.bannerURL = study.properties.banner_url;
+    this.emptyMessage = study.properties.empty_msg;
     this.loadingService.isCaching = false;
     this.loadingService.present(
       await this.translate.get('label_loading').toPromise()
     );
     this.showLogin = false;
-    this.notificationsService.setNext30Notifications();
     this.tasks = await this.studyTasksService.getTaskDisplayList();
-    this.loadingService.dismiss();
+    await this.loadingService.dismiss();
+    SplashScreen.hide();
 
     // log the user visiting this tab
     this.surveyDataService.logPageVisitToServer({
@@ -156,6 +159,7 @@ export class HomePage implements OnInit {
     try {
       // download the study
       const study: Study = await this.surveyDataService.downloadStudy(url);
+      this.bannerURL = study.properties.banner_url;
       await this.storageService.saveStudy(study);
 
       // log the enrolment event
