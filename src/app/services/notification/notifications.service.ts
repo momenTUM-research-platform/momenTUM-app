@@ -61,8 +61,8 @@ export class NotificationsService {
    *
    * @param task The task that the notification is for
    */
-  scheduleNotification(task: Task) {
-    LocalNotifications.schedule({
+  async scheduleNotification(task: Task) {
+    await LocalNotifications.schedule({
       notifications: [
         {
           title: task.alert_title,
@@ -105,7 +105,7 @@ export class NotificationsService {
    * Get a list of pending notifications.
    */
   async getPending(): Promise<LocalNotificationSchema[]> {
-    const pendingList: PendingLocalNotificationSchema[] = await (
+    const pendingList: PendingLocalNotificationSchema[] = (
       await LocalNotifications.getPending()
     ).notifications;
     if (pendingList != null) {
