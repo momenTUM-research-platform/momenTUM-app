@@ -1,12 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import {
-  AlertController,
-  Platform,
-  RefresherCustomEvent,
-} from '@ionic/angular';
-
+import { AlertController } from '@ionic/angular';
 import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
