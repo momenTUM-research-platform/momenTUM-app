@@ -53,12 +53,12 @@ export class DataService {
    *
    * @param surveyData An object containing all metadata about a survey response
    */
-  sendSurveyDataToServer(surveyData: SurveyData) {
+  async sendSurveyDataToServer(surveyData: SurveyData) {
     return Promise.all([
       this.storage.get('current-study'),
       this.storage.get('uuid'),
       this.studyTasksService.getAllTasks(),
-    ]).then((values) => {
+    ]).then(async (values) => {
       const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
       const uuid = values[1];
 
