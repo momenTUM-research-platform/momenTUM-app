@@ -43,19 +43,17 @@ type SurveyData =
       alert_time: string;
     };
 
-interface LogEvent {
+interface Log {
   timestamp: string;
-  milliseconds: number;
   page: string;
   event: string;
-  module_index: any;
 }
 
 interface Response {
-  module_name: string;
   module_id: number;
+  module_name: string;
   alert_time: string;
-  submission_time: string;
+  timestamp: string;
   data: SurveyResponse | PvtResponse;
 }
 

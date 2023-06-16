@@ -115,12 +115,10 @@ export class ProgressPage {
         );
 
         // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
+        this.surveyDataService.sendLog({
           timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
           page: 'my-progress',
           event: 'entry',
-          module_index: -1,
         });
 
         // check if any graphs are available and add history items
@@ -220,12 +218,10 @@ export class ProgressPage {
 
   async ionViewWillLeave() {
     if (this.enrolledInStudy) {
-      this.surveyDataService.logPageVisitToServer({
+      this.surveyDataService.sendLog({
         timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
         page: 'my-progress',
         event: 'exit',
-        module_index: -1,
       });
     }
   }

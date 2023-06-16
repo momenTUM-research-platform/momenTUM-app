@@ -12,7 +12,7 @@ import {
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
 import { StudyTasksService } from '../study-tasks/study-tasks.service';
-import { Task } from 'src/app/interfaces/types';
+import { Log, Task } from 'src/app/interfaces/types';
 import moment from 'moment';
 import { Route, Router } from '@angular/router';
 import { DataService } from '../data/data.service';
@@ -39,16 +39,14 @@ export class NotificationsService {
       'localNotificationActionPerformed',
       (notificationAction: ActionPerformed) => {
         // log that the user clicked on this notification
-        const logEvent = {
+        const logEvent: Log = {
           timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
           page:
             'notification-' +
             moment(notificationAction.notification.extra.task_time).format(),
           event: 'click',
-          module_index: notificationAction.notification.extra.task_index,
         };
-        this.dataService.logPageVisitToServer(logEvent);
+        this.dataService.sendLog(logEvent);
         this.router.navigate([
           'survey/' + notificationAction.notification.extra.task_id,
         ]);

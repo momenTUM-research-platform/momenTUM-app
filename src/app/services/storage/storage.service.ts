@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
 import { Study } from 'src/app/interfaces/study';
-import { LogEvent, Response, Task } from 'src/app/interfaces/types';
+import { Log, Response, Task } from 'src/app/interfaces/types';
 import { UuidService } from '../uuid/uuid.service';
 
 @Injectable({
@@ -88,7 +88,7 @@ export class StorageService {
    * @param log The log to be stored.
    * @returns A Promise that resolves when the log is stored.
    */
-  async saveLog(log: LogEvent) {
+  async saveLog(log: Log) {
     const key = 'logs';
     const logs = await this.nStorage.get(key);
     logs.push(log);
@@ -116,10 +116,25 @@ export class StorageService {
     return study as Study;
   }
 
+  /**
+   * Retrieves all tasks from the storage.
+   * @returns An array containing all tasks.
+   * If there is none, it returns null.
+   */
   async getTasks(): Promise<Task[]> {
     const str = await this.nStorage.get('study-tasks');
     if (str === null) return null;
     const tasks = JSON.parse(str);
     return tasks as Task[];
+  }
+
+  /**
+   * Retrieves the UUID that has been given to the participant from the storage.
+   * @returns A string containing the UUID.
+   * If there is none, it returns null.
+   */
+  async getUuid(): Promise<string> {
+    const uuid = await this.nStorage.get('uuid');
+    return uuid;
   }
 }

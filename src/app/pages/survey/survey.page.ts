@@ -194,12 +194,10 @@ export class SurveyPage implements OnInit {
     }
 
     // log the user visiting this tab
-    this.surveyDataService.logPageVisitToServer({
+    this.surveyDataService.sendLog({
       timestamp: moment().format(),
-      milliseconds: moment().valueOf(),
       page: 'survey',
       event: 'entry',
-      module_index: this.module_index,
     });
     SplashScreen.hide();
   }
@@ -218,12 +216,10 @@ export class SurveyPage implements OnInit {
     } else {
       // save an exit log
       this.surveyDataService
-        .logPageVisitToServer({
+        .sendLog({
           timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
           page: 'survey',
           event: 'exit',
-          module_index: this.module_index,
         })
         .catch(() => {});
       // nav back to the home screen
@@ -465,25 +461,20 @@ export class SurveyPage implements OnInit {
     this.tasks[this.task_index].responses = responses;
 
     // attempt to post surveyResponse to server
-    await this.surveyDataService
-      .sendSurveyDataToServer({
-        module_index: this.module_index,
-        module_name: this.module_name,
-        responses,
-        response_time,
-        response_time_in_ms: response_time_ms,
-        alert_time: this.tasks[this.task_index].alert_time || '',
-      })
-      .catch(() => {});
+    await this.surveyDataService.sendResponse({
+      module_id: this.module_index,
+      module_name: this.module_name,
+      data: responses,
+      timestamp: response_time,
+      alert_time: this.tasks[this.task_index].alert_time || '',
+    });
 
     // write tasks back to storage
     await this.storage.saveTasks(this.tasks);
-    await this.surveyDataService.logPageVisitToServer({
+    await this.surveyDataService.sendLog({
       timestamp: moment().format(),
-      milliseconds: moment().valueOf(),
       page: 'survey',
       event: 'submit',
-      module_index: this.module_index,
     });
     this.navController.navigateRoot('/');
   }

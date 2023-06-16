@@ -283,21 +283,20 @@ export class PvtPage implements OnInit, ViewWillLeave {
     tasks[this.taskIndex].response_time = responseTime;
     tasks[this.taskIndex].response_time_ms = responseTimeInMs;
 
-    await this.surveyDataService.sendSurveyDataToServer({
-      module_index: this.moduleIndex,
+    await this.surveyDataService.sendResponse({
+      module_id: this.moduleIndex,
       module_name: this.moduleName,
-      entries: this.reactionTimes,
-      response_time: responseTime,
-      response_time_in_ms: responseTimeInMs,
+      data: {
+        reaction_times: this.reactionTimes,
+      },
+      timestamp: responseTime,
       alert_time: this.alertTime,
     });
     this.storageService.set('study-tasks', JSON.stringify(tasks));
-    this.surveyDataService.logPageVisitToServer({
+    this.surveyDataService.sendLog({
       timestamp: moment().format(),
-      milliseconds: moment().valueOf(),
       page: 'pvt',
       event: 'submit',
-      module_index: this.moduleIndex,
     });
   }
 

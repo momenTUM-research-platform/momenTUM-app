@@ -152,9 +152,9 @@ describe('SurveyDataService', () => {
     };
 
     // data is responses to questions
-    await service.sendSurveyDataToServer(data1);
+    await service.sendResponse(data1);
     // data is pvt entries
-    await service.sendSurveyDataToServer(data2);
+    await service.sendResponse(data2);
 
     expect(studyTaskServiceSpy.getAllTasks).toHaveBeenCalledTimes(2);
     expect(httpClientSpy.post).toHaveBeenCalledTimes(2);
@@ -185,7 +185,7 @@ describe('SurveyDataService', () => {
       event: 'string',
       module_index: 1,
     } as LogEvent;
-    await service.logPageVisitToServer(log);
+    await service.sendLogToServer(log);
     expect(httpClientSpy.post).toHaveBeenCalledTimes(1);
     expect(uuidServiceSpy.generateUUID).toHaveBeenCalledTimes(1);
     expect(StorageServiceSpy.get).toHaveBeenCalledTimes(2);

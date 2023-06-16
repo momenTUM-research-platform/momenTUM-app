@@ -71,24 +71,20 @@ export class SettingsPage {
       this.notificationsEnabled = notificationsEnabled;
     }
     if (this.isEnrolled) {
-      this.surveyDataService.logPageVisitToServer({
+      this.surveyDataService.sendLog({
         timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
         page: 'settings',
         event: 'entry',
-        module_index: -1,
       });
     }
   }
 
   ionViewWillLeave() {
     if (this.isEnrolled) {
-      this.surveyDataService.logPageVisitToServer({
+      this.surveyDataService.sendLog({
         timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
         page: 'settings',
         event: 'exit',
-        module_index: -1,
       });
     }
   }
@@ -110,12 +106,10 @@ export class SettingsPage {
           handler: async () => {
             // log a withdraw event to the server
             this.loadingService.present('Withdrawing...');
-            this.surveyDataService.logPageVisitToServer({
+            this.surveyDataService.sendLog({
               timestamp: moment().format(),
-              milliseconds: moment().valueOf(),
               page: 'settings',
               event: 'withdraw',
-              module_index: -1,
             });
             // upload any pending logs and data
             try {

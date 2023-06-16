@@ -71,12 +71,10 @@ export class HomePage implements OnInit {
 
     // Log page visit
     if (!this.enrolled) return;
-    this.surveyDataService.logPageVisitToServer({
+    this.surveyDataService.sendLog({
       timestamp: moment().format(),
-      milliseconds: moment().valueOf(),
       page: 'home',
       event: 'entry',
-      module_index: -1,
     });
   }
 
@@ -87,12 +85,10 @@ export class HomePage implements OnInit {
   ionViewWillLeave() {
     // Log page exit
     if (!this.showLogin) {
-      this.surveyDataService.logPageVisitToServer({
+      this.surveyDataService.sendLog({
         timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
         page: 'home',
         event: 'exit',
-        module_index: -1,
       });
     }
   }
@@ -101,9 +97,6 @@ export class HomePage implements OnInit {
    * Initializes the variables.
    */
   async initialize() {
-    this.loadingService.present(
-      await this.translate.get('label_loading').toPromise()
-    );
     // set theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
@@ -116,10 +109,13 @@ export class HomePage implements OnInit {
       this.tasks = [];
       this.bannerURL = '';
       this.emptyMessage = '';
-      this.loadingService.dismiss();
       return;
     }
 
+    // only show loading bar if enrolled
+    this.loadingService.present(
+      await this.translate.get('label_loading').toPromise()
+    );
     this.bannerURL = study.properties.banner_url;
     this.emptyMessage = study.properties.empty_msg;
     this.loadingService.isCaching = false;
@@ -170,12 +166,10 @@ export class HomePage implements OnInit {
       await this.storageService.saveStudy(study);
 
       // log the enrolment event
-      this.surveyDataService.logPageVisitToServer({
+      this.surveyDataService.sendLog({
         timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
         page: 'home',
         event: 'enrol',
-        module_index: -1,
       });
 
       // cache all media files if this study has set this property to true
