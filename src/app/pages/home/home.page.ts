@@ -28,7 +28,8 @@ import { SplashScreen } from '@capacitor/splash-screen';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  showLogin = true; // Used for showing / hiding elements depending on whether the user is enrolled in a study or not
+  showLogin = true; // Used for showing / hiding elements
+  enrolled = false; // Used for determining whether the user is enrolled in a study or not
   tasks: Task[] = []; // Stores the list of tasks to be completed by the user
   bannerURL: string; // The URL from which the banner is loaded
   emptyMessage: string; // A message that is shown if no tasks are available
@@ -74,6 +75,7 @@ export class HomePage implements OnInit {
     SplashScreen.hide();
 
     // Log page visit
+    if (!this.enrolled) return;
     this.surveyDataService.logPageVisitToServer({
       timestamp: moment().format(),
       milliseconds: moment().valueOf(),
@@ -104,6 +106,9 @@ export class HomePage implements OnInit {
    * Initializes the variables.
    */
   async initialize() {
+    this.loadingService.present(
+      await this.translate.get('label_loading').toPromise()
+    );
     // set theme
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
@@ -111,19 +116,19 @@ export class HomePage implements OnInit {
     // check whether enrolled or not
     const study = await this.storageService.getStudy();
     if (study === null) {
+      this.enrolled = false;
       this.showLogin = true;
       this.tasks = [];
       this.bannerURL = '';
       this.emptyMessage = '';
+      this.loadingService.dismiss();
       return;
     }
 
     this.bannerURL = study.properties.banner_url;
     this.emptyMessage = study.properties.empty_msg;
     this.loadingService.isCaching = false;
-    this.loadingService.present(
-      await this.translate.get('label_loading').toPromise()
-    );
+    this.enrolled = true;
     this.showLogin = false;
     this.tasks = await this.studyTasksService.getToDos();
     await this.loadingService.dismiss();
