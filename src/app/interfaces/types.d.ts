@@ -50,8 +50,7 @@ interface Log {
 }
 
 interface Response {
-  module_id: number;
-  module_name: string;
+  module_id: string;
   alert_time: string;
   timestamp: string;
   data: SurveyResponse | PvtResponse;
