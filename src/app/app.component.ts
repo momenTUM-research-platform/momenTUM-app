@@ -33,10 +33,10 @@ export class AppComponent implements OnInit {
    * - initializing the theme
    */
   async ngOnInit() {
+    this.storage.init();
+    this.initializeTheme();
+    this.notificationsService.addListenerOnClick();
     await this.platform.ready();
-    await this.storage.init();
-    await this.initializeTheme();
-    await this.notificationsService.addListenerOnClick();
   }
 
   /**
