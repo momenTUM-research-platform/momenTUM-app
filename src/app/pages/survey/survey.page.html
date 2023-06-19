@@ -10,15 +10,15 @@
         >
           <ion-icon slot="icon-only" name="arrow-back">Home</ion-icon>
         </ion-button>
-        <span class="text">{{this.current_section_name}}</span>
+        <span class="text">{{sectionName}}</span>
       </ion-item>
     </ion-buttons>
 
     <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
-      <span class="text">{{this.currentSection}}/{{this.num_sections}}</span>
+      <span class="text">{{sectionIndex}}/{{survey.sections.length}}</span>
     </ion-item>
     <ion-progress-bar
-      [value]="(this.currentSection - 1)/(num_sections - 1)"
+      [value]="(sectionIndex)/(survey.sections.length - 1)"
     ></ion-progress-bar>
   </ion-toolbar>
 </ion-header>
@@ -27,7 +27,7 @@
   <div *ngIf="survey">
     <!--questions-->
     <ion-card
-      *ngFor="let question of survey.sections[this.currentSection-1].questions"
+      *ngFor="let question of survey.sections[sectionIndex].questions"
       [hidden]="question.hidden"
       color="tertiary"
     >
@@ -228,7 +228,8 @@
             size="large"
             expand="block"
             color="secondary"
-            >{{this.submit_text}}</ion-button
+            >{{sectionIndex + 1 === survey.sections.length ? survey.submit_text
+            : 'Next'}}</ion-button
           >
         </ion-label>
       </ion-item>
