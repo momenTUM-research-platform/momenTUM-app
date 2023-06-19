@@ -6,6 +6,7 @@ import { StudyTasksService } from '../../services/study-tasks/study-tasks.servic
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
 import { Task } from 'src/app/interfaces/types';
+import { Pvt } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-pvt',
@@ -23,21 +24,21 @@ export class PvtPage implements OnInit, ViewWillLeave {
   submitText: string;
 
   // OUTPUT
-  moduleName: string;
-  moduleIndex: number;
-  reactionTimes: number[];
+  moduleId: string;
+  reactionTimes: number[] = [];
   alertTime: string;
 
   // HELPER VARIABLES:
   taskIndex: number;
   reacted: boolean;
-  reactedTooEarly: boolean;
-  reactedTooLate: boolean;
-  state: 'Instructions' | 'Countdown' | 'PVT' | 'Results' | 'Exited';
+  reactedTooEarly = false;
+  reactedTooLate = false;
+  state: 'Instructions' | 'Countdown' | 'PVT' | 'Results' | 'Exited' =
+    'Instructions';
   counter: number; // Countdown
-  timer: number; // for PVT page
+  timer = 0; // for PVT page
   instructionTimer: any; // for Instructions page
-  exited: boolean;
+  exited = false;
   readonly tooLateMessage = 'too late';
   readonly tooEarlyMessage = 'too early';
 
@@ -47,14 +48,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
     private storageService: StorageService
-  ) {
-    this.reactionTimes = [];
-    this.state = 'Instructions';
-    this.exited = false;
-    this.reactedTooLate = false;
-    this.reactedTooEarly = false;
-    this.timer = 0;
-  }
+  ) {}
 
   /**
    * Angular lifecycle hook method.
@@ -229,16 +223,17 @@ export class PvtPage implements OnInit, ViewWillLeave {
    * */
   public async setStudyParameters() {
     const task_id = this.route.snapshot.paramMap.get('task_id');
-    await this.getModule(task_id).then((module) => {
-      this.trials = module.trials;
-      this.min = module.min_waiting;
-      this.max = module.max_waiting;
-      this.moduleName = module.name;
-      this.showResults = module.show;
-      this.timeToTimeout = module.max_reaction;
-      this.enableExit = module.exit;
-      this.submitText = module.submit_text;
-    });
+    const task = await this.storageService.getTaskByID(task_id);
+    this.moduleId = task.uuid;
+    const params = (await this.storageService.getModuleByID(
+      this.moduleId
+    )) as Pvt;
+    this.trials = params.trials;
+    this.min = params.min_waiting;
+    this.max = params.max_waiting;
+    this.showResults = params.show;
+    this.timeToTimeout = params.max_reaction;
+    this.enableExit = params.exit;
   }
 
   /**
@@ -248,24 +243,23 @@ export class PvtPage implements OnInit, ViewWillLeave {
    * @returns A Promise with the correct module from the local storage.
    * */
   public async getModule(task_id: string | null): Promise<any> {
-    return this.studyTasksService
-      .getAllTasks()
+    let moduleIndex: number;
+    return this.storageService
+      .getTasks()
       .then((tasks) => {
         let taskIndex = 0;
         for (const task of tasks) {
           if (task_id === String(task.task_id)) {
-            this.moduleIndex = task.index;
+            moduleIndex = task.index;
             this.alertTime = moment(new Date(task.time)).format();
             this.taskIndex = taskIndex;
             break;
           }
           taskIndex++;
         }
-        return this.storageService.get('current-study');
+        return this.storageService.getStudy();
       })
-      .then(
-        (studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]
-      );
+      .then((studyObject: any) => JSON.parse(studyObject).modules[moduleIndex]);
   }
 
   /**
@@ -278,21 +272,13 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const responseTime = moment().format();
     const responseTimeInMs = moment().valueOf();
 
-    const tasks: Task[] = await this.studyTasksService.getAllTasks();
+    const tasks: Task[] = await this.storageService.getTasks();
     tasks[this.taskIndex].completed = true;
     tasks[this.taskIndex].response_time = responseTime;
     tasks[this.taskIndex].response_time_ms = responseTimeInMs;
 
-    await this.surveyDataService.sendResponse({
-      module_id: this.moduleIndex,
-      module_name: this.moduleName,
-      data: {
-        reaction_times: this.reactionTimes,
-      },
-      timestamp: responseTime,
-      alert_time: this.alertTime,
-    });
-    this.storageService.set('study-tasks', JSON.stringify(tasks));
+    await this.surveyDataService.sendResponse(tasks[this.taskIndex]);
+    this.storageService.saveTasks(tasks);
     this.surveyDataService.sendLog({
       timestamp: moment().format(),
       page: 'pvt',
