@@ -4,39 +4,52 @@ import { Study } from 'src/app/interfaces/study';
 import { Log, Response, Task } from 'src/app/interfaces/types';
 import { UuidService } from '../uuid/uuid.service';
 
+/**
+ * This service was implemented using ionic/storage-angular.
+ * Please read the documentation of [ionic/storage-angular](https://github.com/ionic-team/ionic-storage)
+ * for further information.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class StorageService {
   private nStorage: Storage;
+  readonly keys = {
+    study: 'current-study',
+    tasks: 'study-tasks',
+    responses: 'responses',
+    logs: 'logs',
+    enrolment_date: 'enrolment-date',
+    uuid: 'uuid',
+    uuid_set: 'uuid-set',
+    condition: 'condition',
+    notifications_enabled: 'notifications_enabled',
+  };
 
   constructor(private storage: Storage, private uuidService: UuidService) {
     this.init();
   }
 
+  /**
+   * Initializes the storage.
+   */
   async init() {
-    // If using, define drivers here: await this.storage.defineDriver(/*...*/);
     const storage = await this.storage.create();
     this.nStorage = storage;
   }
 
-  public async set(key: string, value: any) {
-    return await this.nStorage.set(key, value);
-  }
-
-  public async get(key: string): Promise<any> {
-    return await this.nStorage.get(key);
-  }
-
-  async removeItem(key: string) {
-    return await this.nStorage.remove(key);
-  }
-
+  /**
+   * Removes everything from the local storage.
+   */
   async clear() {
     return await this.nStorage.clear();
   }
 
-  async keys() {
+  /**
+   * Gets all current keys which hold a value in the local storage.
+   * @returns A list of keys.
+   */
+  async getKeys() {
     return await this.nStorage.keys();
   }
 
@@ -45,7 +58,7 @@ export class StorageService {
    * @param tasks The tasks to be stored.
    */
   async saveTasks(tasks: Task[]) {
-    const key = 'study-tasks';
+    const key = this.keys.tasks;
     const value = JSON.stringify(tasks);
     await this.nStorage.set(key, value);
   }
@@ -56,7 +69,7 @@ export class StorageService {
    * @returns A Promise that resolves when the response is stored.
    */
   async saveResponse(response: Response) {
-    const key = 'responses';
+    const key = this.keys.responses;
     const responses = await this.nStorage.get(key);
     responses.push(response);
     return await this.nStorage.set(key, responses);
@@ -69,18 +82,24 @@ export class StorageService {
    */
   async saveStudy(study: Study) {
     // save the study object as JSON string
-    const key = 'current-study';
+    let key = this.keys.study;
     const value = JSON.stringify(study);
     await this.nStorage.set(key, value);
 
     // save the enrolment-date
-    await this.nStorage.set('enrolment-date', new Date());
+    key = this.keys.enrolment_date;
+    await this.nStorage.set(key, new Date());
 
     // generate and save UUID for user
+    key = this.keys.uuid;
     const uuid = this.uuidService.generateUUID('');
-    await this.nStorage.set('uuid', uuid);
-    await this.nStorage.set('uuid-set', true);
-    await this.nStorage.set('notifications-enabled', true);
+    await this.nStorage.set(key, uuid);
+
+    key = this.keys.uuid_set;
+    await this.nStorage.set(key, true);
+
+    key = this.keys.notifications_enabled;
+    await this.nStorage.set(key, true);
   }
 
   /**
@@ -89,7 +108,7 @@ export class StorageService {
    * @returns A Promise that resolves when the log is stored.
    */
   async saveLog(log: Log) {
-    const key = 'logs';
+    const key = this.keys.logs;
     const logs = await this.nStorage.get(key);
     logs.push(log);
     return await this.nStorage.set(key, logs);
@@ -100,7 +119,7 @@ export class StorageService {
    * @param condition The condition to be stored
    */
   async saveCondition(condition: string) {
-    const key = 'condition';
+    const key = this.keys.condition;
     this.nStorage.set(key, condition);
   }
 
@@ -110,7 +129,8 @@ export class StorageService {
    * If there is none, it returns null.
    */
   async getStudy(): Promise<Study> {
-    const str = await this.nStorage.get('current-study');
+    const key = this.keys.study;
+    const str = await this.nStorage.get(key);
     if (str === null) return null;
     const study = JSON.parse(str);
     return study as Study;
@@ -122,7 +142,8 @@ export class StorageService {
    * If there is none, it returns null.
    */
   async getTasks(): Promise<Task[]> {
-    const str = await this.nStorage.get('study-tasks');
+    const key = this.keys.tasks;
+    const str = await this.nStorage.get(key);
     if (str === null) return null;
     const tasks = JSON.parse(str);
     return tasks as Task[];
@@ -134,7 +155,40 @@ export class StorageService {
    * If there is none, it returns null.
    */
   async getUuid(): Promise<string> {
-    const uuid = await this.nStorage.get('uuid');
+    const key = this.keys.uuid;
+    const uuid = await this.nStorage.get(key);
     return uuid;
+  }
+
+  /**
+   * Gets a task by its task_id from the local storage.
+   * @returns The task object if found, else null.
+   */
+  async getTaskByID(ID: string) {
+    const key = this.keys.tasks;
+    const str = await this.nStorage.get(key);
+    if (str === null) return null;
+    const tasks = JSON.parse(str);
+    for (const task of tasks) {
+      if (task.task_id === ID) return task;
+    }
+    return null;
+  }
+
+  /**
+   * Gets the module params for the module with the matching ID from the study in the local storage.
+   * @returns The params object if found, else null.
+   */
+  async getModuleByID(ID: string) {
+    const key = this.keys.study;
+    const str = await this.nStorage.get(key);
+    if (str === null) return null;
+    const study = JSON.parse(str) as Study;
+    for (const module of study.modules) {
+      if (module.id === ID) {
+        return module.body;
+      }
+    }
+    return null;
   }
 }
