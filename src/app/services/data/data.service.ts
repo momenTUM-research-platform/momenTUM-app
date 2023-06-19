@@ -4,9 +4,10 @@ import { StudyTasksService } from '../study-tasks/study-tasks.service';
 import { UuidService } from '../uuid/uuid.service';
 import { Http } from '@capacitor-community/http';
 import { StorageService } from '../storage/storage.service';
-import { Log, Response } from 'src/app/interfaces/types';
+import { Log, Response, Task } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
 import { post } from 'cypress/types/jquery';
+import moment from 'moment';
 
 @Injectable({
   providedIn: 'root',
@@ -49,8 +50,21 @@ export class DataService {
    *
    * @param task The task that has been completed.
    */
-  async sendResponse(response: Response) {
-    this.postToServer(response);
+  async sendResponse(task: Task) {
+    // Build response object
+    const response: Response = {
+      module_id: task.module_id,
+      alert_time: task.alert_time,
+      timestamp: moment().format(),
+      data: task.responses,
+    };
+
+    // HTTP POST
+    const success = this.postToServer(response);
+    if (success) return;
+
+    // Save the response in the local storage for a later try
+    this.storage.saveResponse(response);
   }
 
   /**
@@ -106,6 +120,7 @@ export class DataService {
    * This method is supposed to be used within this service only.
    *
    * @param data The data to append in the body
+   * @returns A boolean value indicating whether status code 200 has been received.
    */
   private async postToServer(data: any) {
     const url = (await this.storage.getStudy()).properties.post_url;
@@ -113,6 +128,14 @@ export class DataService {
     Http.post({
       url,
       data,
-    });
+    })
+      .then((result) => {
+        return result.status === 200;
+      })
+      .catch((e) => {
+        // case in which the url is invalid
+        console.log(e);
+        return false;
+      });
   }
 }

@@ -164,13 +164,13 @@ export class StorageService {
    * Gets a task by its task_id from the local storage.
    * @returns The task object if found, else null.
    */
-  async getTaskByID(ID: string) {
+  async getTaskByID(ID: string): Promise<Task> {
     const key = this.keys.tasks;
     const str = await this.nStorage.get(key);
     if (str === null) return null;
     const tasks = JSON.parse(str);
     for (const task of tasks) {
-      if (task.task_id === ID) return task;
+      if (task.task_id === ID) return task as Task;
     }
     return null;
   }
