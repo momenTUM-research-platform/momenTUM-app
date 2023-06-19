@@ -6,7 +6,7 @@ import { Http } from '@capacitor-community/http';
 import { StorageService } from '../storage/storage.service';
 import { Log, Response, Task } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
-import { post } from 'cypress/types/jquery';
+import { data, post } from 'cypress/types/jquery';
 import moment from 'moment';
 
 @Injectable({
@@ -53,7 +53,7 @@ export class DataService {
   async sendResponse(task: Task) {
     // Build response object
     const response: Response = {
-      module_id: task.module_id,
+      module_id: task.uuid,
       alert_time: task.alert_time,
       timestamp: moment().format(),
       data: task.responses,
@@ -83,36 +83,16 @@ export class DataService {
    *
    * @param dataType The type of data to attempt to upload, e.g. 'pending-logs' (log events) or 'pending-data' (survey responses)
    */
-  uploadPendingData(dataType: 'pending-log' | 'pending-data') {
-    return Promise.all([this.storage.get('current-study'), this.storage.keys()])
-      .then((values) => {
-        const studyJSON = JSON.parse(JSON.parse(JSON.stringify(values[0])));
-        const keys = values[1];
-
-        const pendingLogKeys = [];
-        for (const key of keys) {
-          if (key.startsWith(dataType)) {
-            pendingLogKeys.push(key);
-          }
-        }
-        return {
-          pendingLogKeys,
-          post_url: studyJSON?.properties.post_url,
-        };
-      })
-      .then((data) => {
-        data.pendingLogKeys.map((pendingKey) => {
-          this.storage.get(pendingKey).then((log) => {
-            const logJSONObj = JSON.parse(log.toString());
-            const bodyData = new FormData();
-            for (const key in logJSONObj) {
-              if (logJSONObj.hasOwnProperty(key)) {
-                bodyData.append(key, logJSONObj[key]);
-              }
-            }
-          });
-        });
-      });
+  async uploadPendingData(dataType: 'pending-log' | 'pending-data') {
+    let data: Response[] | Log[];
+    if (dataType === 'pending-data') {
+      data = await this.storage.getPendingResponses();
+    } else {
+      data = await this.storage.getPendingLogs();
+    }
+    for (const obj of data) {
+      this.postToServer(obj);
+    }
   }
 
   /**

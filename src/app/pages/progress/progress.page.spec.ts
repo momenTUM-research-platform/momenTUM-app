@@ -116,7 +116,7 @@ describe('ProgressPage', () => {
       await fixture.detectChanges();
       await fixture.whenStable();
       expect(spyStorageGet).toHaveBeenCalledTimes(2);
-      expect(component.studyJSON).toEqual(stubStudy);
+      expect(component.study).toEqual(stubStudy);
       expect(component.enrolledInStudy).toBe(true);
       expect(component.studyDay).toBeGreaterThanOrEqual(1);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);

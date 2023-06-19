@@ -54,10 +54,8 @@ export class SettingsPage {
   async ionViewWillEnter() {
     this.isEnrolled = false;
     this.study = await this.storage.getStudy();
-    this.uuid = await this.storage.get('uuid');
-    const notificationsEnabled = await this.storage.get(
-      'notifications-enabled'
-    );
+    this.uuid = await this.storage.getUuid();
+    const notificationsEnabled = await this.storage.notificationsEnabled();
     if (this.study === null) {
       this.isEnrolled = false;
       return;
@@ -133,7 +131,7 @@ export class SettingsPage {
    */
   toggleNotifications() {
     // update the notifications flag
-    this.storage.set('notifications-enabled', this.notificationsEnabled);
+    this.storage.setNotificationsEnabled(this.notificationsEnabled);
     // set the next 30 notifications (cancels all notifications before setting them if enabled)
     this.notificationsService.setNext30Notifications();
   }

@@ -86,19 +86,12 @@ export class StorageService {
     const value = JSON.stringify(study);
     await this.nStorage.set(key, value);
 
-    // save the enrolment-date
-    key = this.keys.enrolment_date;
-    await this.nStorage.set(key, new Date());
-
     // generate and save UUID for user
     key = this.keys.uuid;
     const uuid = this.uuidService.generateUUID('');
     await this.nStorage.set(key, uuid);
 
     key = this.keys.uuid_set;
-    await this.nStorage.set(key, true);
-
-    key = this.keys.notifications_enabled;
     await this.nStorage.set(key, true);
   }
 
@@ -124,6 +117,24 @@ export class StorageService {
   }
 
   /**
+   *
+   * @param date The date of enrolment
+   */
+  async setEnrolmentDate(date: Date) {
+    const key = this.keys.enrolment_date;
+    await this.nStorage.set(key, new Date());
+  }
+
+  /**
+   *
+   * @param value The value to which the notifications-enabled flag should be set to.
+   */
+  async setNotificationsEnabled(value: boolean) {
+    const key = this.keys.notifications_enabled;
+    await this.nStorage.set(key, value);
+  }
+
+  /**
    * Retrieves the currently enrolled in study object from the storage.
    * @returns The study in which the participant is currently enrolled in.
    * If there is none, it returns null.
@@ -134,6 +145,16 @@ export class StorageService {
     if (str === null) return null;
     const study = JSON.parse(str);
     return study as Study;
+  }
+
+  /**
+   *
+   * @returns The enrolment date as Date object
+   */
+  async getEnrolmentDate(): Promise<Date> {
+    const key = this.keys.enrolment_date;
+    const enrolment_date = await this.nStorage.get(key);
+    return enrolment_date as Date;
   }
 
   /**
@@ -190,5 +211,34 @@ export class StorageService {
       }
     }
     return null;
+  }
+
+  /**
+   * @returns A boolean value indicating whether the notifications have are enabled or not.
+   */
+  async notificationsEnabled() {
+    const key: string = this.keys.notifications_enabled;
+    const notificationsEnabled: boolean = await this.nStorage.get(key);
+    return notificationsEnabled;
+  }
+
+  /**
+   *
+   * @returns An array containing all the pending responses.
+   */
+  async getPendingResponses() {
+    const key = this.keys.responses;
+    const responses: Response[] = await this.nStorage.get(key);
+    return responses;
+  }
+
+  /**
+   *
+   * @returns An array containing all the pending logs.
+   */
+  async getPendingLogs() {
+    const key = this.keys.logs;
+    const logs: Log[] = await this.nStorage.get(key);
+    return logs;
   }
 }

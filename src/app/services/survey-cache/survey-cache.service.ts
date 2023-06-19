@@ -124,52 +124,49 @@ export class SurveyCacheService {
   /**
    * Replaces the remote URLs for media items with the local URLs
    */
-  updateMediaURLsInStudy() {
-    this.storage.get('current-study').then((studyString: any) => {
-      try {
-        const studyObject: Study = JSON.parse(studyString);
-        // update the banner url first
-        // @ts-ignore
-        studyObject.properties.banner_url = this.localMediaURLs.banner;
+  async updateMediaURLsInStudy() {
+    const studyObject: Study = await this.storage.getStudy();
+    try {
+      // update the banner url first
+      studyObject.properties.banner_url = this.localMediaURLs.banner;
 
-        // update the other media items to the corresponding local URL
-        // get urls from media elements
-        for (const module of studyObject.modules) {
-          if (module.body.type === 'survey' && module.body.sections) {
-            for (const section of module.body.sections) {
-              // Must check if the sections exist,
-              // they don't for pvt modules
+      // update the other media items to the corresponding local URL
+      // get urls from media elements
+      for (const module of studyObject.modules) {
+        if (module.body.type === 'survey' && module.body.sections) {
+          for (const section of module.body.sections) {
+            // Must check if the sections exist,
+            // they don't for pvt modules
 
-              const mediaQuestions = section.questions.filter(
-                (question) => question.body.type === 'media'
-              );
+            const mediaQuestions = section.questions.filter(
+              (question) => question.body.type === 'media'
+            );
 
-              for (const question of mediaQuestions) {
-                if (question.id in this.localMediaURLs) {
-                  // @ts-ignore
-                  question.body.src = this.localMediaURLs[question.id];
-                }
+            for (const question of mediaQuestions) {
+              if (question.id in this.localMediaURLs) {
                 // @ts-ignore
-                if (question.body.subtype === 'video') {
-                  // @ts-ignore
-                  question.thumb = this.localMediaURLs.banner;
-                }
+                question.body.src = this.localMediaURLs[question.id];
+              }
+              // @ts-ignore
+              if (question.body.subtype === 'video') {
+                // @ts-ignore
+                question.thumb = this.localMediaURLs.banner;
               }
             }
           }
         }
-
-        // update the study protocol in storage
-        this.storage.set('current-study', JSON.stringify(studyObject));
-      } catch (e) {
-        console.log('Error: ' + e);
       }
 
-      // dismiss the loading spinner
-      if (this.loadingService) {
-        // Added this condition
-        this.loadingService.dismiss();
-      }
-    });
+      // update the study protocol in storage
+      this.storage.saveStudy(studyObject);
+    } catch (e) {
+      console.log(e);
+    }
+
+    // dismiss the loading spinner
+    if (this.loadingService) {
+      // Added this condition
+      this.loadingService.dismiss();
+    }
   }
 }

@@ -130,13 +130,9 @@ export class NotificationsService {
   async setNext30Notifications() {
     await this.cancelAll();
 
-    const notificationsEnabled = await this.storage.get(
-      'notifications-enabled'
-    );
-
+    const notificationsEnabled = await this.storage.notificationsEnabled();
     if (notificationsEnabled) {
-      const storage_tasks: any = await this.storage.get('study-tasks');
-      const tasks: Task[] = JSON.parse(storage_tasks);
+      const tasks: Task[] = await this.storage.getTasks();
       if (tasks !== null) {
         let alertCount = 0;
         for (const task of tasks) {
