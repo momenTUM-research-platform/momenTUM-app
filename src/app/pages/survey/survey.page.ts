@@ -20,23 +20,13 @@ import { SplashScreen } from '@capacitor/splash-screen';
 export class SurveyPage implements OnInit {
   @ViewChild(IonContent, { static: false }) content: IonContent;
 
-  // the text to display as submit button label
-  submit_text = 'Submit';
-
   // variables to handle the sections
-  currentSection = 1;
-  num_sections: number;
-  current_section_name: string;
+  sectionIndex = 1;
+  sectionName: string;
 
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Survey;
-
-  // task objects
-  tasks: Task[];
-  task_id: string;
-  task_index: number;
-  module_index: number;
-  module_name: string;
+  taskID: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -70,27 +60,20 @@ export class SurveyPage implements OnInit {
       }
     });
 
-    // the id of the task to be displayed
-    this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
-    this.tasks = await this.studyTasksService.getAllTasks();
-    for (let i = 0; i < this.tasks.length; i++) {
-      if (this.task_id === String(this.tasks[i].task_id)) {
-        this.module_name = this.tasks[i].name;
-        this.module_index = this.tasks[i].index;
-        this.task_index = i;
-        break;
-      }
-    }
+    // load the task
+    this.taskID = this.route.snapshot.paramMap.get('task_id');
+    const task = await this.storage.getTaskByID(this.taskID);
 
     // check if this task is valid
     this.studyTasksService.getToDos().then((t) => {
       let taskAvailable = false;
       for (const task of t) {
-        if (String(task.task_id) === this.task_id) {
+        if (String(task.task_id) === this.taskID) {
           taskAvailable = true;
           break;
         }
       }
+
       if (!taskAvailable) {
         this.showToast(
           'This task had a time limit and is no longer available.',
@@ -101,9 +84,7 @@ export class SurveyPage implements OnInit {
     });
 
     // extract the JSON from the study object
-    const studyObject: any = await this.storage.get('current-study');
-    const study = JSON.parse(studyObject);
-    this.survey = study.modules[this.module_index].body;
+    this.survey = (await this.storage.getModuleByID(task.module_id)) as Survey;
 
     // shuffle modules if required
     if (this.survey.shuffle) {
@@ -118,9 +99,7 @@ export class SurveyPage implements OnInit {
     }
 
     // get the name of the current section
-    this.num_sections = this.survey.sections.length;
-    this.current_section_name =
-      this.survey.sections[this.currentSection - 1].name;
+    this.sectionName = this.survey.sections[this.sectionIndex].name;
 
     // get the user ID and then set up question variables
     // initialise all of the questions to be displayed
@@ -128,7 +107,7 @@ export class SurveyPage implements OnInit {
     this.setupQuestionVariables(uuid.toString());
 
     // set the submit text as appropriate
-    if (this.currentSection < this.num_sections) {
+    if (this.sectionIndex < this.survey.sections.length) {
       this.submit_text = 'Next';
     } else {
       this.submit_text = this.survey.submit_text;
@@ -206,12 +185,10 @@ export class SurveyPage implements OnInit {
    * Handles the back button behaviour
    */
   back() {
-    if (this.currentSection > 1) {
+    if (this.sectionIndex > 0) {
       this.ngZone.run(() => {
-        this.currentSection--;
-        this.current_section_name =
-          this.survey.sections[this.currentSection - 1].name;
-        this.submit_text = 'Next';
+        this.sectionIndex--;
+        this.sectionName = this.survey.sections[this.sectionIndex].name;
       });
     } else {
       // save an exit log
@@ -422,16 +399,10 @@ export class SurveyPage implements OnInit {
     }
 
     // not the last section: go to the next section
-    if (this.currentSection !== this.num_sections) {
+    if (this.sectionIndex !== this.survey.sections.length) {
       this.ngZone.run(() => {
-        this.currentSection++;
-        this.current_section_name =
-          this.survey.sections[this.currentSection - 1].name;
-
-        if (this.currentSection === this.num_sections) {
-          this.submit_text = this.survey.submit_text;
-        }
-
+        this.sectionIndex++;
+        this.sectionName = this.survey.sections[this.sectionIndex - 1].name;
         this.content.scrollToTop(0);
       });
       return;
@@ -461,13 +432,7 @@ export class SurveyPage implements OnInit {
     this.tasks[this.task_index].responses = responses;
 
     // attempt to post surveyResponse to server
-    await this.surveyDataService.sendResponse({
-      module_id: this.module_index,
-      module_name: this.module_name,
-      data: responses,
-      timestamp: response_time,
-      alert_time: this.tasks[this.task_index].alert_time || '',
-    });
+    await this.surveyDataService.sendResponse(this.tasks[this.task_index]);
 
     // write tasks back to storage
     await this.storage.saveTasks(this.tasks);
@@ -486,7 +451,7 @@ export class SurveyPage implements OnInit {
    */
   checkErrors(): boolean {
     const currentQuestions =
-      this.survey.sections[this.currentSection - 1].questions;
+      this.survey.sections[this.sectionIndex - 1].questions;
     let errorCount = 0;
     for (const question of currentQuestions) {
       const error =
