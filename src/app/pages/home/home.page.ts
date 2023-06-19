@@ -307,10 +307,7 @@ export class HomePage implements OnInit {
    * @param task
    */
   async openTask(task: Task) {
-    const route =
-      task.type === 'alarm-outline'
-        ? '/pvt/' + task.task_id
-        : '/survey/' + task.task_id;
+    const route = `/${task.type}/${task.task_id}`;
     this.navController.navigateRoot(route);
   }
 
