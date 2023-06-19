@@ -27,6 +27,7 @@ export class SurveyPage implements OnInit {
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Survey;
   taskID: string;
+  task_index: number;
 
   constructor(
     private route: ActivatedRoute,
@@ -63,6 +64,7 @@ export class SurveyPage implements OnInit {
     // load the task
     this.taskID = this.route.snapshot.paramMap.get('task_id');
     const task = await this.storage.getTaskByID(this.taskID);
+    this.task_index = task.index;
 
     // check if this task is valid
     this.studyTasksService.getToDos().then((t) => {
@@ -84,7 +86,7 @@ export class SurveyPage implements OnInit {
     });
 
     // extract the JSON from the study object
-    this.survey = (await this.storage.getModuleByID(task.module_id)) as Survey;
+    this.survey = (await this.storage.getModuleByID(task.uuid)) as Survey;
 
     // shuffle modules if required
     if (this.survey.shuffle) {
@@ -103,15 +105,8 @@ export class SurveyPage implements OnInit {
 
     // get the user ID and then set up question variables
     // initialise all of the questions to be displayed
-    const uuid = await this.storage.get('uuid');
+    const uuid = await this.storage.getUuid();
     this.setupQuestionVariables(uuid.toString());
-
-    // set the submit text as appropriate
-    if (this.sectionIndex < this.survey.sections.length) {
-      this.submit_text = 'Next';
-    } else {
-      this.submit_text = this.survey.submit_text;
-    }
 
     // toggle rand_group questions
     // figure out which ones are grouped together, randomly show one and set its response value to 1
@@ -409,18 +404,19 @@ export class SurveyPage implements OnInit {
     }
 
     // add the alert time to the response
-    this.tasks[this.task_index].alert_time = moment(
-      new Date(this.tasks[this.task_index].time).toISOString()
+    const tasks = await this.storage.getTasks();
+    tasks[this.task_index].alert_time = moment(
+      new Date(tasks[this.task_index].time).toISOString()
     ).format();
 
     // get a timestmap of submission time in both readable and ms format
     const response_time = moment().format();
-    this.tasks[this.task_index].response_time = response_time;
+    tasks[this.task_index].response_time = response_time;
     const response_time_ms = moment().valueOf();
-    this.tasks[this.task_index].response_time_ms = response_time_ms;
+    tasks[this.task_index].response_time_ms = response_time_ms;
 
     // indicate that the current task is completed
-    this.tasks[this.task_index].completed = true;
+    tasks[this.task_index].completed = true;
 
     // add all of the responses to an object in the task to be sent to server
     const responses: SurveyResponse = {};
@@ -429,13 +425,13 @@ export class SurveyPage implements OnInit {
         responses[question.id] = question.response;
       }
     }
-    this.tasks[this.task_index].responses = responses;
+    tasks[this.task_index].responses = responses;
 
     // attempt to post surveyResponse to server
-    await this.surveyDataService.sendResponse(this.tasks[this.task_index]);
+    await this.surveyDataService.sendResponse(tasks[this.task_index]);
 
     // write tasks back to storage
-    await this.storage.saveTasks(this.tasks);
+    await this.storage.saveTasks(tasks);
     await this.surveyDataService.sendLog({
       timestamp: moment().format(),
       page: 'survey',
