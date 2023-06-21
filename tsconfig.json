@@ -22,5 +22,6 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
-  "exclude": ["**/*.spec.ts"]
+  "exclude": ["node_modules"],
+  "files": ["src/main.ts"]
 }
