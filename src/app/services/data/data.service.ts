@@ -102,7 +102,7 @@ export class DataService {
    * @param data The data to append in the body
    * @returns A boolean value indicating whether status code 200 has been received.
    */
-  private async postToServer(data: any) {
+  async postToServer(data: any) {
     const url = (await this.storage.getStudy()).properties.post_url;
 
     Http.post({
