@@ -140,7 +140,7 @@ export interface Multi {
   type: 'multi';
   radio: boolean;
   modal: boolean;
-  options: [];
+  options: string[];
   shuffle: boolean;
 
   optionsChecked?: Option[];
