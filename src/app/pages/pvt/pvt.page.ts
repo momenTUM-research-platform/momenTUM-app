@@ -107,7 +107,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const path = 'pvt-data.csv';
     Filesystem.readdir({
       path: '',
-      directory: Directory.Data,
+      directory: Directory.Documents,
     })
       .then((result) => {
         for (const file of result.files) {
@@ -127,14 +127,14 @@ export class PvtPage implements OnInit, ViewWillLeave {
         if (!found) {
           await Filesystem.writeFile({
             path,
-            directory: Directory.Data,
+            directory: Directory.Documents,
             data: 'trial index, reaction time' + data,
             encoding: Encoding.UTF8,
           });
         } else {
           await Filesystem.appendFile({
             path,
-            directory: Directory.Data,
+            directory: Directory.Documents,
             data,
             encoding: Encoding.UTF8,
           });
