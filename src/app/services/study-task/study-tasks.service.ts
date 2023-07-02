@@ -54,14 +54,11 @@ export class StudyTasksService {
         const alert_message = mod.alerts.message;
 
         const typeToIcon: { [type: string]: string } = {
-          survey: 'checkmark-circle-outline',
-          video: 'film-outline',
-          audio: 'headset-outline',
-          info: 'bulb-outline',
-          pvt: 'alarm-outline',
+          survey: 'document-text-outline',
+          pvt: 'stopwatch-outline',
         };
-        const module_type = typeToIcon[mod.type] || 'default';
 
+        const module_type = typeToIcon[mod.params.type] || 'default';
         const module_name = mod.name;
         const module_index = i;
 

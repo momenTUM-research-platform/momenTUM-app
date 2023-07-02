@@ -19,28 +19,27 @@ declare interface Properties {
   cache: boolean;
 }
 
-declare interface Module {
-  type: string;
-  name: string;
-  submit_text: string;
+declare interface Alerts {
+  title: string;
+  message: string;
+  start_offset: number;
+  duration: number;
+  times: {
+    hours: number;
+    minutes: number;
+  }[];
+  random: boolean;
+  random_interval: number;
+  sticky: boolean;
+  sticky_label: string;
+  timeout: boolean;
+  timeout_after: number;
+}
 
+declare interface Module {
+  name: string;
   condition: string;
-  alerts: {
-    title: string;
-    message: string;
-    start_offset: number;
-    duration: number;
-    times: {
-      hours: number;
-      minutes: number;
-    }[];
-    random: boolean;
-    random_interval: number;
-    sticky: boolean;
-    sticky_label: string;
-    timeout: boolean;
-    timeout_after: number;
-  };
+  alerts: Alerts;
   graph: {
     display: boolean;
     variable: string;
@@ -49,25 +48,30 @@ declare interface Module {
     type: 'bar' | 'line';
     max_points: number;
   };
-  sections: {
-    id: string;
-    name: string;
-    shuffle: boolean;
-    questions: (
-      | Instruction
-      | Text
-      | DateTime
-      | YesNo
-      | Slider
-      | Multi
-      | External
-      | Media
-      | Files
-    )[];
-  }[];
   id: string;
   unlock_after: string[];
+  params: {
+    type: 'survey';
+    submit_text: string;
+    shuffle: boolean;
+    sections: Section[];
+  } | {
+    type: 'pvt';
+    trials: number;
+    min_waiting: number;
+    max_waiting: number;
+    show: boolean;
+    max_reaction: number;
+    exit: boolean;
+  };
+}
+
+
+declare interface Section {
+  id: string;
+  name: string;
   shuffle: boolean;
+  questions: Question[];
 }
 
 interface Question {
@@ -91,6 +95,26 @@ interface Question {
   model?: string | number;
   hideError?: boolean;
   value?: number;
+  hide_id?: string;
+  hide_value?: string;
+  hide_if?: boolean;
+  subtype?: 'date' | 'time' | 'datetime' | 'image' | 'video' | 'audio' |  'short' | 'long' | 'numeric';
+  min?: number;
+  max?: number;
+  hint_left?: string;
+  hint_right?: string;
+  yes_text?: string;
+  no_text?: string;
+
+  radio?: boolean;
+  modal?: boolean;
+  options?: string[];
+  optionsChecked?: Option[]; // adjust in Generator
+  shuffle?: boolean;
+  src?: string;
+  thumb?: string;
+  file_name?: string;
+
 }
 
 interface Instruction extends Question {
@@ -109,7 +133,7 @@ interface YesNo extends Question {
   yes_text: string;
   no_text: string;
   hide_id?: string;
-  hide_value?: boolean;
+  hide_value?: string;
   hide_if?: boolean;
 }
 interface Slider extends Question {
@@ -139,7 +163,7 @@ interface Media extends Question {
   src: string;
   thumb: string;
 }
-interface External extends Question {
+interface ExternalQuestion extends Question {
   type: 'external';
   src: string;
 }

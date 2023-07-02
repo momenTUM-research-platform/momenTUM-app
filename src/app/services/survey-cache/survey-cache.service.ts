@@ -60,16 +60,19 @@ export class SurveyCacheService {
     for (const module of study.modules) {
       // Must check if the sections exist,
       // they don't for pvt modules
-      if (module.sections) {
-        for (const section of module.sections) {
-          const mediaQuestions = section.questions.filter(
-            (question): question is Media => question.type === 'media'
-          );
-          for (const question of mediaQuestions) {
-            this.mediaToCache[question.id] = question.src;
+      if(module.params.type === 'survey'){
+        if (module.params.sections) {
+          for (const section of module.params.sections) {
+            const mediaQuestions = section.questions.filter(
+              (question): question is Media => question.type === 'media'
+            );
+            for (const question of mediaQuestions) {
+              this.mediaToCache[question.id] = question.src;
+            }
           }
         }
       }
+
     }
     // set mediaCount to be number of media items
     this.mediaCount = Object.keys(this.mediaToCache).length;
@@ -133,8 +136,8 @@ export class SurveyCacheService {
         // update the other media items to the corresponding local URL
         // get urls from media elements
         for (const module of studyObject.modules) {
-          if (module.sections) {
-            for (const section of module.sections) {
+          if (module.params.type === 'survey' &&  module.params.sections) {
+            for (const section of module.params.sections) {
               // Must check if the sections exist,
               // they don't for pvt modules
 

@@ -29,10 +29,7 @@ export class SurveyPage implements OnInit {
   study: Study;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Module = {
-    type: '',
     name: '',
-    submit_text: '',
-
     condition: '',
     alerts: {
       title: '',
@@ -55,17 +52,14 @@ export class SurveyPage implements OnInit {
       type: 'bar',
       max_points: 0,
     },
-    sections: [
-      {
-        id: '',
-        name: '',
-        shuffle: false,
-        questions: [],
-      },
-    ],
     id: '',
     unlock_after: [],
-    shuffle: false,
+    params: {
+      type: 'survey',
+      submit_text: '',
+      shuffle: false,
+      sections: [],
+    },
   };
 
   questions: any;
@@ -93,7 +87,6 @@ export class SurveyPage implements OnInit {
    * Initialises the survey and displays it on the screen
    */
   async ngOnInit() {
-
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
@@ -123,6 +116,8 @@ export class SurveyPage implements OnInit {
 
       await this.studyTasksService.getAllTasks().then((tasks) => {
         this.tasks = tasks;
+
+
 
         for (let i = 0; i < this.tasks.length; i++) {
           if (this.task_id === String(this.tasks[i].task_id)) {
@@ -158,13 +153,21 @@ export class SurveyPage implements OnInit {
         this.survey = this.study.modules[this.module_index];
 
         // shuffle modules if required
-        if (this.survey.shuffle) {
-          this.survey.sections = this.shuffle(this.survey.sections);
+        if (
+          this.survey.params.type === 'survey' &&
+          this.survey.params.shuffle
+        ) {
+          this.survey.params.sections = this.shuffle(
+            this.survey.params.sections
+          );
         }
 
         // shuffle questions if required
-        if (this.survey.sections !== undefined) {
-          for (const section of this.survey.sections) {
+        if (
+          this.survey.params.type === 'survey' &&
+          this.survey.params.sections !== undefined
+        ) {
+          for (const section of this.survey.params.sections) {
             if (section.shuffle) {
               section.questions = this.shuffle(section.questions);
             }
@@ -172,9 +175,14 @@ export class SurveyPage implements OnInit {
         }
 
         // get the name of the current section
-        this.num_sections = this.survey.sections.length;
+        this.num_sections =
+          this.survey.params.type === 'survey'
+            ? this.survey.params.sections.length
+            : 0;
         this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
+          this.survey.params.type === 'survey'
+            ? this.survey.params.sections[this.current_section - 1].name
+            : '';
 
         // get the user ID and then set up question variables
         // initialise all of the questions to be displayed
@@ -184,18 +192,26 @@ export class SurveyPage implements OnInit {
         if (this.current_section < this.num_sections) {
           this.submit_text = 'Next';
         } else {
-          this.submit_text = this.survey.submit_text;
+          this.submit_text =
+            this.survey.params.type === 'survey'
+              ? this.survey.params.submit_text
+              : '';
         }
 
         // set the current section of questions
         this.questions =
-          this.survey.sections[this.current_section - 1].questions;
+          this.survey.params.type === 'survey'
+            ? this.survey.params.sections[this.current_section - 1].questions
+            : ' ';
 
         // toggle rand_group questions
         // figure out which ones are grouped together, randomly show one and set its response value to 1
         const randomGroups: { [rand_group: string]: string[] } = {};
-        if (this.survey.sections !== undefined) {
-          for (const section of this.survey.sections) {
+        if (
+          this.survey.params.type === 'survey' &&
+          this.survey.params.sections !== undefined
+        ) {
+          for (const section of this.survey.params.sections) {
             for (const question of section.questions) {
               if (question.rand_group) {
                 // set a flag to indicate that this question shouldn't reappear via branching logic
@@ -228,43 +244,46 @@ export class SurveyPage implements OnInit {
 
         // iterate back through and show the ones that have been randomly calculated
         // while removing the branching attributes from those that are hidden
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (showThese.includes(question.id)) {
-              question.noToggle = false;
-              question.response = 1;
-              // hide any questions from the rand_group that were not made visible
-              // and remove any branching logic attributes
-              // ### How to do this in TS?
-            } else if (question.noToggle) {
-              question.hideSwitch = false;
-              // @ts-ignore
-              delete question.hide_id;
-              // @ts-ignore
-              delete question.hide_value;
-              // @ts-ignore
-              delete question.hide_if;
+        if (this.survey.params.type === 'survey') {
+          for (const section of this.survey.params.sections) {
+            for (const question of section.questions) {
+              if (showThese.includes(question.id)) {
+                question.noToggle = false;
+                question.response = 1;
+                // hide any questions from the rand_group that were not made visible
+                // and remove any branching logic attributes
+                // ### How to do this in TS?
+              } else if (question.noToggle) {
+                question.hideSwitch = false;
+                // @ts-ignore
+                delete question.hide_id;
+                // @ts-ignore
+                delete question.hide_value;
+                // @ts-ignore
+                delete question.hide_if;
+              }
             }
           }
-        }
 
-        // toggle dynamic question setup
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            this.toggleDynamicQuestions(question);
+          // toggle dynamic question setup
+          for (const section of this.survey.params.sections) {
+            for (const question of section.questions) {
+              this.toggleDynamicQuestions(question);
+            }
           }
-        }
 
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'survey',
-          event: 'entry',
-          module_index: this.module_index,
-        });
+          // log the user visiting this tab
+          this.surveyDataService.logPageVisitToServer({
+            timestamp: moment().format(),
+            milliseconds: moment().valueOf(),
+            page: 'survey',
+            event: 'entry',
+            module_index: this.module_index,
+          });
+        }
       });
     });
+
   }
 
   /**
@@ -279,10 +298,10 @@ export class SurveyPage implements OnInit {
     if (this.current_section > 1) {
       this.ngZone.run(() => {
         this.current_section--;
-        this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
-        this.questions =
-          this.survey.sections[this.current_section - 1].questions;
+        this.current_section_name = this.survey.params.type === 'survey' ?
+          this.survey.params.sections[this.current_section - 1].name : '';
+        this.questions =this.survey.params.type === 'survey' ?
+          this.survey.params.sections[this.current_section - 1].questions : '';
         this.submit_text = 'Next';
       });
     } else {
@@ -307,8 +326,8 @@ export class SurveyPage implements OnInit {
    */
   setupQuestionVariables(uuid: string) {
     // for all relevant questions add an empty response variable
-    if (this.survey.sections) {
-      for (const section of this.survey.sections) {
+    if (this.survey.params.type === "survey" && this.survey.params.sections) {
+      for (const section of this.survey.params.sections) {
         for (const question of section.questions) {
           // for all question types that can be responded to, set default values
           question.response = '';
@@ -324,32 +343,33 @@ export class SurveyPage implements OnInit {
             // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
           } else if (
             question.type === 'media' &&
-            (question.subtype === 'audio' || question.subtype === 'video')
+            ((question as Media).subtype === 'audio' || (question as Media).subtype === 'video')
           ) {
             // @ts-ignore
             question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.src
+              (question as Media).src
             );
-            if (question.subtype === 'video') {
+            if ((question as Media).subtype === 'video') {
               // @ts-ignore
               question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
-                question.thumb
+                (question as Media).thumb
               );
             }
 
-            // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
+            // for external embedded content, sanitize the URLs to make them safe/work in html5
+            // tags ### Since when is there an exteral type?
           } else if (question.type === 'external') {
-            question.src = question.src + '?uuid=' + uuid;
+            (question as ExternalQuestion).src = (question as ExternalQuestion).src + '?uuid=' + uuid;
             // @ts-ignore
             question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.src
+              (question as ExternalQuestion).src
             );
 
             // for slider questions, set the default value to be halfway between min and max
           } else if (question.type === 'slider') {
             // get min and max
-            const min = question.min;
-            const max = question.max;
+            const min = (question as Slider).min;
+            const max = (question as Slider).max;
 
             // set the default value of the slider to the middle value
             const model = min + (max - min) / 2;
@@ -362,21 +382,21 @@ export class SurveyPage implements OnInit {
           } else if (question.type === 'multi') {
             // set up checked tracking for checkbox questions types
             const tempOptions: Option[] = [];
-            for (const option of question.options) {
+            for (const option of (question as Multi).options) {
               tempOptions.push({
                 text: option,
                 checked: false,
               });
             }
-            question.optionsChecked = tempOptions;
+            (question as Multi).optionsChecked = tempOptions;
 
             // counterbalance the choices if necessary
-            if (question.shuffle) {
-              question.optionsChecked = this.shuffle(question.optionsChecked);
+            if ((question as Multi).shuffle) {
+              (question as Multi).optionsChecked = this.shuffle((question as Multi).optionsChecked);
             }
 
             // set the empty response to an array for checkbox questions
-            if (!question.radio) {
+            if (!(question as Multi).radio) {
               question.response = [];
             }
           }
@@ -465,46 +485,50 @@ export class SurveyPage implements OnInit {
 
     const id = question.id;
     // hide anything with the id as long as the value is equal
-    for (const section of this.survey.sections) {
-      for (const q of section.questions) {
-        if ('hide_id' in q && q.hide_id === id) {
-          const hideValue = q.hide_value;
+    if (this.survey.params.type === 'survey') {
+      for (const section of this.survey.params.sections) {
+        for (const q of section.questions) {
+          if ('hide_id' in q && q.hide_id === id) {
+            const hideValue = q.hide_value;
 
-          if (
-            question.type === 'multi' ||
-            question.type === 'yesno' ||
-            question.type === 'text'
-          ) {
-            // determine whether to hide/show the element
-            const hideIf = q.hide_if;
-            const valueEquals = hideValue === question.response;
-            if (valueEquals === hideIf) {
-              q.hideSwitch = false;
-            } else {
-              q.hideSwitch = true;
-            }
-          } else if (
-            question.type === 'slider' &&
-            typeof hideValue === 'string' &&
-            question.response
-          ) {
-            const direction = hideValue.substring(0, 1);
-            const cutoff = parseInt(
-              hideValue.substring(1, hideValue.length),
-              10
-            );
-            const lessThan = direction === '<';
-            if (lessThan) {
-              if (question.response <= cutoff) {
-                q.hideSwitch = true;
-              } else {
+            if (
+              question.type === 'multi' ||
+              question.type === 'yesno' ||
+              question.type === 'text'
+            ) {
+              // determine whether to hide/show the element
+              const hideIf = q.hide_if;
+              const valueEquals = hideValue === question.response;
+              if (valueEquals === hideIf) {
                 q.hideSwitch = false;
+              } else {
+                q.hideSwitch = true;
               }
-            } else {
-              if (question.response >= cutoff) {
-                q.hideSwitch = true;
+            } else if (
+              question.type === 'slider' &&
+              typeof hideValue === 'string' &&
+              question.response
+            ) {
+              const direction = hideValue.substring(0, 1);
+              const cutoff = parseInt(
+                hideValue.substring(1, hideValue.length),
+                10
+              );
+              const lessThan = direction === '<';
+              if (lessThan) {
+                const response = parseFloat(question.response as string); // Convert to number
+                if (response <= cutoff) {
+                  q.hideSwitch = true;
+                } else {
+                  q.hideSwitch = false;
+                }
               } else {
-                q.hideSwitch = false;
+                const response = parseFloat(question.response as string); // Convert to number
+                if (response >= cutoff) {
+                  q.hideSwitch = true;
+                } else {
+                  q.hideSwitch = false;
+                }
               }
             }
           }
@@ -527,10 +551,9 @@ export class SurveyPage implements OnInit {
       ) {
         question.hideError = false;
         // Only works for question types other than instruction
-        if(question.type !== 'instruction'){
+        if (question.type !== 'instruction') {
           errorCount++;
         }
-
       } else {
         question.hideError = true;
       }
@@ -557,11 +580,14 @@ export class SurveyPage implements OnInit {
 
         // add all of the responses to an object in the task to be sent to server
         const responses: Responses = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            responses[question.id] = question.response;
+        if(this.survey.params.type === 'survey'){
+          for (const section of this.survey.params.sections) {
+            for (const question of section.questions) {
+              responses[question.id] = question.response;
+            }
           }
         }
+
         this.tasks[this.task_index].responses = responses;
 
         // attempt to post surveyResponse to server
@@ -593,13 +619,13 @@ export class SurveyPage implements OnInit {
       } else {
         this.ngZone.run(() => {
           this.current_section++;
-          this.questions =
-            this.survey.sections[this.current_section - 1].questions;
-          this.current_section_name =
-            this.survey.sections[this.current_section - 1].name;
+          this.questions = this.survey.params.type === 'survey' ?
+            this.survey.params.sections[this.current_section - 1].questions : undefined;
+          this.current_section_name = this.survey.params.type === 'survey' ?
+            this.survey.params.sections[this.current_section - 1].name : undefined;
 
           if (this.current_section === this.num_sections) {
-            this.submit_text = this.survey.submit_text;
+            this.submit_text = this.survey.params.type === 'survey' ?  this.survey.params.submit_text  : undefined;
           }
 
           this.content.scrollToTop(0);

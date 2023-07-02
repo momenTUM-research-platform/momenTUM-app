@@ -32,7 +32,7 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
 
     await this.barcodeScannerService.checkPermission().catch((err) => {
-      console.log(err);
+      console.log('Barcode Scanner: ' + err.message);
     });
 
     await this.platform.ready();

@@ -411,6 +411,7 @@ export class HomePage implements OnInit {
    * @param data A data object returned from the server to represent a study object
    */
   async enrolInStudy(study: Study) {
+
     this.isEnrolledInStudy = true;
     this.hideEnrolOptions = true;
 
@@ -445,6 +446,7 @@ export class HomePage implements OnInit {
         const tasks = this.study
           ? await this.studyTasksService.generateStudyTasks(this.study)
           : [];
+
         // setup the notifications
         await this.notificationsService.setNext30Notifications();
         await this.loadStudyDetails();
@@ -598,12 +600,12 @@ export class HomePage implements OnInit {
   /**
    * Refreshes the list of tasks
    */
-  async doRefresh(refresher: RefresherCustomEvent) {
+  async doRefresh(event: Event) {
     if (!this.loadingService.isLoading) {
       this.ionViewWillEnter();
     }
     setTimeout(() => {
-      refresher.target.complete();
+      (event.target as HTMLIonRefresherElement).complete();
     }, 250);
   }
 }

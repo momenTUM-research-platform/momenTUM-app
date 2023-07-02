@@ -23,7 +23,8 @@
 <ion-content>
   <!--questions-->
   <ion-card
-    *ngFor="let question of survey.sections[this.current_section-1].questions"
+    *ngFor="let question of (survey.params.type === 'survey' ?  survey.params.sections[this.current_section-1]?.questions : [])"
+
     [hidden]="!question.hideSwitch"
     color="tertiary"
   >
