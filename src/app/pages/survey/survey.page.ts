@@ -89,7 +89,6 @@ export class SurveyPage implements OnInit {
     this.survey = (await this.storage.getModuleByID(task.uuid))
       .params as Survey;
 
-    console.log(this.survey.sections[0].questions[0].type);
     // shuffle modules if required
     if (this.survey.shuffle) {
       this.survey.sections = this.shuffle(this.survey.sections);
@@ -226,18 +225,16 @@ export class SurveyPage implements OnInit {
             question.type === 'media' &&
             (question.subtype === 'audio' || question.subtype === 'video')
           ) {
-            // @ts-ignore
-            question.type.src =
-              this.domSanitizer.bypassSecurityTrustResourceUrl(question.src);
+            question.safeurl = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              question.src
+            );
             if (question.subtype === 'video') {
-              // @ts-ignore
-              question.type.thumb =
+              question.safethumb =
                 this.domSanitizer.bypassSecurityTrustResourceUrl(
                   question.thumb
                 );
             }
 
-            // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
             // for slider questions, set the default value to be halfway between min and max
           } else if (question.type === 'slider') {
             // get min and max
@@ -440,14 +437,14 @@ export class SurveyPage implements OnInit {
     for (const question of currentQuestions) {
       const error =
         question.required &&
-        (question.response === '' || question.response === undefined) &&
-        question.hidden === false;
+        !question.hidden &&
+        question.type !== 'instruction' &&
+        question.type !== 'media' &&
+        (question.response === '' || question.response === undefined);
 
       if (error) {
         question.hideError = false;
-        if (question.type !== 'instruction') {
-          errorCount++;
-        }
+        errorCount++;
       } else {
         question.hideError = true;
       }
