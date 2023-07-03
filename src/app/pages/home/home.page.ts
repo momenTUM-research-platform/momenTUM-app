@@ -196,8 +196,8 @@ export class HomePage implements OnInit {
     } catch (error) {
       // handle download errors
       await this.loadingService.dismiss();
-      const invalidJSONError = error === 'InvalidStudyError';
-      const invalidHTTPError = !invalidJSONError;
+      const invalidHTTPError = error !== 'InvalidStudyError';
+      const invalidJSONError = !invalidHTTPError;
       this.displayEnrolError(invalidJSONError, invalidHTTPError);
       console.log(error);
       return;

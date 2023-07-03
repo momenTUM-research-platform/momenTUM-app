@@ -25,11 +25,6 @@ export class DataService {
    * If the link is invalid it throws an HTTP error.
    */
   async downloadStudy(url: string): Promise<Study> {
-    // TODO: implement this function
-    function isValidStudy(object: any): object is Study {
-      return true;
-    }
-
     const options = {
       url: url,
       headers: {},
@@ -39,8 +34,12 @@ export class DataService {
     // HTTP GET request
     const result = await Http.get(options);
     const object = result.data;
-    if (isValidStudy(object)) return object;
+    if (this.validateStudy(object)) return object;
     else throw Error('InvalidStudyError');
+  }
+
+  validateStudy(study: any): study is Study {
+    return true;
   }
 
   /**
