@@ -160,7 +160,7 @@ export class ProgressPage {
                 if (k === variableToGraph) {
                   // format the response time
                   const response_time = moment(
-                    new Date(task.response_time)
+                    new Date(task.response_time as string)
                   ).format('MMM Do, h:mma');
                   task_labels.push(response_time);
                   task_data.push(task.responses[k]);

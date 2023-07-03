@@ -29,6 +29,13 @@ export class HomePage implements OnInit {
   bannerURL: string; // The URL from which the banner is loaded
   emptyMessage: string; // A message that is shown if no tasks are available
   themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
+  typeToIcon = {
+    survey: 'checkmark-circle-outline',
+    video: 'film-outline',
+    audio: 'headset-outline',
+    info: 'bulb-outline',
+    pvt: 'alarm-outline',
+  };
 
   constructor(
     private surveyDataService: DataService,
@@ -192,6 +199,7 @@ export class HomePage implements OnInit {
       const invalidJSONError = error === 'InvalidStudyError';
       const invalidHTTPError = !invalidJSONError;
       this.displayEnrolError(invalidJSONError, invalidHTTPError);
+      console.log(error);
       return;
     }
 

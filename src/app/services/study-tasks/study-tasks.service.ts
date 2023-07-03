@@ -42,13 +42,7 @@ export class StudyTasksService {
         const module_random = mod.alerts.random;
         const module_randomInterval = mod.alerts.random_interval;
         const module_times = mod.alerts.times;
-        const typeToIcon: { [type: string]: string } = {
-          survey: 'checkmark-circle-outline',
-          video: 'film-outline',
-          audio: 'headset-outline',
-          info: 'bulb-outline',
-          pvt: 'alarm-outline',
-        };
+
         const startDay = new Date(); // set a date object for today
         startDay.setHours(0, 0, 0, 0); // set the time to midnight
 
@@ -92,9 +86,9 @@ export class StudyTasksService {
             const task_obj: Task = {
               uuid: mod.id,
               index: i,
-              task_id: task_id,
+              task_id: String(task_id),
               name: mod.name,
-              type: typeToIcon[mod.body.type] || 'default',
+              type: mod.params.type,
               hidden: !(mod.alerts.sticky && sticky_count === 0),
               unlock_after:
                 mod.unlock_after === undefined ? [] : mod.unlock_after,

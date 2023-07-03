@@ -61,14 +61,14 @@ export class SurveyCacheService {
     for (const module of study.modules) {
       // Must check if the sections exist,
       // they don't for pvt modules
-      if (module.body.type === 'survey' && module.body.sections) {
-        for (const section of module.body.sections) {
+      if (module.params.type === 'survey' && module.params.sections) {
+        for (const section of module.params.sections) {
           const mediaQuestions = section.questions.filter((question) => {
-            question.body.type === 'media';
+            question.type === 'media';
           });
           for (const question of mediaQuestions) {
             // @ts-ignore
-            this.mediaToCache[question.id] = question.body.src;
+            this.mediaToCache[question.id] = question.type.src;
           }
         }
       }
@@ -133,22 +133,22 @@ export class SurveyCacheService {
       // update the other media items to the corresponding local URL
       // get urls from media elements
       for (const module of studyObject.modules) {
-        if (module.body.type === 'survey' && module.body.sections) {
-          for (const section of module.body.sections) {
+        if (module.params.type === 'survey' && module.params.sections) {
+          for (const section of module.params.sections) {
             // Must check if the sections exist,
             // they don't for pvt modules
 
             const mediaQuestions = section.questions.filter(
-              (question) => question.body.type === 'media'
+              (question) => question.type === 'media'
             );
 
             for (const question of mediaQuestions) {
               if (question.id in this.localMediaURLs) {
                 // @ts-ignore
-                question.body.src = this.localMediaURLs[question.id];
+                question.type.src = this.localMediaURLs[question.id];
               }
               // @ts-ignore
-              if (question.body.subtype === 'video') {
+              if (question.type.subtype === 'video') {
                 // @ts-ignore
                 question.thumb = this.localMediaURLs.banner;
               }

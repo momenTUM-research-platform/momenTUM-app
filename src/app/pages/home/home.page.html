@@ -44,7 +44,11 @@
         detail="true"
         (click)="openTask(task)"
       >
-        <ion-icon color="medium" name="{{task.type}}" slot="start"></ion-icon>
+        <ion-icon
+          color="medium"
+          name="{{typeToIcon[task.type]}}"
+          slot="start"
+        ></ion-icon>
         <ion-label class="ion-text-wrap" color="primary">
           {{task.name}}
           <p *ngIf="!task.sticky" class="moment">{{task.moment}}</p>

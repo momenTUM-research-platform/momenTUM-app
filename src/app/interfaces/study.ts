@@ -201,7 +201,7 @@ export interface Section {
   shuffle: boolean;
 
   /** The questions in this section. */
-  questions: Question[];
+  questions: (Instruction | DateTime | YesNo | Slider | Media | Multi | Text)[];
 }
 
 export interface Question {
@@ -211,17 +211,15 @@ export interface Question {
   /** The question. */
   text: string;
 
-  /** Parameters for this question. */
+  /** The question type. */
   type:
-    | Instruction
-    | DateTime
-    | Multi
-    | Text
-    | Slider
-    | Media
-    | YesNo
-    | External
-    | File;
+    | 'instruction'
+    | 'text'
+    | 'yesno'
+    | 'datetime'
+    | 'multi'
+    | 'media'
+    | 'slider';
 
   /** Indicates whether the question can be left unanswered. */
   required: boolean;
@@ -234,8 +232,8 @@ export interface Question {
 
   /** Indicates whether this question should become visible if the response (of the question with the id hide_id) equals the value in hide_value or invisible. */
   hide_if: boolean;
-  rand_group?: string;
 
+  rand_group?: string;
   hidden?: boolean;
   hideError?: boolean;
   model?: any;
@@ -244,27 +242,27 @@ export interface Question {
   value?: any;
 }
 
-export interface Instruction {
+export interface Instruction extends Question {
   type: 'instruction';
 }
 
-export interface YesNo {
+export interface YesNo extends Question {
   type: 'yesno';
   yes_text: string;
   no_text: string;
 }
 
-export interface Text {
+export interface Text extends Question {
   type: 'text';
   subtype: 'short' | 'long' | 'numeric';
 }
 
-export interface DateTime {
+export interface DateTime extends Question {
   type: 'datetime';
   subtype: 'date' | 'time' | 'datetime';
 }
 
-export interface Slider {
+export interface Slider extends Question {
   type: 'slider';
   min: number;
   max: number;
@@ -272,7 +270,7 @@ export interface Slider {
   hint_right: string;
 }
 
-export interface Multi {
+export interface Multi extends Question {
   type: 'multi';
   radio: boolean;
   modal: boolean;
@@ -282,26 +280,13 @@ export interface Multi {
   optionsChecked?: Option[];
 }
 
-export interface File {
-  type: 'file';
-  src: string;
-  file_name: string;
-}
-
-export interface Media {
+export interface Media extends Question {
   type: 'media';
   subtype: 'image' | 'video' | 'audio';
   src: string;
   thumb: string;
 
   safethumb?: any;
-  safeurl?: any;
-}
-
-export interface External {
-  type: 'external';
-  src: string;
-
   safeurl?: any;
 }
 

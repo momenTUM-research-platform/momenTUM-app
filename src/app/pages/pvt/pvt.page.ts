@@ -225,9 +225,8 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const task_id = this.route.snapshot.paramMap.get('task_id');
     const task = await this.storageService.getTaskByID(task_id);
     this.moduleId = task.uuid;
-    const params = (await this.storageService.getModuleByID(
-      this.moduleId
-    )) as Pvt;
+    const params = (await this.storageService.getModuleByID(this.moduleId))
+      .params as Pvt;
     this.trials = params.trials;
     this.min = params.min_waiting;
     this.max = params.max_waiting;

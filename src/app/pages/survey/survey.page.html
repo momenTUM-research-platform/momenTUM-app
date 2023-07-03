@@ -15,9 +15,12 @@
     </ion-buttons>
 
     <ion-item slot="end" class="light-blue-toolbar" lines="none" mode="md">
-      <span class="text">{{sectionIndex}}/{{survey.sections.length}}</span>
+      <span *ngIf="survey" class="text"
+        >{{sectionIndex}}/{{survey.sections.length}}</span
+      >
     </ion-item>
     <ion-progress-bar
+      *ngIf="survey"
       [value]="(sectionIndex)/(survey.sections.length - 1)"
     ></ion-progress-bar>
   </ion-toolbar>
@@ -43,69 +46,69 @@
       <ion-card-content>
         <!--date time-->
         <ion-datetime
-          *ngIf="question.body.type === 'datetime'"
+          *ngIf="question.type === 'datetime'"
           locale="de-DE"
           [(ngModel)]="question.model"
           (ionChange)="setAnswer(question)"
-          presentation="{{question.body.subtype === 'time' ? 'time' : question.body.subtype === 'date' ? 'date' : 'date-time'}}"
+          presentation="{{question.subtype === 'time' ? 'time' : question.subtype === 'date' ? 'date' : 'date-time'}}"
         ></ion-datetime>
         <!--slider type-->
         <ion-range
-          *ngIf="question.body.type === 'slider'"
-          [min]="question.body.min"
-          [max]="question.body.max"
+          *ngIf="question.type === 'slider'"
+          [min]="question.min"
+          [max]="question.max"
           [(ngModel)]="question.model"
           [pin]="true"
           [value]="question.model"
           (ionChange)="setAnswer(question)"
         >
-          <ion-label slot="start">{{question.body.hint_left}}</ion-label>
-          <ion-label slot="end">{{question.body.hint_right}}</ion-label>
+          <ion-label slot="start">{{question.hint_left}}</ion-label>
+          <ion-label slot="end">{{question.hint_right}}</ion-label>
         </ion-range>
         <!--video type-->
         <video
-          *ngIf="question.body.type === 'media' && question.body.subtype === 'video'"
+          *ngIf="question.type === 'media' && question.subtype === 'video'"
           controls="controls"
           controlsList="nodownload"
-          [poster]="question.body.thumb"
+          [poster]="question.thumb"
           preload="metadata"
           webkit-playsinline="webkit-playsinline"
           style="width: 100%"
         >
-          <source [src]="question.body.src" />
+          <source [src]="question.src" />
         </video>
         <!--audio type-->
         <audio
-          *ngIf="question.body.type === 'media' && question.body.subtype === 'audio'"
+          *ngIf="question.type === 'media' && question.subtype === 'audio'"
           style="width: 100%"
           controls
           preload="metadata"
           controlsList="nodownload"
         >
-          <source [src]="question.body.src" type="audio/ogg" />
+          <source [src]="question.src" type="audio/ogg" />
           your device does not support the audio element
         </audio>
         <!--image type-->
         <ion-img
-          *ngIf="question.body.type === 'media' && question.body.subtype === 'image'"
+          *ngIf="question.type === 'media' && question.subtype === 'image'"
           style="width: 100%"
-          [src]="question.body.src"
+          [src]="question.src"
         ></ion-img>
         <!--short text input-->
         <ion-input
-          *ngIf="question.body.type === 'text' && question.body.subtype !== 'long'"
+          *ngIf="question.type === 'text' && question.subtype !== 'long'"
           [(ngModel)]="question.model"
           (ionBlur)="setAnswer(question)"
-          type="{{question.body.subtype === 'short' ? 'text' : 'number'}}"
+          type="{{question.subtype === 'short' ? 'text' : 'number'}}"
           autocomplete="on"
           autocorrect="on"
-          placeholder="{{question.body.subtype === 'short' ? 'Enter response...' : 'Enter number...'}}"
-          pattern="{{question.body.subtype === 'short' ? undefined : '\d*'}}"
+          placeholder="{{question.subtype === 'short' ? 'Enter response...' : 'Enter number...'}}"
+          pattern="{{question.subtype === 'short' ? undefined : '\d*'}}"
         >
         </ion-input>
         <!--long text input-->
         <ion-textarea
-          *ngIf="question.body.type === 'text' && question.body.subtype === 'long'"
+          *ngIf="question.type === 'text' && question.subtype === 'long'"
           [(ngModel)]="question.model"
           (ionBlur)="setAnswer(question)"
           placeholder="Enter response..."
@@ -113,15 +116,15 @@
           rows="3"
         ></ion-textarea>
         <!--multi input-->
-        <ion-list *ngIf="question.body.type === 'multi'">
-          <!--no modal, radio-->
+        <ion-list *ngIf="question.type === 'multi'">
+          <!--radio-->
           <ion-radio-group
-            *ngIf="!question.body.modal && question.body.radio"
+            *ngIf="!question.modal && question.radio"
             (ionChange)="setAnswer(question)"
             [(ngModel)]="question.model"
           >
             <ion-item
-              *ngFor="let option of question.body.optionsChecked"
+              *ngFor="let option of question.optionsChecked"
               class="ion-margin radio-button-style"
               lines="none"
             >
@@ -135,10 +138,10 @@
               ></ion-radio>
             </ion-item>
           </ion-radio-group>
-          <!--no modal, no radio-->
-          <ng-container *ngIf="!question.body.modal && !question.body.radio">
+          <!--no radio-->
+          <ng-container *ngIf="!question.modal && !question.radio">
             <ion-item
-              *ngFor="let option of question.body.optionsChecked"
+              *ngFor="let option of question.optionsChecked"
               lines="none"
             >
               <ion-label style="font-size: medium">{{option.text}}</ion-label>
@@ -149,20 +152,20 @@
               ></ion-checkbox>
             </ion-item>
           </ng-container>
-          <!--modal, no radio and radio-->
+          <!--modal-->
           <ion-select
-            *ngIf="question.body.modal"
+            *ngIf="question.modal"
             style="width: 100%; max-width: 100%"
             (ionChange)="setAnswer(question)"
             [(ngModel)]="question.model"
             placeholder="Select..."
             okText="Select"
             cancelText="Dismiss"
-            multiple="{{!question.body.radio}}"
+            multiple="{{!question.radio}}"
           >
             <ion-select-option
               color="tertiary"
-              *ngFor="let option of question.body.optionsChecked"
+              *ngFor="let option of question.optionsChecked"
             >
               {{option.text}}
             </ion-select-option>
@@ -170,49 +173,19 @@
         </ion-list>
         <!--yes no-->
         <ion-segment
-          *ngIf="question.body.type === 'yesno'"
+          *ngIf="question.type === 'yesno'"
           [(ngModel)]="question.model"
           (ionChange)="setAnswer(question)"
         >
-          <ion-segment-button
-            value="{{question.body.yes_text}}"
-            layout="icon-start"
-          >
-            <ion-label>{{question.body.yes_text}}</ion-label>
+          <ion-segment-button value="{{question.yes_text}}" layout="icon-start">
+            <ion-label>{{question.yes_text}}</ion-label>
             <ion-icon name="checkmark-sharp"></ion-icon>
           </ion-segment-button>
-          <ion-segment-button
-            value="{{question.body.no_text}}"
-            layout="icon-start"
-          >
-            <ion-label>{{question.body.no_text}}</ion-label>
+          <ion-segment-button value="{{question.no_text}}" layout="icon-start">
+            <ion-label>{{question.no_text}}</ion-label>
             <ion-icon name="close-sharp"></ion-icon>
           </ion-segment-button>
         </ion-segment>
-        <!--external-->
-        <iframe
-          *ngIf="question.body.type === 'external'"
-          width="100%"
-          height="100%"
-          style="--webkit-transform: scale(0.5); --moz-transform-scale: (0.5)"
-          frameborder="0"
-          scrolling="yes"
-          [src]="question.body.src"
-        ></iframe>
-        <!--file-->
-        <ion-button
-          *ngIf="question.body.type === 'file'"
-          class="center"
-          value="Open file"
-          color="light"
-          layout="icon-start"
-          (click)="openExternalFile(question.body.src)"
-        >
-          <ion-label style="margin: auto"
-            >{{question.body.file_name}}</ion-label
-          >
-          <ion-icon size="small" name="open-outline"></ion-icon>
-        </ion-button>
       </ion-card-content>
     </ion-card>
 

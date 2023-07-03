@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
-import { Study } from 'src/app/interfaces/study';
+import { Module, Study } from 'src/app/interfaces/study';
 import { Log, Response, Task } from 'src/app/interfaces/types';
 import { UuidService } from '../uuid/uuid.service';
 
@@ -185,32 +185,30 @@ export class StorageService {
    * Gets a task by its task_id from the local storage.
    * @returns The task object if found, else null.
    */
-  async getTaskByID(ID: string): Promise<Task> {
+  async getTaskByID(task_id: string): Promise<Task> {
     const key = this.keys.tasks;
     const str = await this.nStorage.get(key);
     if (str === null) return null;
     const tasks = JSON.parse(str);
     for (const task of tasks) {
-      if (task.task_id === ID) return task as Task;
+      if (task.task_id === task_id) return task as Task;
     }
-    return null;
+    throw new Error('TaskNotFoundError');
   }
 
   /**
    * Gets the module params for the module with the matching ID from the study in the local storage.
    * @returns The params object if found, else null.
    */
-  async getModuleByID(ID: string) {
+  async getModuleByID(ID: string): Promise<Module> {
     const key = this.keys.study;
     const str = await this.nStorage.get(key);
     if (str === null) return null;
     const study = JSON.parse(str) as Study;
     for (const module of study.modules) {
-      if (module.id === ID) {
-        return module.body;
-      }
+      if (module.id === ID) return module as Module;
     }
-    return null;
+    throw new Error('ModuleNotFoundError');
   }
 
   /**

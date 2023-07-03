@@ -9,7 +9,7 @@ import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import { Survey, Question, Option } from 'src/app/interfaces/study';
-import { Task, SurveyResponse } from 'src/app/interfaces/types';
+import { SurveyResponse } from 'src/app/interfaces/types';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
@@ -21,13 +21,14 @@ export class SurveyPage implements OnInit {
   @ViewChild(IonContent, { static: false }) content: IonContent;
 
   // variables to handle the sections
-  sectionIndex = 1;
-  sectionName: string;
+  sectionIndex = 0;
+  sectionName: string = '';
 
   // survey template - load prior to data from storage ### This seems like the wrong survey format
   survey: Survey;
-  taskID: string;
+  task_id: string;
   task_index: number;
+  loaded: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,32 +63,33 @@ export class SurveyPage implements OnInit {
     });
 
     // load the task
-    this.taskID = this.route.snapshot.paramMap.get('task_id');
-    const task = await this.storage.getTaskByID(this.taskID);
+    this.task_id = this.route.snapshot.paramMap.get('task_id');
+    const task = await this.storage.getTaskByID(this.task_id);
     this.task_index = task.index;
 
     // check if this task is valid
-    this.studyTasksService.getToDos().then((t) => {
-      let taskAvailable = false;
-      for (const task of t) {
-        if (String(task.task_id) === this.taskID) {
-          taskAvailable = true;
-          break;
-        }
+    const todos = await this.studyTasksService.getToDos();
+    let taskAvailable = false;
+    for (const task of todos) {
+      if (task.task_id === this.task_id) {
+        taskAvailable = true;
+        break;
       }
-
-      if (!taskAvailable) {
-        this.showToast(
-          'This task had a time limit and is no longer available.',
-          'bottom'
-        );
-        this.navController.navigateRoot('/');
-      }
-    });
+    }
+    if (!taskAvailable) {
+      this.showToast(
+        'This task had a time limit and is no longer available.',
+        'bottom'
+      );
+      this.navController.navigateRoot('/');
+      return;
+    }
 
     // extract the JSON from the study object
-    this.survey = (await this.storage.getModuleByID(task.uuid)) as Survey;
+    this.survey = (await this.storage.getModuleByID(task.uuid))
+      .params as Survey;
 
+    console.log(this.survey.sections[0].questions[0].type);
     // shuffle modules if required
     if (this.survey.shuffle) {
       this.survey.sections = this.shuffle(this.survey.sections);
@@ -215,43 +217,32 @@ export class SurveyPage implements OnInit {
           question.hidden = false;
 
           // for datetime questions, default to the current date/time
-          if (question.body.type === 'datetime') {
+          if (question.type === 'datetime') {
             // placeholder for dates
             question.model = moment().format();
 
             // for audio/video questions, sanitize the URLs to make them safe/work in html5 tags ### Not sanitizing at themoment
           } else if (
-            question.body.type === 'media' &&
-            (question.body.subtype === 'audio' ||
-              question.body.subtype === 'video')
+            question.type === 'media' &&
+            (question.subtype === 'audio' || question.subtype === 'video')
           ) {
             // @ts-ignore
-            question.body.src =
-              this.domSanitizer.bypassSecurityTrustResourceUrl(
-                question.body.src
-              );
-            if (question.body.subtype === 'video') {
+            question.type.src =
+              this.domSanitizer.bypassSecurityTrustResourceUrl(question.src);
+            if (question.subtype === 'video') {
               // @ts-ignore
-              question.body.thumb =
+              question.type.thumb =
                 this.domSanitizer.bypassSecurityTrustResourceUrl(
-                  question.body.thumb
+                  question.thumb
                 );
             }
 
             // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
-          } else if (question.body.type === 'external') {
-            question.body.src = question.body.src + '?uuid=' + uuid;
-            // @ts-ignore
-            question.body.src =
-              this.domSanitizer.bypassSecurityTrustResourceUrl(
-                question.body.src
-              );
-
             // for slider questions, set the default value to be halfway between min and max
-          } else if (question.body.type === 'slider') {
+          } else if (question.type === 'slider') {
             // get min and max
-            const min = question.body.min;
-            const max = question.body.max;
+            const min = question.min;
+            const max = question.max;
 
             // set the default value of the slider to the middle value
             const model = min + (max - min) / 2;
@@ -261,26 +252,24 @@ export class SurveyPage implements OnInit {
             question.value = model;
 
             // for checkbox items, the response is set to an empty array
-          } else if (question.body.type === 'multi') {
+          } else if (question.type === 'multi') {
             // set up checked tracking for checkbox questions types
             const tempOptions: Option[] = [];
-            for (const option of question.body.options) {
+            for (const option of question.options) {
               tempOptions.push({
                 text: option,
                 checked: false,
               });
             }
-            question.body.optionsChecked = tempOptions;
+            question.optionsChecked = tempOptions;
 
             // counterbalance the choices if necessary
-            if (question.body.shuffle) {
-              question.body.optionsChecked = this.shuffle(
-                question.body.optionsChecked
-              );
+            if (question.shuffle) {
+              question.optionsChecked = this.shuffle(question.optionsChecked);
             }
 
             // set the empty response to an array for checkbox questions
-            if (!question.body.radio) {
+            if (!question.radio) {
               question.response = [];
             }
           }
@@ -394,10 +383,10 @@ export class SurveyPage implements OnInit {
     }
 
     // not the last section: go to the next section
-    if (this.sectionIndex !== this.survey.sections.length) {
+    if (this.sectionIndex + 1 !== this.survey.sections.length) {
       this.ngZone.run(() => {
         this.sectionIndex++;
-        this.sectionName = this.survey.sections[this.sectionIndex - 1].name;
+        this.sectionName = this.survey.sections[this.sectionIndex].name;
         this.content.scrollToTop(0);
       });
       return;
@@ -446,8 +435,7 @@ export class SurveyPage implements OnInit {
    * @returns A boolean value indicating whether the section has errors (true) or not (false)
    */
   checkErrors(): boolean {
-    const currentQuestions =
-      this.survey.sections[this.sectionIndex - 1].questions;
+    const currentQuestions = this.survey.sections[this.sectionIndex].questions;
     let errorCount = 0;
     for (const question of currentQuestions) {
       const error =
@@ -457,7 +445,7 @@ export class SurveyPage implements OnInit {
 
       if (error) {
         question.hideError = false;
-        if (question.body.type !== 'instruction') {
+        if (question.type !== 'instruction') {
           errorCount++;
         }
       } else {

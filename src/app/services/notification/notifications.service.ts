@@ -65,7 +65,7 @@ export class NotificationsService {
         {
           title: task.alert_title,
           body: task.alert_message,
-          id: task.task_id,
+          id: Number(task.task_id),
           smallIcon: 'res://notification_icon',
           largeIcon: 'res//notification_icon',
           largeBody: task.alert_message,

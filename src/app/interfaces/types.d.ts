@@ -3,7 +3,7 @@ import { Question } from './study';
 interface Task {
   uuid: string;
   index: number;
-  task_id: number;
+  task_id: string;
   name: string;
   type: string;
   hidden: boolean;
