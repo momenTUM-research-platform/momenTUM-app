@@ -31,9 +31,6 @@ export class HomePage implements OnInit {
   themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
   typeToIcon = {
     survey: 'checkmark-circle-outline',
-    video: 'film-outline',
-    audio: 'headset-outline',
-    info: 'bulb-outline',
     pvt: 'alarm-outline',
   };
 
