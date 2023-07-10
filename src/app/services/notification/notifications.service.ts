@@ -39,14 +39,6 @@ export class NotificationsService {
       'localNotificationActionPerformed',
       (notificationAction: ActionPerformed) => {
         // log that the user clicked on this notification
-        const logEvent: Log = {
-          timestamp: moment().format(),
-          page:
-            'notification-' +
-            moment(notificationAction.notification.extra.task_time).format(),
-          event: 'click',
-        };
-        this.dataService.sendLog(logEvent);
         this.router.navigate([
           'survey/' + notificationAction.notification.extra.task_id,
         ]);

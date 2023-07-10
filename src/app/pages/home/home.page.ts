@@ -75,26 +75,6 @@ export class HomePage implements OnInit {
 
     // Log page visit
     if (!this.enrolled) return;
-    this.surveyDataService.sendLog({
-      timestamp: moment().format(),
-      page: 'home',
-      event: 'entry',
-    });
-  }
-
-  /**
-   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
-   * Executed each time the view of the home page is exited.
-   */
-  ionViewWillLeave() {
-    // Log page exit
-    if (!this.showLogin) {
-      this.surveyDataService.sendLog({
-        timestamp: moment().format(),
-        page: 'home',
-        event: 'exit',
-      });
-    }
   }
 
   /**
@@ -169,13 +149,6 @@ export class HomePage implements OnInit {
       const study: Study = await this.surveyDataService.downloadStudy(url);
       await this.storageService.saveStudy(study);
 
-      // log the enrolment event
-      this.surveyDataService.sendLog({
-        timestamp: moment().format(),
-        page: 'home',
-        event: 'enrol',
-      });
-
       // cache all media files if this study has set this property to true
       if (study.properties.cache) {
         this.loadingService.dismiss().then(async () => {
@@ -199,8 +172,6 @@ export class HomePage implements OnInit {
       console.log(error);
       return;
     }
-
-    // setup the study task objects
   }
 
   /**

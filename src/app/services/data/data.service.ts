@@ -1,19 +1,21 @@
 import { Injectable } from '@angular/core';
-import { Platform } from '@ionic/angular';
-import { StudyTasksService } from '../study-tasks/study-tasks.service';
-import { UuidService } from '../uuid/uuid.service';
 import { Http } from '@capacitor-community/http';
+import { HttpClient } from '@angular/common/http';
 import { StorageService } from '../storage/storage.service';
 import { Log, Response, Task } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
-import { data, post } from 'cypress/types/jquery';
 import moment from 'moment';
+import { Platform } from '@ionic/angular';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService {
-  constructor(private storage: StorageService) {}
+  constructor(
+    private storage: StorageService,
+    private http: HttpClient,
+    private platform: Platform
+  ) {}
 
   /**
    * Downloads a study from a remote URL.
@@ -49,18 +51,32 @@ export class DataService {
    *
    * @param task The task that has been completed.
    */
-  async sendResponse(task: Task) {
-    // Build response object
-    const response: Response = {
-      module_id: task.uuid,
-      alert_time: task.alert_time,
-      timestamp: moment().format(),
-      data: task.responses,
-    };
+  async sendResponse(
+    response: Response,
+    type: 'survey_response' | 'pvt_response'
+  ) {
+    const study = await this.storage.getStudy();
+    const bodyData = new FormData();
+
+    bodyData.append('data_type', type);
+    bodyData.append('user_id', await this.storage.getUuid());
+    bodyData.append('study_id', study.properties.study_id);
+    bodyData.append('module_index', String(response.module_index));
+    bodyData.append('module_id', study.modules[response.module_index].id);
+    bodyData.append('module_name', study.modules[response.module_index].name);
+    bodyData.append('responses', JSON.stringify(response.data));
+    bodyData.append('response_time', response.response_time);
+    bodyData.append(
+      'response_time_in_ms',
+      String(response.response_time_in_ms)
+    );
+    bodyData.append('alert_time', response.alert_time);
+    bodyData.append('platform', this.platform.platforms()[0]);
 
     // HTTP POST
-    const success = this.postToServer(response);
+    const success = this.postToServer(bodyData, 'response');
     if (success) return;
+    console.log('unsuccessfull');
 
     // Save the response in the local storage for a later try
     this.storage.saveResponse(response);
@@ -73,7 +89,12 @@ export class DataService {
    *
    * @param log An object containing metadata about a log event
    */
-  async sendLog(log: Log) {}
+  async sendLog(log: Log) {
+    const success = this.postToServer(log, 'log');
+    if (success) return;
+
+    this.storage.saveLog(log);
+  }
 
   /**
    * Use this method to send all stored responses and logs whose transmission failed in previous attempts.
@@ -82,15 +103,17 @@ export class DataService {
    *
    * @param dataType The type of data to attempt to upload, e.g. 'pending-logs' (log events) or 'pending-data' (survey responses)
    */
-  async uploadPendingData(dataType: 'pending-log' | 'pending-data') {
+  async uploadPendingData(dataType: 'log' | 'response') {
     let data: Response[] | Log[];
-    if (dataType === 'pending-data') {
+
+    if (dataType === 'response') {
       data = await this.storage.getPendingResponses();
     } else {
       data = await this.storage.getPendingLogs();
     }
+
     for (const obj of data) {
-      this.postToServer(obj);
+      this.postToServer(obj, dataType);
     }
   }
 
@@ -101,20 +124,10 @@ export class DataService {
    * @param data The data to append in the body
    * @returns A boolean value indicating whether status code 200 has been received.
    */
-  async postToServer(data: any) {
-    const url = (await this.storage.getStudy()).properties.post_url;
-
-    Http.post({
-      url,
-      data,
-    })
-      .then((result) => {
-        return result.status === 200;
-      })
-      .catch((e) => {
-        // case in which the url is invalid
-        console.log(e);
-        return false;
-      });
+  async postToServer(data: any, type: 'log' | 'response') {
+    const postUrl = (await this.storage.getStudy()).properties.post_url;
+    this.http.post(postUrl + '/' + type, data).subscribe((response) => {
+      return response;
+    });
   }
 }

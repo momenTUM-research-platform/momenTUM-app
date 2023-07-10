@@ -8,10 +8,7 @@ import { Task } from 'src/app/interfaces/types';
   providedIn: 'root',
 })
 export class StudyTasksService {
-  constructor(
-    private storageService: StorageService,
-    private loadingService: LoadingService
-  ) {}
+  constructor(private storageService: StorageService) {}
 
   /**
    * Generates all the tasks (interventions) from the study.

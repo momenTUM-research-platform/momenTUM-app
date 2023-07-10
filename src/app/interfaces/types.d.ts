@@ -25,23 +25,25 @@ interface Task {
   label?: string;
 }
 
-type SurveyData =
-  | {
-      module_index: number;
-      module_name: string;
-      responses: SurveyResponse;
-      response_time: string;
-      response_time_in_ms: number;
-      alert_time: string;
-    }
-  | {
-      module_index: number;
-      module_name: string;
-      entries: number[];
-      response_time: string;
-      response_time_in_ms: number;
-      alert_time: string;
-    };
+// // DEPRECATED
+//
+// type SurveyData =
+//   | {
+//       module_index: number;
+//       module_name: string;
+//       responses: SurveyResponse;
+//       response_time: string;
+//       response_time_in_ms: number;
+//       alert_time: string;
+//     }
+//   | {
+//       module_index: number;
+//       module_name: string;
+//       entries: number[];
+//       response_time: string;
+//       response_time_in_ms: number;
+//       alert_time: string;
+//     };
 
 interface Log {
   timestamp: string;
@@ -50,9 +52,11 @@ interface Log {
 }
 
 interface Response {
-  module_id: string;
+  module_index: number;
+  module_name: string;
+  response_time: string;
+  response_time_in_ms: number;
   alert_time: string;
-  timestamp: string;
   data: SurveyResponse | PvtResponse;
 }
 

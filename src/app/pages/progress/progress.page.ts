@@ -109,13 +109,6 @@ export class ProgressPage {
         new Date()
       );
 
-      // log the user visiting this tab
-      this.surveyDataService.sendLog({
-        timestamp: moment().format(),
-        page: 'my-progress',
-        event: 'entry',
-      });
-
       const tasks = await this.storage.getTasks();
       // get all entries for history
       for (const task of tasks) {
@@ -204,15 +197,5 @@ export class ProgressPage {
     ndays = (tv2 - tv1) / 1000 / 86400;
     ndays = Math.round(ndays - 0.5);
     return ndays;
-  }
-
-  async ionViewWillLeave() {
-    if (this.enrolledInStudy) {
-      this.surveyDataService.sendLog({
-        timestamp: moment().format(),
-        page: 'my-progress',
-        event: 'exit',
-      });
-    }
   }
 }

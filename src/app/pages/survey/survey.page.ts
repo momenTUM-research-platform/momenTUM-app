@@ -9,7 +9,7 @@ import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
 import { Survey, Question, Option } from 'src/app/interfaces/study';
-import { SurveyResponse } from 'src/app/interfaces/types';
+import { Response, SurveyResponse } from 'src/app/interfaces/types';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
@@ -168,12 +168,6 @@ export class SurveyPage implements OnInit {
       }
     }
 
-    // log the user visiting this tab
-    this.surveyDataService.sendLog({
-      timestamp: moment().format(),
-      page: 'survey',
-      event: 'entry',
-    });
     SplashScreen.hide();
   }
 
@@ -187,14 +181,6 @@ export class SurveyPage implements OnInit {
         this.sectionName = this.survey.sections[this.sectionIndex].name;
       });
     } else {
-      // save an exit log
-      this.surveyDataService
-        .sendLog({
-          timestamp: moment().format(),
-          page: 'survey',
-          event: 'exit',
-        })
-        .catch(() => {});
       // nav back to the home screen
       this.navController.navigateRoot('/');
     }
@@ -414,15 +400,18 @@ export class SurveyPage implements OnInit {
     tasks[this.task_index].responses = responses;
 
     // attempt to post surveyResponse to server
-    await this.surveyDataService.sendResponse(tasks[this.task_index]);
+    const response: Response = {
+      module_index: tasks[this.task_index].index,
+      module_name: tasks[this.task_index].name,
+      alert_time: tasks[this.task_index].alert_time,
+      response_time: response_time,
+      response_time_in_ms: response_time_ms,
+      data: responses,
+    };
+    await this.surveyDataService.sendResponse(response, 'survey_response');
 
     // write tasks back to storage
     await this.storage.saveTasks(tasks);
-    await this.surveyDataService.sendLog({
-      timestamp: moment().format(),
-      page: 'survey',
-      event: 'submit',
-    });
     this.navController.navigateRoot('/');
   }
 

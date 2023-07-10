@@ -64,6 +64,26 @@ export class StorageService {
   }
 
   /**
+   * Saves a task in the storage.
+   * If a task with the same task_id exists, it will be overwritten.
+   * @param taskID The task to be stored.
+   */
+  async saveTask(task: Task) {
+    const tasks = await this.getTasks();
+    let index = 0;
+    for (const t of tasks) {
+      if (t.task_id === task.task_id) {
+        tasks[index] = task;
+        this.saveTasks(tasks);
+        return;
+      }
+      index++;
+    }
+    tasks.push(task);
+    this.saveTasks(tasks);
+  }
+
+  /**
    * Saves a Response to the local storage.
    * @param response The response to be saved.
    * @returns A Promise that resolves when the response is stored.
@@ -238,5 +258,16 @@ export class StorageService {
     const key = this.keys.logs;
     const logs: Log[] = await this.nStorage.get(key);
     return logs;
+  }
+
+  /**
+   * Retrieves the parameters of a specific module through a given task id.
+   * @param taskID
+   */
+  async getModuleParamsByTaskId(taskID: string) {
+    const task: Task = await this.getTaskByID(taskID);
+    const moduleID = task.uuid;
+    const module: Module = await this.getModuleByID(moduleID);
+    return module.params;
   }
 }

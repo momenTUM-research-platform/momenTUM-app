@@ -5,8 +5,8 @@ import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
-import { Task } from 'src/app/interfaces/types';
-import { Pvt } from 'src/app/interfaces/study';
+import { Response, Task } from 'src/app/interfaces/types';
+import { Pvt, Study } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-pvt',
@@ -14,6 +14,8 @@ import { Pvt } from 'src/app/interfaces/study';
   styleUrls: ['./pvt.page.scss'],
 })
 export class PvtPage implements OnInit, ViewWillLeave {
+  taskID: string;
+
   // INPUT from study
   trials: number;
   min: number;
@@ -43,7 +45,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
   readonly tooEarlyMessage = 'too early';
 
   constructor(
-    private surveyDataService: DataService,
+    private dataService: DataService,
     private navController: NavController,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
@@ -222,43 +224,20 @@ export class PvtPage implements OnInit, ViewWillLeave {
    * copies all study-PVT-parameters from storage to the variables of this class.
    * */
   public async setStudyParameters() {
-    const task_id = this.route.snapshot.paramMap.get('task_id');
-    const task = await this.storageService.getTaskByID(task_id);
-    this.moduleId = task.uuid;
-    const params = (await this.storageService.getModuleByID(this.moduleId))
-      .params as Pvt;
-    this.trials = params.trials;
-    this.min = params.min_waiting;
-    this.max = params.max_waiting;
-    this.showResults = params.show;
-    this.timeToTimeout = params.max_reaction;
-    this.enableExit = params.exit;
-  }
-
-  /**
-   * Finds a module in the local storage by one of its task_id's.
-   *
-   * @param task_id the task_id of a task of this module.
-   * @returns A Promise with the correct module from the local storage.
-   * */
-  public async getModule(task_id: string | null): Promise<any> {
-    let moduleIndex: number;
-    return this.storageService
-      .getTasks()
-      .then((tasks) => {
-        let taskIndex = 0;
-        for (const task of tasks) {
-          if (task_id === String(task.task_id)) {
-            moduleIndex = task.index;
-            this.alertTime = moment(new Date(task.time)).format();
-            this.taskIndex = taskIndex;
-            break;
-          }
-          taskIndex++;
-        }
-        return this.storageService.getStudy();
-      })
-      .then((studyObject: any) => JSON.parse(studyObject).modules[moduleIndex]);
+    this.taskID = this.route.snapshot.paramMap.get('task_id');
+    const params = await this.storageService.getModuleParamsByTaskId(
+      this.taskID
+    );
+    if (params.type === 'pvt') {
+      this.trials = params.trials;
+      this.min = params.min_waiting;
+      this.max = params.max_waiting;
+      this.showResults = params.show;
+      this.timeToTimeout = params.max_reaction;
+      this.enableExit = params.exit;
+    } else {
+      throw new Error('TypeError: The parameters need to be of type "pvt".');
+    }
   }
 
   /**
@@ -271,18 +250,24 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const responseTime = moment().format();
     const responseTimeInMs = moment().valueOf();
 
-    const tasks: Task[] = await this.storageService.getTasks();
-    tasks[this.taskIndex].completed = true;
-    tasks[this.taskIndex].response_time = responseTime;
-    tasks[this.taskIndex].response_time_ms = responseTimeInMs;
+    const task: Task = await this.storageService.getTaskByID(this.taskID);
+    task.completed = true;
+    task.response_time = responseTime;
+    task.response_time_ms = responseTimeInMs;
 
-    await this.surveyDataService.sendResponse(tasks[this.taskIndex]);
-    this.storageService.saveTasks(tasks);
-    this.surveyDataService.sendLog({
-      timestamp: moment().format(),
-      page: 'pvt',
-      event: 'submit',
-    });
+    const response: Response = {
+      module_index: task.index,
+      module_name: task.name,
+      response_time: task.response_time,
+      response_time_in_ms: task.response_time_ms,
+      alert_time: task.alert_time,
+      data: {
+        reaction_times: this.reactionTimes,
+      },
+    };
+
+    await this.dataService.sendResponse(response, 'pvt_response');
+    this.storageService.saveTask(task);
   }
 
   /**
