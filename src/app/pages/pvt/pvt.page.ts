@@ -254,6 +254,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
     task.completed = true;
     task.response_time = responseTime;
     task.response_time_ms = responseTimeInMs;
+    task.alert_time = moment(new Date(task.time).toISOString()).format();
 
     const response: Response = {
       module_index: task.index,
