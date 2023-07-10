@@ -148,6 +148,7 @@ export class HomePage implements OnInit {
       // download the study
       const study: Study = await this.surveyDataService.downloadStudy(url);
       await this.storageService.saveStudy(study);
+      await this.storageService.setEnrolmentDate(new Date());
 
       // cache all media files if this study has set this property to true
       if (study.properties.cache) {

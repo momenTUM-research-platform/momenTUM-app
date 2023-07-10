@@ -104,10 +104,7 @@ export class ProgressPage {
       this.enrolledInStudy = true;
 
       // calculate the study day
-      this.studyDay = this.diffDays(
-        new Date(enrolmentDate.toString()),
-        new Date()
-      );
+      this.studyDay = this.diffDays(enrolmentDate, new Date());
 
       const tasks = await this.storage.getTasks();
       // get all entries for history
