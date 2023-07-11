@@ -65,5 +65,5 @@ interface SurveyResponse {
 }
 
 interface PvtResponse {
-  reaction_times: number[];
+  reaction_times: string;
 }

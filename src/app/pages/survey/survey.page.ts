@@ -376,19 +376,17 @@ export class SurveyPage implements OnInit {
     }
 
     // add the alert time to the response
-    const tasks = await this.storage.getTasks();
-    tasks[this.task_index].alert_time = moment(
-      new Date(tasks[this.task_index].time).toISOString()
-    ).format();
+    const task = await this.storage.getTaskByID(this.task_id);
+    task.alert_time = moment(new Date(task.time).toISOString()).format();
 
     // get a timestmap of submission time in both readable and ms format
     const response_time = moment().format();
-    tasks[this.task_index].response_time = response_time;
+    task.response_time = response_time;
     const response_time_ms = moment().valueOf();
-    tasks[this.task_index].response_time_ms = response_time_ms;
+    task.response_time_ms = response_time_ms;
 
     // indicate that the current task is completed
-    tasks[this.task_index].completed = true;
+    task.completed = true;
 
     // add all of the responses to an object in the task to be sent to server
     const responses: SurveyResponse = {};
@@ -397,13 +395,13 @@ export class SurveyPage implements OnInit {
         responses[question.id] = question.response;
       }
     }
-    tasks[this.task_index].responses = responses;
+    task.responses = responses;
 
     // attempt to post surveyResponse to server
     const response: Response = {
-      module_index: tasks[this.task_index].index,
-      module_name: tasks[this.task_index].name,
-      alert_time: tasks[this.task_index].alert_time,
+      module_index: task.index,
+      module_name: task.name,
+      alert_time: task.alert_time,
       response_time: response_time,
       response_time_in_ms: response_time_ms,
       data: responses,
@@ -411,7 +409,7 @@ export class SurveyPage implements OnInit {
     await this.surveyDataService.sendResponse(response, 'survey_response');
 
     // write tasks back to storage
-    await this.storage.saveTasks(tasks);
+    await this.storage.saveTask(task);
     this.navController.navigateRoot('/');
   }
 

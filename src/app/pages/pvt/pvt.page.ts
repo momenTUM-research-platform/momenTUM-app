@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
-import { Response, Task } from 'src/app/interfaces/types';
+import { PvtResponse, Response, Task } from 'src/app/interfaces/types';
 import { Pvt, Study } from 'src/app/interfaces/study';
 
 @Component({
@@ -255,6 +255,9 @@ export class PvtPage implements OnInit, ViewWillLeave {
     task.response_time = responseTime;
     task.response_time_ms = responseTimeInMs;
     task.alert_time = moment(new Date(task.time).toISOString()).format();
+    const pvtResponse: PvtResponse = {
+      reaction_times: String(this.reactionTimes),
+    };
 
     const response: Response = {
       module_index: task.index,
@@ -262,9 +265,7 @@ export class PvtPage implements OnInit, ViewWillLeave {
       response_time: task.response_time,
       response_time_in_ms: task.response_time_ms,
       alert_time: task.alert_time,
-      data: {
-        reaction_times: this.reactionTimes,
-      },
+      data: pvtResponse,
     };
 
     await this.dataService.sendResponse(response, 'pvt_response');
