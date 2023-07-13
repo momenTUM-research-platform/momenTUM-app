@@ -5,10 +5,8 @@ import { AlertController } from '@ionic/angular';
 import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
-import { UuidService } from '../../services/uuid/uuid.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import * as moment from 'moment';
 import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController } from '@ionic/angular';
@@ -87,6 +85,8 @@ export class HomePage implements OnInit {
 
     // check whether enrolled or not
     const study = await this.storageService.getStudy();
+
+    // set state variables if not enrolled
     if (study === null) {
       this.enrolled = false;
       this.showLogin = true;
@@ -96,13 +96,12 @@ export class HomePage implements OnInit {
       return;
     }
 
-    // only show loading bar if enrolled
-    this.loadingService.present(
+    // set state variables if enrolled
+    await this.loadingService.present(
       await this.translate.get('label_loading').toPromise()
     );
     this.bannerURL = study.properties.banner_url;
     this.emptyMessage = study.properties.empty_msg;
-    this.loadingService.isCaching = false;
     this.enrolled = true;
     this.showLogin = false;
     this.tasks = await this.studyTasksService.getToDos();

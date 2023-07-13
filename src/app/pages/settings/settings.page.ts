@@ -86,7 +86,7 @@ export class SettingsPage {
           text: 'Withdraw',
           handler: async () => {
             // log a withdraw event to the server
-            this.loadingService.present('Withdrawing...');
+            await this.loadingService.present('Withdrawing...');
             // upload any pending logs and data
             try {
               await this.surveyDataService.uploadPendingData('log');
