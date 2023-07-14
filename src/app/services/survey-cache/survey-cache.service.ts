@@ -54,7 +54,6 @@ export class SurveyCacheService {
    */
   getMediaURLs(study: Study) {
     // get banner url
-    // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
     // get urls from media elements
