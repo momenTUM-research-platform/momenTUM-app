@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import * as moment from 'moment';
+import moment from 'moment';
 import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { TranslateConfigService } from '../../translate-config.service';
@@ -13,10 +13,10 @@ import { Study } from 'src/app/interfaces/study';
 })
 export class ProgressPage {
   // array to store the graphs
-  graphs: Array<any> = new Array();
+  graphs = [];
 
   // array to store the history
-  history: Array<any> = new Array();
+  history = [];
 
   // flag for study enrolment
   enrolledInStudy = false;
@@ -35,27 +35,23 @@ export class ProgressPage {
     responsive: true,
     maintainAspectRatio: true,
     scales: {
-      xAxes: [
-        {
-          ticks: {
-            fontSize: 6,
-          },
-          barThickness: 20,
+      x: {
+        ticks: {
+          fontSize: 6,
         },
-      ],
-      yAxes: [
-        {
-          ticks: {
-            fontSize: 8,
-            beginAtZero: true,
-          },
+        barThickness: 20,
+      },
+      y: {
+        ticks: {
+          fontSize: 8,
+          beginAtZero: true,
         },
-      ],
+      },
     },
   };
 
   // graph colours
-  chartColors: Array<any> = [
+  chartColors = [
     {
       backgroundColor: 'rgba(4,153,139,0.6)',
       borderColor: 'rgba(148,159,177,1)',
@@ -84,8 +80,6 @@ export class ProgressPage {
 
   constructor(
     private storage: StorageService,
-    private studyTasksService: StudyTasksService,
-    private surveyDataService: DataService,
     private translateConfigService: TranslateConfigService
   ) {
     // get the default language of the device
@@ -176,6 +170,7 @@ export class ProgressPage {
             blurb: graph_blurb,
             header: graph_header,
           };
+          console.log(task_data);
 
           // if the task had any data to graph, push it
           if (task_data.length > 0) {
