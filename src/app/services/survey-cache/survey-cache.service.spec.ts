@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { File, FileEntry } from '@ionic-native/file/ngx';
+
 import { LoadingService } from '../loading/loading-service.service';
 import { StorageService } from '../storage/storage.service';
 import { SurveyCacheService } from './survey-cache.service';

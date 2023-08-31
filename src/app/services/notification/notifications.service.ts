@@ -8,9 +8,14 @@ import {
   CancelOptions,
   PendingLocalNotificationSchema,
   ListChannelsResult,
+  ActionPerformed,
 } from '@capacitor/local-notifications';
 import { StorageService } from '../storage/storage.service';
-import { StudyTasksService } from '../study-task/study-tasks.service';
+import { StudyTasksService } from '../study-tasks/study-tasks.service';
+import { Log, Task } from 'src/app/interfaces/types';
+import moment from 'moment';
+import { Route, Router } from '@angular/router';
+import { DataService } from '../data/data.service';
 
 @Injectable({
   providedIn: 'root',
@@ -18,76 +23,27 @@ import { StudyTasksService } from '../study-task/study-tasks.service';
 export class NotificationsService {
   constructor(
     private storage: StorageService,
-    private studyTasksService: StudyTasksService
+    private studyTasksService: StudyTasksService,
+    private router: Router,
+    private dataService: DataService
   ) {}
 
-  async createChannel(channel: Channel): Promise<void> {
-    return await LocalNotifications.createChannel(channel);
-  }
-
-  async deleteChannel(channel: Channel): Promise<void> {
-    return await LocalNotifications.deleteChannel(channel);
-  }
-
-  async listChannels(): Promise<ListChannelsResult> {
-    return await LocalNotifications.listChannels();
-  }
-
-  async fireQueuedEvents() {
-    // To be implmented
-    // Fire queued events once the device is ready and all listeners are registered.
-    // throw new Error('Feature to fire queued events not available.');
-  }
-
-  async addListenerOnClick(listenerFunction: any) {
+  /**
+   * Adds a listener to a notification click.
+   * Navigates the user to the right task.
+   * Logs the noticification-click.
+   * @param notificationAction The event that triggered this handler function.
+   */
+  async addListenerOnClick() {
     LocalNotifications.addListener(
       'localNotificationActionPerformed',
-      listenerFunction
+      (notificationAction: ActionPerformed) => {
+        // log that the user clicked on this notification
+        this.router.navigate([
+          'survey/' + notificationAction.notification.extra.task_id,
+        ]);
+      }
     );
-  }
-
-  showLocalNotification(
-    title: string,
-    body: string,
-    at: Date,
-    smallIcon: string,
-    largeIcon: string,
-    largeBody: string,
-    summaryText: string,
-    attachments: Attachment[],
-    extra: any,
-    ongoing: boolean,
-    autoCancel: boolean,
-    id: number = Math.floor(Math.random() * 1000) + 1,
-    repeats: boolean,
-    every: ScheduleEvery,
-    count: number,
-    on: any
-  ): void {
-    LocalNotifications.schedule({
-      notifications: [
-        {
-          title,
-          body,
-          id,
-          smallIcon,
-          largeIcon,
-          largeBody,
-          summaryText,
-          attachments,
-          extra,
-          ongoing,
-          autoCancel,
-          schedule: {
-            at,
-            repeats,
-            every,
-            count,
-            on,
-          },
-        },
-      ],
-    });
   }
 
   /**
@@ -95,13 +51,13 @@ export class NotificationsService {
    *
    * @param task The task that the notification is for
    */
-  scheduleNotification(task: Task) {
-    LocalNotifications.schedule({
+  async scheduleNotification(task: Task) {
+    await LocalNotifications.schedule({
       notifications: [
         {
           title: task.alert_title,
           body: task.alert_message,
-          id: task.task_id,
+          id: Number(task.task_id),
           smallIcon: 'res://notification_icon',
           largeIcon: 'res//notification_icon',
           largeBody: task.alert_message,
@@ -139,7 +95,7 @@ export class NotificationsService {
    * Get a list of pending notifications.
    */
   async getPending(): Promise<LocalNotificationSchema[]> {
-    const pendingList: PendingLocalNotificationSchema[] = await (
+    const pendingList: PendingLocalNotificationSchema[] = (
       await LocalNotifications.getPending()
     ).notifications;
     if (pendingList != null) {
@@ -155,9 +111,7 @@ export class NotificationsService {
   async requestPermissions() {
     const status: string = (await LocalNotifications.checkPermissions())
       .display;
-    if (status.endsWith('granted')) {
-      // Do nothing
-    } else {
+    if (!status.endsWith('granted')) {
       await LocalNotifications.requestPermissions();
     }
   }
@@ -168,13 +122,9 @@ export class NotificationsService {
   async setNext30Notifications() {
     await this.cancelAll();
 
-    const notificationsEnabled = await this.storage.get(
-      'notifications-enabled'
-    );
-
+    const notificationsEnabled = await this.storage.notificationsEnabled();
     if (notificationsEnabled) {
-      const storage_tasks: any = await this.storage.get('study-tasks');
-      const tasks: Task[] = JSON.parse(storage_tasks);
+      const tasks: Task[] = await this.storage.getTasks();
       if (tasks !== null) {
         let alertCount = 0;
         for (const task of tasks) {

@@ -23,10 +23,10 @@ import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { NavMock, ToastMock } from '../../../../test-config/mocks-ionic';
 import moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { DataService } from '../../services/data/data.service';
 
 describe('SurveyPage', () => {
   let component: SurveyPage;
@@ -89,8 +89,7 @@ describe('SurveyPage', () => {
         fixture.debugElement.injector.get(StudyTasksService);
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       spylogPageVisitToServer = spyOn(
         surveyDataService,
         'logPageVisitToServer'
@@ -134,7 +133,7 @@ describe('SurveyPage', () => {
         expect(component.num_sections).toEqual(
           stubStudy.modules[stubValueTasks[0].index].sections.length
         );
-        expect(component.current_section).toEqual(current_section);
+        expect(component.currentSection).toEqual(current_section);
         expect(component.current_section_name).toBe(
           stubStudy.modules[stubValueTasks[0].index].sections[
             current_section - 1
@@ -322,7 +321,7 @@ describe('SurveyPage', () => {
         .then(() => {
           component.back();
 
-          if (component.current_section > 1) {
+          if (component.currentSection > 1) {
             expect(component.submit_text).toBe('Next');
           } else {
             expect(navCtrl.navigateRoot).toHaveBeenCalledWith('/');

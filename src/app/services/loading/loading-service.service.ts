@@ -16,34 +16,22 @@ export class LoadingService {
    * @param msg The message to display in the loading dialog
    */
   async present(msg: string) {
-    this.isLoading = true;
-    return await this.loadingController
-      .create({
-        message: msg,
-        spinner: 'crescent',
-        duration: 7000,
-      })
-      .then((a) => {
-        a.present().then(() => {
-          if (!this.isLoading) {
-            a.dismiss().then(() => console.log('abort presenting'));
-          }
-        });
-      });
+    const loading = await this.loadingController.create({
+      message: msg,
+      spinner: 'crescent',
+      duration: 7000,
+    });
+
+    loading.present();
   }
 
   /**
    * Dismisses the loading dialog
    */
   async dismiss() {
-    this.isLoading = false; // Seems unnecessary as dismiss() only runs if isLoading is false
-    this.isCaching = false;
     const loader = await this.loadingController.getTop();
     if (loader) {
-      // Added this condition
-      return loader.dismiss();
-    } else {
-      return;
+      await loader.dismiss();
     }
   }
 }

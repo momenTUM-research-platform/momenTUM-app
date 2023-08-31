@@ -5,9 +5,11 @@ import { NotificationsService } from '../../services/notification/notifications.
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { TranslateConfigService } from '../../translate-config.service';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { DataService } from '../../services/data/data.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
+import { LoadingService } from 'src/app/services/loading/loading-service.service';
+import { Study } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-settings',
@@ -29,16 +31,7 @@ export class SettingsPage {
 
   // store a reference to the study object
   // empty template used prior to loading data
-  study: any = {
-    properties: {
-      study_name: '',
-      instructions: '',
-      support_email: '',
-      support_url: '',
-      ethics: '',
-      pls: '',
-    },
-  };
+  study: Study;
 
   constructor(
     private storage: StorageService,
@@ -46,64 +39,34 @@ export class SettingsPage {
     private alertController: AlertController,
     private notificationsService: NotificationsService,
     private translateConfigService: TranslateConfigService,
-    private surveyDataService: SurveyDataService
+    private surveyDataService: DataService,
+    private loadingService: LoadingService
   ) {
     // get the default language of the device
     this.selectedLanguage =
       this.translateConfigService.getDefaultLanguage() || 'en';
   }
 
-  ionViewWillEnter() {
+  /**
+   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
+   *
+   */
+  async ionViewWillEnter() {
     this.isEnrolled = false;
+    this.study = await this.storage.getStudy();
+    this.uuid = await this.storage.getUuid();
+    const notificationsEnabled = await this.storage.notificationsEnabled();
+    if (this.study === null) {
+      this.isEnrolled = false;
+      return;
+    }
+    this.isEnrolled = true;
 
-    Promise.all([
-      this.storage.get('current-study'),
-      this.storage.get('uuid'),
-      this.storage.get('notifications-enabled'),
-    ]).then((values) => {
-      // check if user is currently enrolled in study
-      // to show/hide additional options
-      const studyObject: string = values[0];
-
-      if (studyObject !== null) {
-        this.isEnrolled = true;
-        this.study = JSON.parse(studyObject);
-      } else {
-        this.isEnrolled = false;
-      }
-
-      // get the uuid from storage to display in the list
-      this.uuid = values[1].toString();
-
-      // get the status of the notifications
-      const notificationsEnabled = values[2] as unknown as boolean;
-      if (notificationsEnabled === null) {
-        this.notificationsEnabled = false;
-      } else {
-        this.notificationsEnabled = notificationsEnabled;
-      }
-      if (this.isEnrolled) {
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'settings',
-          event: 'entry',
-          module_index: -1,
-        });
-      }
-    });
-  }
-
-  ionViewWillLeave() {
-    if (this.isEnrolled) {
-      this.surveyDataService.logPageVisitToServer({
-        timestamp: moment().format(),
-        milliseconds: moment().valueOf(),
-        page: 'settings',
-        event: 'exit',
-        module_index: -1,
-      });
+    // get the status of the notifications
+    if (notificationsEnabled === null) {
+      this.notificationsEnabled = false;
+    } else {
+      this.notificationsEnabled = notificationsEnabled;
     }
   }
 
@@ -121,35 +84,18 @@ export class SettingsPage {
         },
         {
           text: 'Withdraw',
-          handler: () => {
+          handler: async () => {
             // log a withdraw event to the server
-            this.surveyDataService.logPageVisitToServer({
-              timestamp: moment().format(),
-              milliseconds: moment().valueOf(),
-              page: 'settings',
-              event: 'withdraw',
-              module_index: -1,
-            });
+            await this.loadingService.present('Withdrawing...');
             // upload any pending logs and data
-            this.surveyDataService
-              .uploadPendingData('pending-log')
-              .then(() =>
-                this.surveyDataService.uploadPendingData('pending-data')
-              )
-              .then(
-                () => this.storage.removeItem('current-study')
-                // then remove all the pending study tasks from storage
-              )
-              .then(
-                () => this.storage.removeItem('study-tasks')
-                // then cancel all remaining notifications and navigate to home
-              )
-              .then(() => {
-                // cancel all notifications
-                this.notificationsService.cancelAll();
-                // navigate to the home tab
-                this.navController.navigateRoot('/');
-              });
+            try {
+              await this.surveyDataService.uploadPendingData('log');
+              await this.surveyDataService.uploadPendingData('response');
+            } catch {}
+            await this.storage.clear();
+            await this.notificationsService.cancelAll();
+            await this.loadingService.dismiss();
+            await this.navController.navigateRoot('/');
           },
         },
       ],
@@ -163,7 +109,7 @@ export class SettingsPage {
    */
   toggleNotifications() {
     // update the notifications flag
-    this.storage.set('notifications-enabled', this.notificationsEnabled);
+    this.storage.setNotificationsEnabled(this.notificationsEnabled);
     // set the next 30 notifications (cancels all notifications before setting them if enabled)
     this.notificationsService.setNext30Notifications();
   }

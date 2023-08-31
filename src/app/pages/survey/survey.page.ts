@@ -1,13 +1,19 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
+import { DataService } from '../../services/data/data.service';
 import { NavController, IonContent, ToastController } from '@ionic/angular';
 import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
+import { Survey, Question, Option } from 'src/app/interfaces/study';
+import { Response, SurveyResponse } from 'src/app/interfaces/types';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { PhotoService } from '../../services/photo/photo.service';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { CameraPhoto, Photo } from '@capacitor/camera';
 
 @Component({
   selector: 'app-survey',
@@ -17,73 +23,26 @@ import { Capacitor } from '@capacitor/core';
 export class SurveyPage implements OnInit {
   @ViewChild(IonContent, { static: false }) content: IonContent;
 
-  // the text to display as submit button label
-  submit_text = 'Submit';
-
   // variables to handle the sections
-  current_section = 1;
-  num_sections: number;
-  current_section_name: string;
+  sectionIndex = 0;
+  sectionName: string = '';
 
-  // study object
-  study: Study;
   // survey template - load prior to data from storage ### This seems like the wrong survey format
-  survey: Module = {
-    type: '',
-    name: '',
-    submit_text: '',
-
-    condition: '',
-    alerts: {
-      title: '',
-      message: '',
-      start_offset: 0,
-      duration: 0,
-      times: [],
-      random: false,
-      random_interval: 0,
-      sticky: false,
-      sticky_label: '',
-      timeout: false,
-      timeout_after: 0,
-    },
-    graph: {
-      display: false,
-      variable: '',
-      title: '',
-      blurb: '',
-      type: 'bar',
-      max_points: 0,
-    },
-    sections: [
-      {
-        id: '',
-        name: '',
-        shuffle: false,
-        questions: [],
-      },
-    ],
-    id: '',
-    unlock_after: [],
-    shuffle: false,
-  };
-
-  questions: any;
-
-  // task objects
-  tasks: Task[];
+  survey: Survey;
   task_id: string;
   task_index: number;
-  module_index: number;
-  module_name: string;
+  loaded: boolean = false;
+
+  photoUrl: SafeResourceUrl | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private storage: StorageService,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
+    private photoService: PhotoService,
     private studyTasksService: StudyTasksService,
-    private surveyDataService: SurveyDataService,
+    private surveyDataService: DataService,
     private toastController: ToastController,
     private ngZone: NgZone
   ) {}
@@ -93,7 +52,6 @@ export class SurveyPage implements OnInit {
    * Initialises the survey and displays it on the screen
    */
   async ngOnInit() {
-
     // necessary to update height of external embedded content
     window.addEventListener('message', (e) => {
       if (e.data.hasOwnProperty('frameHeight')) {
@@ -110,192 +68,125 @@ export class SurveyPage implements OnInit {
       }
     });
 
-    // the id of the task to be displayed
-    this.task_id = this.route.snapshot.paramMap.get('task_id') || '';
+    // load the task
+    this.task_id = this.route.snapshot.paramMap.get('task_id');
+    const task = await this.storage.getTaskByID(this.task_id);
+    this.task_index = task.index;
 
-    Promise.all([
-      this.storage.get('current-study'),
-      this.storage.get('uuid'),
-    ]).then(async (values) => {
-      const studyObject: any = values[0];
-      const uuid = values[1];
-      // get the task object for this task
+    // check if this task is valid
+    const todos = await this.studyTasksService.getToDos();
+    let taskAvailable = false;
+    for (const task of todos) {
+      if (task.task_id === this.task_id) {
+        taskAvailable = true;
+        break;
+      }
+    }
+    if (!taskAvailable) {
+      this.showToast(
+        'This task had a time limit and is no longer available.',
+        'bottom'
+      );
+      this.navController.navigateRoot('/');
+      return;
+    }
 
-      await this.studyTasksService.getAllTasks().then((tasks) => {
-        this.tasks = tasks;
+    // extract the JSON from the study object
+    this.survey = (await this.storage.getModuleByID(task.uuid))
+      .params as Survey;
 
-        for (let i = 0; i < this.tasks.length; i++) {
-          if (this.task_id === String(this.tasks[i].task_id)) {
-            this.module_name = this.tasks[i].name;
-            this.module_index = this.tasks[i].index;
-            this.task_index = i;
-            break;
+    // shuffle modules if required
+    if (this.survey.shuffle) {
+      this.survey.sections = this.shuffle(this.survey.sections);
+    }
+
+    // shuffle questions if required
+    for (const section of this.survey.sections) {
+      if (section.shuffle) {
+        section.questions = this.shuffle(section.questions);
+      }
+    }
+
+    // get the name of the current section
+    this.sectionName = this.survey.sections[this.sectionIndex].name;
+
+    // get the user ID and then set up question variables
+    // initialise all of the questions to be displayed
+    const uuid = await this.storage.getUuid();
+    this.setupQuestionVariables(uuid.toString());
+
+    // toggle rand_group questions
+    // figure out which ones are grouped together, randomly show one and set its response value to 1
+    const randomGroups: { [rand_group: string]: string[] } = {};
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        if (question.rand_group) {
+          // set a flag to indicate that this question shouldn't reappear via branching logic
+          question.noToggle = true;
+
+          // categorise questions by rand_group
+          if (!(question.rand_group in randomGroups)) {
+            randomGroups[question.rand_group] = [];
+            randomGroups[question.rand_group].push(question.id);
+          } else {
+            randomGroups[question.rand_group].push(question.id);
           }
         }
+      }
+    }
 
-        // check if this task is valid
-        this.studyTasksService.getTaskDisplayList().then((t) => {
-          let taskAvailable = false;
-          for (const task of t) {
-            if (String(task.task_id) === this.task_id) {
-              taskAvailable = true;
-              break;
-            }
-          }
-          if (!taskAvailable) {
-            this.showToast(
-              'This task had a time limit and is no longer available.',
-              'bottom'
-            );
-            this.navController.navigateRoot('/');
-          }
-        });
+    // from each rand_group, select a random item to show
+    const showThese = [];
+    for (const key in randomGroups) {
+      if (randomGroups.hasOwnProperty(key)) {
+        // select a random value from each array and add it to the "showThese array"
+        showThese.push(
+          randomGroups[key][
+            Math.floor(Math.random() * randomGroups[key].length)
+          ]
+        );
+      }
+    }
 
-        // extract the JSON from the study object
-        this.study = JSON.parse(studyObject);
-
-        // get the correct module
-        this.survey = this.study.modules[this.module_index];
-
-        // shuffle modules if required
-        if (this.survey.shuffle) {
-          this.survey.sections = this.shuffle(this.survey.sections);
+    // iterate back through and show the ones that have been randomly calculated
+    // while removing the branching attributes from those that are hidden
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        if (showThese.includes(question.id)) {
+          question.noToggle = false;
+          question.response = 1;
+          // hide any questions from the rand_group that were not made visible
+          // and remove any branching logic attributes
+          // ### How to do this in TS?
+        } else if (question.noToggle) {
+          question.hidden = true;
+          delete question.hide_id;
+          delete question.hide_value;
+          delete question.hide_if;
         }
+      }
+    }
 
-        // shuffle questions if required
-        if (this.survey.sections !== undefined) {
-          for (const section of this.survey.sections) {
-            if (section.shuffle) {
-              section.questions = this.shuffle(section.questions);
-            }
-          }
-        }
+    // toggle dynamic question setup
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        this.toggleDynamicQuestions(question);
+      }
+    }
 
-        // get the name of the current section
-        this.num_sections = this.survey.sections.length;
-        this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
-
-        // get the user ID and then set up question variables
-        // initialise all of the questions to be displayed
-        this.setupQuestionVariables(uuid.toString());
-
-        // set the submit text as appropriate
-        if (this.current_section < this.num_sections) {
-          this.submit_text = 'Next';
-        } else {
-          this.submit_text = this.survey.submit_text;
-        }
-
-        // set the current section of questions
-        this.questions =
-          this.survey.sections[this.current_section - 1].questions;
-
-        // toggle rand_group questions
-        // figure out which ones are grouped together, randomly show one and set its response value to 1
-        const randomGroups: { [rand_group: string]: string[] } = {};
-        if (this.survey.sections !== undefined) {
-          for (const section of this.survey.sections) {
-            for (const question of section.questions) {
-              if (question.rand_group) {
-                // set a flag to indicate that this question shouldn't reappear via branching logic
-                question.noToggle = true;
-
-                // categorise questions by rand_group
-                if (!(question.rand_group in randomGroups)) {
-                  randomGroups[question.rand_group] = [];
-                  randomGroups[question.rand_group].push(question.id);
-                } else {
-                  randomGroups[question.rand_group].push(question.id);
-                }
-              }
-            }
-          }
-        }
-
-        // from each rand_group, select a random item to show
-        const showThese = [];
-        for (const key in randomGroups) {
-          if (randomGroups.hasOwnProperty(key)) {
-            // select a random value from each array and add it to the "showThese array"
-            showThese.push(
-              randomGroups[key][
-                Math.floor(Math.random() * randomGroups[key].length)
-              ]
-            );
-          }
-        }
-
-        // iterate back through and show the ones that have been randomly calculated
-        // while removing the branching attributes from those that are hidden
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            if (showThese.includes(question.id)) {
-              question.noToggle = false;
-              question.response = 1;
-              // hide any questions from the rand_group that were not made visible
-              // and remove any branching logic attributes
-              // ### How to do this in TS?
-            } else if (question.noToggle) {
-              question.hideSwitch = false;
-              // @ts-ignore
-              delete question.hide_id;
-              // @ts-ignore
-              delete question.hide_value;
-              // @ts-ignore
-              delete question.hide_if;
-            }
-          }
-        }
-
-        // toggle dynamic question setup
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            this.toggleDynamicQuestions(question);
-          }
-        }
-
-        // log the user visiting this tab
-        this.surveyDataService.logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'survey',
-          event: 'entry',
-          module_index: this.module_index,
-        });
-      });
-    });
+    SplashScreen.hide();
   }
-
-  /**
-   * Called on ngOnInIt to set the variabled of the task
-   *
-   */
 
   /**
    * Handles the back button behaviour
    */
   back() {
-    if (this.current_section > 1) {
+    if (this.sectionIndex > 0) {
       this.ngZone.run(() => {
-        this.current_section--;
-        this.current_section_name =
-          this.survey.sections[this.current_section - 1].name;
-        this.questions =
-          this.survey.sections[this.current_section - 1].questions;
-        this.submit_text = 'Next';
+        this.sectionIndex--;
+        this.sectionName = this.survey.sections[this.sectionIndex].name;
       });
     } else {
-      // save an exit log
-      this.surveyDataService
-        .logPageVisitToServer({
-          timestamp: moment().format(),
-          milliseconds: moment().valueOf(),
-          page: 'survey',
-          event: 'exit',
-          module_index: this.module_index,
-        })
-        .catch(() => {});
       // nav back to the home screen
       this.navController.navigateRoot('/');
     }
@@ -314,7 +205,7 @@ export class SurveyPage implements OnInit {
           question.response = '';
           question.model = '';
           question.hideError = true;
-          question.hideSwitch = true;
+          question.hidden = false;
 
           // for datetime questions, default to the current date/time
           if (question.type === 'datetime') {
@@ -326,24 +217,15 @@ export class SurveyPage implements OnInit {
             question.type === 'media' &&
             (question.subtype === 'audio' || question.subtype === 'video')
           ) {
-            // @ts-ignore
-            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            question.safeurl = this.domSanitizer.bypassSecurityTrustResourceUrl(
               question.src
             );
             if (question.subtype === 'video') {
-              // @ts-ignore
-              question.thumb = this.domSanitizer.bypassSecurityTrustResourceUrl(
-                question.thumb
-              );
+              question.safethumb =
+                this.domSanitizer.bypassSecurityTrustResourceUrl(
+                  question.thumb
+                );
             }
-
-            // for external embedded content, sanitize the URLs to make them safe/work in html5 tags ### Since when is there an exteral type?
-          } else if (question.type === 'external') {
-            question.src = question.src + '?uuid=' + uuid;
-            // @ts-ignore
-            question.src = this.domSanitizer.bypassSecurityTrustResourceUrl(
-              question.src
-            );
 
             // for slider questions, set the default value to be halfway between min and max
           } else if (question.type === 'slider') {
@@ -397,6 +279,26 @@ export class SurveyPage implements OnInit {
 
     // trigger any branching tied to this question
     this.toggleDynamicQuestions(question);
+  }
+
+  /**
+   * Create a take photo function that returns the file blob text
+   */
+
+  async takePhoto(question: any) {
+    try {
+      const savedPhoto = await this.photoService.takePhoto();
+      if (savedPhoto) {
+        question.model ='data:image/jpeg;base64,' + savedPhoto.base64String;
+        this.setAnswer(question);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+    }
+  }
+
+  async deletePhoto(question: any) {
+    this.photoService.deletePhoto(question);
   }
 
   /**
@@ -456,57 +358,20 @@ export class SurveyPage implements OnInit {
     }
   }
 
+  /**
+   *
+   * @param question
+   * @returns
+   */
   toggleDynamicQuestions(question: Question) {
-    // if a question was hidden by rand_group
-    // don't do any branching
-    if (question.noToggle !== undefined && question.noToggle) {
-      return;
-    }
-
-    const id = question.id;
-    // hide anything with the id as long as the value is equal
     for (const section of this.survey.sections) {
       for (const q of section.questions) {
-        if ('hide_id' in q && q.hide_id === id) {
-          const hideValue = q.hide_value;
-
-          if (
-            question.type === 'multi' ||
-            question.type === 'yesno' ||
-            question.type === 'text'
-          ) {
-            // determine whether to hide/show the element
-            const hideIf = q.hide_if;
-            const valueEquals = hideValue === question.response;
-            if (valueEquals === hideIf) {
-              q.hideSwitch = false;
-            } else {
-              q.hideSwitch = true;
-            }
-          } else if (
-            question.type === 'slider' &&
-            typeof hideValue === 'string' &&
-            question.response
-          ) {
-            const direction = hideValue.substring(0, 1);
-            const cutoff = parseInt(
-              hideValue.substring(1, hideValue.length),
-              10
-            );
-            const lessThan = direction === '<';
-            if (lessThan) {
-              if (question.response <= cutoff) {
-                q.hideSwitch = true;
-              } else {
-                q.hideSwitch = false;
-              }
-            } else {
-              if (question.response >= cutoff) {
-                q.hideSwitch = true;
-              } else {
-                q.hideSwitch = false;
-              }
-            }
+        if (q.hide_id === question.id) {
+          if ((q.hide_value === question.response) === q.hide_if) {
+            this.hideQuestion(q);
+          } else {
+            q.hidden = false;
+            this.toggleDynamicQuestions(q);
           }
         }
       }
@@ -514,101 +379,91 @@ export class SurveyPage implements OnInit {
   }
 
   /**
-   * Triggered whenever the submit button is called
-   * Checks if all required questions have been answered and then moves to the next section/saves the response
+   * Handles the submit/next button in each section.
+   * Checks if all required questions have been answered and then moves to the next section/saves the response.
    */
   async submit() {
-    let errorCount = 0;
-    for (const question of this.questions) {
-      if (
-        question.required === true &&
-        (question.response === '' || question.response === undefined) &&
-        question.hideSwitch === true
-      ) {
-        question.hideError = false;
-        // Only works for question types other than instruction
-        if(question.type !== 'instruction'){
-          errorCount++;
-        }
+    // check if section has errors
+    const valid = !this.checkErrors();
+    if (!valid) {
+      this.content.scrollToTop(500);
+      this.showToast('You must answer all required (*) questions', 'bottom');
+      return;
+    }
 
+    // not the last section: go to the next section
+    if (this.sectionIndex + 1 !== this.survey.sections.length) {
+      this.ngZone.run(() => {
+        this.sectionIndex++;
+        this.sectionName = this.survey.sections[this.sectionIndex].name;
+        this.content.scrollToTop(0);
+      });
+      return;
+    }
+
+    // add the alert time to the response
+    const task = await this.storage.getTaskByID(this.task_id);
+    task.alert_time = moment(new Date(task.time).toISOString()).format();
+
+    // get a timestmap of submission time in both readable and ms format
+    const response_time = moment().format();
+    task.response_time = response_time;
+    const response_time_ms = moment().valueOf();
+    task.response_time_ms = response_time_ms;
+
+    // indicate that the current task is completed
+    task.completed = true;
+
+    // add all of the responses to an object in the task to be sent to server
+    const responses: SurveyResponse = {};
+    for (const section of this.survey.sections) {
+      for (const question of section.questions) {
+        responses[question.id] = question.response;
+      }
+    }
+    task.responses = responses;
+
+    // attempt to post surveyResponse to server
+    const response: Response = {
+      module_index: task.index,
+      module_name: task.name,
+      alert_time: task.alert_time,
+      response_time: response_time,
+      response_time_in_ms: response_time_ms,
+      data: responses,
+    };
+    await this.surveyDataService.sendResponse(response, 'survey_response');
+
+    // write tasks back to storage
+    await this.storage.saveTask(task);
+    this.navController.navigateRoot('/');
+  }
+
+  /**
+   * Checks, whether there are any errors in the current section.
+   *
+   * @returns A boolean value indicating whether the section has errors (true) or not (false)
+   */
+  checkErrors(): boolean {
+    const currentQuestions = this.survey.sections[this.sectionIndex].questions;
+    let errorCount = 0;
+    for (const question of currentQuestions) {
+      const error =
+        question.required &&
+        !question.hidden &&
+        question.type !== 'instruction' &&
+        question.type !== 'media' &&
+        (question.response === '' || question.response === undefined);
+
+      if (error) {
+        question.hideError = false;
+        errorCount++;
       } else {
         question.hideError = true;
       }
     }
 
-    if (errorCount === 0) {
-      // if user on last page and there are no errors, fine to submit
-      if (this.current_section === this.num_sections) {
-        // add the alert time to the response
-
-        this.tasks[this.task_index].alert_time = moment(
-          new Date(this.tasks[this.task_index].time).toISOString()
-        ).format();
-
-        // get a timestmap of submission time in both readable and ms format
-        const response_time = moment().format();
-        this.tasks[this.task_index].response_time = response_time;
-
-        const response_time_ms = moment().valueOf();
-        this.tasks[this.task_index].response_time_ms = response_time_ms;
-
-        // indicate that the current task is completed
-        this.tasks[this.task_index].completed = true;
-
-        // add all of the responses to an object in the task to be sent to server
-        const responses: Responses = {};
-        for (const section of this.survey.sections) {
-          for (const question of section.questions) {
-            responses[question.id] = question.response;
-          }
-        }
-        this.tasks[this.task_index].responses = responses;
-
-        // attempt to post surveyResponse to server
-        this.surveyDataService
-          .sendSurveyDataToServer({
-            module_index: this.module_index,
-            module_name: this.module_name,
-            responses,
-            response_time,
-            response_time_in_ms: response_time_ms,
-            alert_time: this.tasks[this.task_index].alert_time || '',
-          })
-          .catch(() => {});
-
-        // write tasks back to storage
-        await this.storage
-          .set('study-tasks', JSON.stringify(this.tasks))
-          .then(async () => {
-            // save an exit log
-            this.surveyDataService.logPageVisitToServer({
-              timestamp: moment().format(),
-              milliseconds: moment().valueOf(),
-              page: 'survey',
-              event: 'submit',
-              module_index: this.module_index,
-            });
-            this.navController.navigateRoot('/');
-          });
-      } else {
-        this.ngZone.run(() => {
-          this.current_section++;
-          this.questions =
-            this.survey.sections[this.current_section - 1].questions;
-          this.current_section_name =
-            this.survey.sections[this.current_section - 1].name;
-
-          if (this.current_section === this.num_sections) {
-            this.submit_text = this.survey.submit_text;
-          }
-
-          this.content.scrollToTop(0);
-        });
-      }
-    } else {
-      this.content.scrollToTop(500);
-      this.showToast('You must answer all required (*) questions', 'bottom');
-    }
+    return errorCount !== 0;
   }
 
   /**
@@ -633,6 +488,20 @@ export class SurveyPage implements OnInit {
     });
 
     toast?.present().catch(() => {});
+  }
+
+  /**
+   * Hides a question and all the questions whose visibility depends on the question.
+   */
+  hideQuestion(question: Question) {
+    question.hidden = true;
+    for (const section of this.survey.sections) {
+      for (const q of section.questions) {
+        if (q.hide_id === question.id) {
+          this.hideQuestion(q);
+        }
+      }
+    }
   }
 
   /**

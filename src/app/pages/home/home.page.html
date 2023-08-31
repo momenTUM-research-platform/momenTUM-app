@@ -3,70 +3,65 @@
     <ion-title> momenTUM </ion-title>
     <ion-buttons slot="start">
       <ion-button (click)="toggleTheme()">
-        <ion-icon slot="icon-only" [name]="darkMode ? 'moon' : 'sunny'"></ion-icon>
+        <ion-icon slot="icon-only" [name]="themeIconName"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<!-- Check to make sure the isHidden property is in the right place -->
 <ion-content class="ion-no-padding">
-  <ion-refresher
-    *ngIf="hideEnrolOptions"
-    slot="fixed"
-    (ionRefresh)="doRefresh($event)"
+  <!-- Displayed if user is not enrolled in a study -->
+  <div
+    *ngIf="showLogin"
+    style="display: flex; justify-content: center"
+    class="ion-margin"
   >
+    <ion-img
+      style="width: 60%; height: auto"
+      [src]="'assets/imgs/logo.png'"
+    ></ion-img>
+  </div>
+  <ion-text *ngIf="showLogin" style="margin-top: 5%">
+    <h1 style="text-align: center">Let's get started</h1>
+    <p class="welcome-msg" [innerHTML]="'msg_welcome' | translate"></p>
+  </ion-text>
+
+  <!-- Displays if user is enrolled in a study -->
+  <ion-refresher *ngIf="!showLogin" slot="fixed" (ionRefresh)="refresh($event)">
     <ion-refresher-content
       pullingIcon="chevron-down-circle-outline"
       refreshingSpinner="crescent"
     >
     </ion-refresher-content>
   </ion-refresher>
-  <!-- Displayed if user is not enrolled in a study -->
-  <ion-img
-  class="banner-image"
-    [src]="'assets/imgs/logo-name.png'"
-    [hidden]="hideEnrolOptions"
-  ></ion-img>
-  <ion-text [hidden]="hideEnrolOptions" style="margin-top:5%">
-    <h1 style="text-align: center">Let's get started</h1>
-    <p class="welcome-msg">
-      Welcome to <ion-label color="primary">momenTUM</ion-label> - a platform to
-      participate in research surveys directly from your smartphone.
-    </p>
-  </ion-text>
-
-  <!-- Displays if user is enrolled in a study -->
-  <div [hidden]="!hideEnrolOptions">
-    <ion-img
-      class="study-image"
-      *ngIf="study"
-      [hidden]="!hideEnrolOptions"
-      [src]="study.properties.banner_url"
-    ></ion-img>
-    <!--item list-->
-    <ng-container *ngFor="let task of task_list" [hidden]="!hideEnrolOptions">
-      <!--single item-->
+  <div *ngIf="!showLogin">
+    <ion-img [src]="bannerURL"></ion-img>
+    <!--tasks-->
+    <div *ngFor="let task of tasks">
       <ion-item
         lines="none"
         *ngIf="task.type !== 'header'"
         detail="true"
-        [routerLink]="task.type === 'alarm-outline' ? '/pvt/' + task.task_id : '/survey/' + task.task_id"
+        (click)="openTask(task)"
       >
-        <ion-icon color="medium" name="{{task.type}}" slot="start"></ion-icon>
+        <ion-icon
+          color="medium"
+          name="{{typeToIcon[task.type]}}"
+          slot="start"
+        ></ion-icon>
         <ion-label class="ion-text-wrap" color="primary">
           {{task.name}}
           <p *ngIf="!task.sticky" class="moment">{{task.moment}}</p>
         </ion-label>
       </ion-item>
-      <!--item group title-->
+      <!--task group title-->
       <ion-item *ngIf="task.type === 'header'" lines="none">
         <ion-label stacked class="title-label">{{task.label}}</ion-label>
       </ion-item>
-    </ng-container>
-    <ion-item lines="none" class="ion-text-center" [hidden]="task_list.length">
-      <ion-label *ngIf="study" class="ion-text-wrap">
-        {{study.properties.empty_msg}}
+    </div>
+    <ion-item lines="none" class="ion-text-center" [hidden]="tasks.length">
+      <ion-label class="ion-text-wrap">
+        {{emptyMessage}}
         <br />
         <ion-icon
           style="font-size: 3em"
@@ -78,13 +73,11 @@
   </div>
 </ion-content>
 
-<ion-footer [hidden]="hideEnrolOptions">
+<ion-footer *ngIf="showLogin">
   <ion-grid class="ion-margin-bottom">
     <ion-row class="ion-justify-content-center">
-      <ion-button
-        class="study-sign-in-button"
-        (click)="scanQR()"
-      >Scan QR Code</ion-button
+      <ion-button class="study-sign-in-button" (click)="scanQR()"
+        >Scan QR Code</ion-button
       >
     </ion-row>
     <ion-row class="ion-justify-content-center">

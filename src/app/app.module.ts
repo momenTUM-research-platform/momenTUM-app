@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 /* plugins */
 
 import { IonicStorageModule } from '@ionic/storage-angular';
-import { File } from '@ionic-native/file/ngx';
+
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -25,7 +25,6 @@ export function LanguageLoader(http: HttpClient) {
 
 @NgModule({
   declarations: [AppComponent],
-  entryComponents: [],
   imports: [
     BrowserModule,
     NgChartsModule,
@@ -42,7 +41,6 @@ export function LanguageLoader(http: HttpClient) {
     }),
   ],
   providers: [
-    File,
     FormsModule,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],

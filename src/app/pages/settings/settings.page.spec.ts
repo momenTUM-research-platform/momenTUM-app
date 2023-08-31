@@ -16,7 +16,7 @@ import { LanguageLoader } from '../../app.module';
 import { SettingsPage } from './settings.page';
 import { StorageService } from 'src/app/services/storage/storage.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
-import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
+import { DataService } from 'src/app/services/data/data.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { NotificationsService } from 'src/app/services/notification/notifications.service';
 import { Browser } from '@capacitor/browser';
@@ -86,8 +86,7 @@ describe('SettingsPage', () => {
 
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       const notificationService =
         fixture.debugElement.injector.get(NotificationsService);
       const navController = fixture.debugElement.injector.get(NavController);
@@ -203,8 +202,6 @@ describe('SettingsPage', () => {
       expect(spyStorageSet).toHaveBeenCalledTimes(1);
     });
   });
-
-
 });
 
 /**

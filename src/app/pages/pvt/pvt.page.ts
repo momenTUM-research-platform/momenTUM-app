@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { DataService } from '../../services/data/data.service';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { NavController, ViewWillLeave } from '@ionic/angular';
+import { PvtResponse, Response, Task } from 'src/app/interfaces/types';
+import { Pvt, Study } from 'src/app/interfaces/study';
 
 @Component({
   selector: 'app-pvt',
@@ -12,6 +14,8 @@ import { NavController, ViewWillLeave } from '@ionic/angular';
   styleUrls: ['./pvt.page.scss'],
 })
 export class PvtPage implements OnInit, ViewWillLeave {
+  taskID: string;
+
   // INPUT from study
   trials: number;
   min: number;
@@ -22,38 +26,31 @@ export class PvtPage implements OnInit, ViewWillLeave {
   submitText: string;
 
   // OUTPUT
-  moduleName: string;
-  moduleIndex: number;
-  reactionTimes: number[];
+  moduleId: string;
+  reactionTimes: number[] = [];
   alertTime: string;
 
   // HELPER VARIABLES:
   taskIndex: number;
   reacted: boolean;
-  reactedTooEarly: boolean;
-  reactedTooLate: boolean;
-  state: 'Instructions' | 'Countdown' | 'PVT' | 'Results' | 'Exited';
+  reactedTooEarly = false;
+  reactedTooLate = false;
+  state: 'Instructions' | 'Countdown' | 'PVT' | 'Results' | 'Exited' =
+    'Instructions';
   counter: number; // Countdown
-  timer: number; // for PVT page
+  timer = 0; // for PVT page
   instructionTimer: any; // for Instructions page
-  exited: boolean;
+  exited = false;
   readonly tooLateMessage = 'too late';
   readonly tooEarlyMessage = 'too early';
 
   constructor(
-    private surveyDataService: SurveyDataService,
+    private dataService: DataService,
     private navController: NavController,
     private route: ActivatedRoute,
     private studyTasksService: StudyTasksService,
     private storageService: StorageService
-  ) {
-    this.reactionTimes = [];
-    this.state = 'Instructions';
-    this.exited = false;
-    this.reactedTooLate = false;
-    this.reactedTooEarly = false;
-    this.timer = 0;
-  }
+  ) {}
 
   /**
    * Angular lifecycle hook method.
@@ -211,7 +208,10 @@ export class PvtPage implements OnInit, ViewWillLeave {
       do {
         this.instructionTimer = Date.now() - start; // update timer
         await this.sleep(0);
-      } while (this.instructionTimer < maxTime && this.state === 'Instructions');
+      } while (
+        this.instructionTimer < maxTime &&
+        this.state === 'Instructions'
+      );
       if (this.state !== 'Instructions') {
         break;
       }
@@ -224,44 +224,20 @@ export class PvtPage implements OnInit, ViewWillLeave {
    * copies all study-PVT-parameters from storage to the variables of this class.
    * */
   public async setStudyParameters() {
-    const task_id = this.route.snapshot.paramMap.get('task_id');
-    await this.getModule(task_id).then((module) => {
-      this.trials = module.trials;
-      this.min = module.min_waiting;
-      this.max = module.max_waiting;
-      this.moduleName = module.name;
-      this.showResults = module.show;
-      this.timeToTimeout = module.max_reaction;
-      this.enableExit = module.exit;
-      this.submitText = module.submit_text;
-    });
-  }
-
-  /**
-   * Finds a module in the local storage by one of its task_id's.
-   *
-   * @param task_id the task_id of a task of this module.
-   * @returns A Promise with the correct module from the local storage.
-   * */
-  public async getModule(task_id: string | null): Promise<any> {
-    return this.studyTasksService
-      .getAllTasks()
-      .then((tasks) => {
-        let taskIndex = 0;
-        for (const task of tasks) {
-          if (task_id === String(task.task_id)) {
-            this.moduleIndex = task.index;
-            this.alertTime = moment(new Date(task.time)).format();
-            this.taskIndex = taskIndex;
-            break;
-          }
-          taskIndex++;
-        }
-        return this.storageService.get('current-study');
-      })
-      .then(
-        (studyObject: any) => JSON.parse(studyObject).modules[this.moduleIndex]
-      );
+    this.taskID = this.route.snapshot.paramMap.get('task_id');
+    const params = await this.storageService.getModuleParamsByTaskId(
+      this.taskID
+    );
+    if (params.type === 'pvt') {
+      this.trials = params.trials;
+      this.min = params.min_waiting;
+      this.max = params.max_waiting;
+      this.showResults = params.show;
+      this.timeToTimeout = params.max_reaction;
+      this.enableExit = params.exit;
+    } else {
+      throw new Error('TypeError: The parameters need to be of type "pvt".');
+    }
   }
 
   /**
@@ -274,27 +250,26 @@ export class PvtPage implements OnInit, ViewWillLeave {
     const responseTime = moment().format();
     const responseTimeInMs = moment().valueOf();
 
-    const tasks: Task[] = await this.studyTasksService.getAllTasks();
-    tasks[this.taskIndex].completed = true;
-    tasks[this.taskIndex].response_time = responseTime;
-    tasks[this.taskIndex].response_time_ms = responseTimeInMs;
+    const task: Task = await this.storageService.getTaskByID(this.taskID);
+    task.completed = true;
+    task.response_time = responseTime;
+    task.response_time_ms = responseTimeInMs;
+    task.alert_time = moment(new Date(task.time).toISOString()).format();
+    const pvtResponse: PvtResponse = {
+      reaction_times: String(this.reactionTimes),
+    };
 
-    await this.surveyDataService.sendSurveyDataToServer({
-      module_index: this.moduleIndex,
-      module_name: this.moduleName,
-      entries: this.reactionTimes,
-      response_time: responseTime,
-      response_time_in_ms: responseTimeInMs,
-      alert_time: this.alertTime,
-    });
-    this.storageService.set('study-tasks', JSON.stringify(tasks));
-    this.surveyDataService.logPageVisitToServer({
-      timestamp: moment().format(),
-      milliseconds: moment().valueOf(),
-      page: 'pvt',
-      event: 'submit',
-      module_index: this.moduleIndex,
-    });
+    const response: Response = {
+      module_index: task.index,
+      module_name: task.name,
+      response_time: task.response_time,
+      response_time_in_ms: task.response_time_ms,
+      alert_time: task.alert_time,
+      data: pvtResponse,
+    };
+
+    await this.dataService.sendResponse(response, 'pvt_response');
+    this.storageService.saveTask(task);
   }
 
   /**

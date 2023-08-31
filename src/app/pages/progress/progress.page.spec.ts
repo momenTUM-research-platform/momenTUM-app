@@ -14,9 +14,9 @@ import {
 import { LanguageLoader } from '../../app.module';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { BarcodeService } from '../../services/barcode/barcode.service';
-import { StudyTasksService } from 'src/app/services/study-task/study-tasks.service';
+import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
 import { StorageService } from 'src/app/services/storage/storage.service';
-import { SurveyDataService } from 'src/app/services/survey-data/survey-data.service';
+import { DataService } from 'src/app/services/data/data.service';
 
 describe('ProgressPage', () => {
   let component: ProgressPage;
@@ -75,8 +75,7 @@ describe('ProgressPage', () => {
         fixture.debugElement.injector.get(StudyTasksService);
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       spySendSurveyDataToServer = spyOn(
         surveyDataService,
         'sendSurveyDataToServer'
@@ -117,7 +116,7 @@ describe('ProgressPage', () => {
       await fixture.detectChanges();
       await fixture.whenStable();
       expect(spyStorageGet).toHaveBeenCalledTimes(2);
-      expect(component.studyJSON).toEqual(stubStudy);
+      expect(component.study).toEqual(stubStudy);
       expect(component.enrolledInStudy).toBe(true);
       expect(component.studyDay).toBeGreaterThanOrEqual(1);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);

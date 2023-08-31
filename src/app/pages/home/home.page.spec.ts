@@ -2,9 +2,9 @@ import { IonicModule, IonIcon, AlertController } from '@ionic/angular';
 import { RefresherCustomEvent } from '@ionic/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
-import { File } from '@ionic-native/file/ngx';
+
 import { RouterTestingModule } from '@angular/router/testing';
-import { SurveyDataService } from '../../services/survey-data/survey-data.service';
+import { DataService } from '../../services/data/data.service';
 import {
   DEFAULT_LANGUAGE,
   TranslateLoader,
@@ -30,7 +30,7 @@ import { StorageService } from 'src/app/services/storage/storage.service';
 import study_tasks from '../../../../cypress/fixtures/study_tasks.json';
 import { NotificationsService } from '../../services/notification/notifications.service';
 import { EmptyError } from 'rxjs';
-import { StudyTasksService } from '../../services/study-task/study-tasks.service';
+import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from 'src/app/services/survey-cache/survey-cache.service';
 import { MockAlert, MockAlertController } from 'test-config/mocks-ionic';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -158,8 +158,7 @@ describe('HomePage', () => {
         fixture.debugElement.injector.get(StudyTasksService);
       const storageServiceCtrl =
         fixture.debugElement.injector.get(StorageService);
-      const surveyDataService =
-        fixture.debugElement.injector.get(SurveyDataService);
+      const surveyDataService = fixture.debugElement.injector.get(DataService);
       const surveyCacheService =
         fixture.debugElement.injector.get(SurveyCacheService);
       const notificationService =
@@ -255,11 +254,11 @@ describe('HomePage', () => {
     it('should call ionViewWillEnter', async () => {
       // Check assignment
       await component.ionViewWillEnter();
-      expect(component.darkMode).toBeDefined();
+      expect(component.themeIconName).toBeDefined();
       expect(spyrequestPermissions).toHaveBeenCalledTimes(1);
       expect(spyLoadingServicePresent).toHaveBeenCalledTimes(1);
       expect(component.hideEnrolOptions).toBe(true);
-      expect(component.isEnrolledInStudy).toBe(false);
+      expect(component.showLogin).toBe(false);
       expect(spyStorageGet).toHaveBeenCalledTimes(3);
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
@@ -274,9 +273,9 @@ describe('HomePage', () => {
       );
       // Check assignment
       const localURL = 'http://localhost:3001/api/surveys/study_for_ios.json';
-      await component.attemptToDownloadStudy(localURL, false, false);
+      await component.enrolInStudy(localURL, false, false);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
       expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
@@ -295,7 +294,7 @@ describe('HomePage', () => {
       );
       await component.enrolInStudy(stubValueStudy);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(component.study).toEqual(stubValueStudy);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
@@ -308,8 +307,8 @@ describe('HomePage', () => {
     });
     it('should call ionViewWillLeave', async () => {
       // Check assignment
-      component.isEnrolledInStudy = true;
-      expect(component.isEnrolledInStudy).toBe(true);
+      component.showLogin = true;
+      expect(component.showLogin).toBe(true);
       await component.ionViewWillLeave();
       expect(spylogPageVisitToServer).toHaveBeenCalledTimes(1);
       expect(spyUploadPendingData).toHaveBeenCalledTimes(2);
@@ -334,7 +333,7 @@ describe('HomePage', () => {
       const [alertArg] = alertControllerStub.calls.mostRecent().args;
       alertArg.buttons[1].handler(localURL);
       await fixture.whenStable();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyStorageSet).toHaveBeenCalledTimes(2);
       expect(spyGetRemoteData).toHaveBeenCalledTimes(1);
@@ -361,13 +360,11 @@ describe('HomePage', () => {
     });
     it('should call load Study Details', async () => {
       await component.loadStudyDetails();
-      expect(component.isEnrolledInStudy).toBe(true);
+      expect(component.showLogin).toBe(true);
       expect(component.hideEnrolOptions).toBe(true);
       expect(spyGetTaskDisplayList).toHaveBeenCalledTimes(1);
     });
   });
-
-
 
   it('should call attempt display enrol error', async () => {
     const mockAlertController = fixture.debugElement.injector.get(
@@ -413,10 +410,10 @@ describe('HomePage', () => {
   it('should call attempt to sort Task List', async () => {
     const stubValueTask: Task[] = JSON.parse(JSON.stringify(study_tasks.tasks));
 
-    component.task_list = stubValueTask;
-    expect(component.task_list).toEqual(stubValueTask);
+    component.tasks = stubValueTask;
+    expect(component.tasks).toEqual(stubValueTask);
     component.sortTasksList();
-    expect(component.task_list[0].index).toEqual(stubValueTask[0].index);
+    expect(component.tasks[0].index).toEqual(stubValueTask[0].index);
   });
 
   it('should call ionViewWillEnter and complete the refresher after a delay', (done) => {
@@ -427,7 +424,7 @@ describe('HomePage', () => {
     const refresher = new MockRefresher(myRefresherElement);
     spyOn(component, 'ionViewWillEnter');
 
-    component.doRefresh(refresher);
+    component.refresh(refresher);
     expect(component.ionViewWillEnter).toHaveBeenCalled();
 
     setTimeout(() => {

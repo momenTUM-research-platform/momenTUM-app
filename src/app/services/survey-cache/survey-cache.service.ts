@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../loading/loading-service.service';
-import { File } from '@ionic-native/file/ngx';
-import {
-  FileDownload,
-  FileDownloadResponse,
-} from 'capacitor-plugin-filedownload';
 import { StorageService } from '../storage/storage.service';
+import { Study } from 'src/app/interfaces/study';
+import { FileDownload } from 'capacitor-plugin-filedownload';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +18,6 @@ export class SurveyCacheService {
   mediaDownloadedCount = 0;
 
   constructor(
-    private file: File,
     private storage: StorageService,
     private loadingService: LoadingService
   ) {}
@@ -33,13 +29,18 @@ export class SurveyCacheService {
    */
   async downloadFile(url: string): Promise<string> {
     try {
-      // get the fileName from the URL
+      // Get the fileName from the URL
       const urlSplit = url.split('/');
       const fileName = urlSplit[urlSplit.length - 1];
-      const file: FileDownloadResponse = await FileDownload.download({
-        uri: url,
-        fileName: this.file.dataDirectory + fileName,
+
+      // Download the file and get its local URL
+      const file = await FileDownload.download({
+        url: url,
+        fileName: fileName,
       });
+
+      console.log('Downloaded file: ' + file);
+      // Return the local URL of the downloaded file
       return file.path;
     } catch (error) {
       throw error;
@@ -53,20 +54,20 @@ export class SurveyCacheService {
    */
   getMediaURLs(study: Study) {
     // get banner url
-    // @ts-ignore
     this.mediaToCache.banner = study.properties.banner_url;
 
     // get urls from media elements
     for (const module of study.modules) {
       // Must check if the sections exist,
       // they don't for pvt modules
-      if (module.sections) {
-        for (const section of module.sections) {
-          const mediaQuestions = section.questions.filter(
-            (question): question is Media => question.type === 'media'
-          );
+      if (module.params.type === 'survey' && module.params.sections) {
+        for (const section of module.params.sections) {
+          const mediaQuestions = section.questions.filter((question) => {
+            question.type === 'media';
+          });
           for (const question of mediaQuestions) {
-            this.mediaToCache[question.id] = question.src;
+            // @ts-ignore
+            this.mediaToCache[question.id] = question.type.src;
           }
         }
       }
@@ -122,52 +123,49 @@ export class SurveyCacheService {
   /**
    * Replaces the remote URLs for media items with the local URLs
    */
-  updateMediaURLsInStudy() {
-    this.storage.get('current-study').then((studyString: any) => {
-      try {
-        const studyObject: Study = JSON.parse(studyString);
-        // update the banner url first
-        // @ts-ignore
-        studyObject.properties.banner_url = this.localMediaURLs.banner;
+  async updateMediaURLsInStudy() {
+    const studyObject: Study = await this.storage.getStudy();
+    try {
+      // update the banner url first
+      studyObject.properties.banner_url = this.localMediaURLs.banner;
 
-        // update the other media items to the corresponding local URL
-        // get urls from media elements
-        for (const module of studyObject.modules) {
-          if (module.sections) {
-            for (const section of module.sections) {
-              // Must check if the sections exist,
-              // they don't for pvt modules
+      // update the other media items to the corresponding local URL
+      // get urls from media elements
+      for (const module of studyObject.modules) {
+        if (module.params.type === 'survey' && module.params.sections) {
+          for (const section of module.params.sections) {
+            // Must check if the sections exist,
+            // they don't for pvt modules
 
-              const mediaQuestions = section.questions.filter(
-                (question): question is Media => question.type === 'media'
-              );
+            const mediaQuestions = section.questions.filter(
+              (question) => question.type === 'media'
+            );
 
-              for (const question of mediaQuestions) {
-                if (question.id in this.localMediaURLs) {
-                  question.src = this.localMediaURLs[question.id];
-                }
-                if (question.subtype === 'video') {
-                  // @ts-ignore
-                  question.thumb = this.localMediaURLs.banner;
-                }
+            for (const question of mediaQuestions) {
+              if (question.id in this.localMediaURLs) {
+                // @ts-ignore
+                question.type.src = this.localMediaURLs[question.id];
+              }
+              // @ts-ignore
+              if (question.type.subtype === 'video') {
+                // @ts-ignore
+                question.thumb = this.localMediaURLs.banner;
               }
             }
           }
         }
-
-
-
-        // update the study protocol in storage
-        this.storage.set('current-study', JSON.stringify(studyObject));
-      } catch (e) {
-        console.log('Error: ' + e);
       }
 
-      // dismiss the loading spinner
-      if (this.loadingService) {
-        // Added this condition
-        this.loadingService.dismiss();
-      }
-    });
+      // update the study protocol in storage
+      this.storage.saveStudy(studyObject);
+    } catch (e) {
+      console.log(e);
+    }
+
+    // dismiss the loading spinner
+    if (this.loadingService) {
+      // Added this condition
+      this.loadingService.dismiss();
+    }
   }
 }
