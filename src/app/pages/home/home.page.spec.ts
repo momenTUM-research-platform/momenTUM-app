@@ -2,7 +2,7 @@ import { IonicModule, IonIcon, AlertController } from '@ionic/angular';
 import { RefresherCustomEvent } from '@ionic/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Storage } from '@ionic/storage';
-import { File } from '@ionic-native/file/ngx';
+
 import { RouterTestingModule } from '@angular/router/testing';
 import { DataService } from '../../services/data/data.service';
 import {

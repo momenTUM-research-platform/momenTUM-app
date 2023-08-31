@@ -46,8 +46,7 @@ exports.SurveyCacheService = void 0;
 var core_1 = require("@angular/core");
 var capacitor_plugin_filedownload_1 = require("capacitor-plugin-filedownload");
 var SurveyCacheService = /** @class */ (function () {
-    function SurveyCacheService(file, storage, loadingService) {
-        this.file = file;
+    function SurveyCacheService(storage, loadingService) {
         this.storage = storage;
         this.loadingService = loadingService;
         this.win = window;
@@ -74,10 +73,11 @@ var SurveyCacheService = /** @class */ (function () {
                         fileName = urlSplit[urlSplit.length - 1];
                         return [4 /*yield*/, capacitor_plugin_filedownload_1.FileDownload.download({
                                 url: url,
-                                fileName: this.file.dataDirectory + fileName
+                                fileName: fileName
                             })];
                     case 1:
                         file = _a.sent();
+                        // Return the local URL of the downloaded file
                         return [2 /*return*/, file.path];
                     case 2:
                         error_1 = _a.sent();

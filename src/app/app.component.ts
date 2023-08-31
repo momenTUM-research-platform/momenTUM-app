@@ -4,7 +4,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Router } from '@angular/router';
 import { DataService } from './services/data/data.service';
-import * as moment from 'moment';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { StorageService } from './services/storage/storage.service';
 import { NotificationsService } from './services/notification/notifications.service';
 import { ActionPerformed } from '@capacitor/local-notifications';
@@ -21,7 +21,9 @@ export class AppComponent implements OnInit {
     private surveyDataService: DataService,
     private router: Router,
     private storage: StorageService
-  ) {}
+  ) {
+    defineCustomElements(window);
+  }
 
   /**
    * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).

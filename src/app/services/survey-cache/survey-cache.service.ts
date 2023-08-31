@@ -1,12 +1,8 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../loading/loading-service.service';
-import { File } from '@ionic-native/file/ngx';
-import {
-  FileDownload,
-  FileDownloadResponse,
-} from 'capacitor-plugin-filedownload';
 import { StorageService } from '../storage/storage.service';
 import { Study } from 'src/app/interfaces/study';
+import { FileDownload } from 'capacitor-plugin-filedownload';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +18,6 @@ export class SurveyCacheService {
   mediaDownloadedCount = 0;
 
   constructor(
-    private file: File,
     private storage: StorageService,
     private loadingService: LoadingService
   ) {}
@@ -34,13 +29,17 @@ export class SurveyCacheService {
    */
   async downloadFile(url: string): Promise<string> {
     try {
-      // get the fileName from the URL
+      // Get the fileName from the URL
       const urlSplit = url.split('/');
       const fileName = urlSplit[urlSplit.length - 1];
-      const file: FileDownloadResponse = await FileDownload.download({
-        url,
-        fileName: this.file.dataDirectory + fileName,
+
+      // Download the file and get its local URL
+      const file = await FileDownload.download({
+        url: url,
+        fileName:  fileName,
       });
+
+      // Return the local URL of the downloaded file
       return file.path;
     } catch (error) {
       throw error;

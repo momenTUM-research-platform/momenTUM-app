@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, NgZone } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { StudyTasksService } from 'src/app/services/study-tasks/study-tasks.service';
 import { DataService } from '../../services/data/data.service';
@@ -11,6 +11,9 @@ import { Capacitor } from '@capacitor/core';
 import { Survey, Question, Option } from 'src/app/interfaces/study';
 import { Response, SurveyResponse } from 'src/app/interfaces/types';
 import { SplashScreen } from '@capacitor/splash-screen';
+import { PhotoService } from '../../services/photo/photo.service';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { CameraPhoto, Photo } from '@capacitor/camera';
 
 @Component({
   selector: 'app-survey',
@@ -30,11 +33,14 @@ export class SurveyPage implements OnInit {
   task_index: number;
   loaded: boolean = false;
 
+  photoUrl: SafeResourceUrl | null = null;
+
   constructor(
     private route: ActivatedRoute,
     private storage: StorageService,
     private domSanitizer: DomSanitizer,
     private navController: NavController,
+    private photoService: PhotoService,
     private studyTasksService: StudyTasksService,
     private surveyDataService: DataService,
     private toastController: ToastController,
@@ -273,6 +279,45 @@ export class SurveyPage implements OnInit {
 
     // trigger any branching tied to this question
     this.toggleDynamicQuestions(question);
+  }
+
+  /**
+   * Create a take photo function that returns the file blob text
+   */
+
+  async takePhoto(question: any) {
+    try {
+      const savedPhoto = await this.photoService.takePhoto();
+      if (savedPhoto) {
+        question.model = savedPhoto.uri;
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+    }
+  }
+
+  async deletePhoto(question: any) {
+    this.photoService.deletePhoto(question);
+  }
+
+  async viewPhoto(question: any) {
+    if (question.model) {
+      const blobString = await this.photoService.getPhotoAsBlobString(
+        question.model
+      );
+      const imageElement = await this.photoService.createImageFromBlobString(
+        blobString
+      );
+
+      // You can implement your logic to display the image, like opening a modal
+      // For example, assuming you have an element with id "imageModal"
+      const modal = document.getElementById('imageModal');
+      if (modal) {
+        modal.innerHTML = ''; // Clear any previous content
+        modal.appendChild(imageElement);
+        // Show the modal or perform your custom logic to display the image
+      }
+    }
   }
 
   /**

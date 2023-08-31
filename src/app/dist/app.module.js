@@ -17,7 +17,6 @@ var ng2_charts_1 = require("ng2-charts");
 var forms_1 = require("@angular/forms");
 /* plugins */
 var storage_angular_1 = require("@ionic/storage-angular");
-var ngx_1 = require("@ionic-native/file/ngx");
 var http_1 = require("@angular/common/http");
 var core_2 = require("@ngx-translate/core");
 var http_loader_1 = require("@ngx-translate/http-loader");
@@ -47,7 +46,6 @@ var AppModule = /** @class */ (function () {
                 }),
             ],
             providers: [
-                ngx_1.File,
                 forms_1.FormsModule,
                 { provide: router_1.RouteReuseStrategy, useClass: angular_1.IonicRouteStrategy },
             ],
