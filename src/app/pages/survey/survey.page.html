@@ -186,6 +186,16 @@
             <ion-icon name="close-sharp"></ion-icon>
           </ion-segment-button>
         </ion-segment>
+
+
+        <!-- Photo -->
+        <ion-segment
+          *ngIf="question.type === 'photo'"
+          [(ngModel)]="question.model"
+          (ionChange)="setAnswer(question)"
+        >
+
+        </ion-segment>
       </ion-card-content>
     </ion-card>
 

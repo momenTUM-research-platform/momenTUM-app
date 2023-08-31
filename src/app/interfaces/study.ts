@@ -201,7 +201,7 @@ export interface Section {
   shuffle: boolean;
 
   /** The questions in this section. */
-  questions: (Instruction | DateTime | YesNo | Slider | Media | Multi | Text)[];
+  questions: (Instruction | Photo | DateTime | YesNo | Slider | Media | Multi | Text)[];
 }
 
 export interface Question {
@@ -214,6 +214,7 @@ export interface Question {
   /** The question type. */
   type:
     | 'instruction'
+    | 'photo'
     | 'text'
     | 'yesno'
     | 'datetime'
@@ -244,6 +245,10 @@ export interface Question {
 
 export interface Instruction extends Question {
   type: 'instruction';
+}
+
+export interface Photo extends Question {
+  type: 'photo';
 }
 
 export interface YesNo extends Question {

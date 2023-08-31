@@ -38,7 +38,7 @@ export class SurveyCacheService {
       const urlSplit = url.split('/');
       const fileName = urlSplit[urlSplit.length - 1];
       const file: FileDownloadResponse = await FileDownload.download({
-        uri: url,
+        url,
         fileName: this.file.dataDirectory + fileName,
       });
       return file.path;

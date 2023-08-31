@@ -25,7 +25,6 @@ export function LanguageLoader(http: HttpClient) {
 
 @NgModule({
   declarations: [AppComponent],
-  entryComponents: [],
   imports: [
     BrowserModule,
     NgChartsModule,
