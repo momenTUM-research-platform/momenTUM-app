@@ -77,6 +77,7 @@ var SurveyCacheService = /** @class */ (function () {
                             })];
                     case 1:
                         file = _a.sent();
+                        console.log('Downloaded file: ' + file);
                         // Return the local URL of the downloaded file
                         return [2 /*return*/, file.path];
                     case 2:

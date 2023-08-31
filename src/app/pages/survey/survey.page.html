@@ -103,13 +103,11 @@
 
 
         <!-- Photo -->
-        <ion-segment *ngIf="question.type === 'photo'" [(ngModel)]="question.model" (ionChange)="setAnswer(question)">
+        <ion-segment *ngIf="question.type === 'photo'" [(ngModel)]="question.model">
           <!-- Create a button to take photo and set the question answer to the photo file -->
-          <ion-button (click)="takePhoto(question)">Take Photo</ion-button>
+          <ion-button fill="outline" class="photo-button" *ngIf="!question.model" (click)="takePhoto(question)">Take Photo</ion-button>
           <!-- Create a button to delete the photo -->
-          <ion-button *ngIf="question.model" (click)="deletePhoto(question)">Delete Photo</ion-button>
-          <!-- Create a button to view the photo -->
-          <ion-button *ngIf="question.model" (click)="viewPhoto(question)">View Photo</ion-button>
+          <ion-button fill="outline" class="photo-button" *ngIf="question.model" (click)="deletePhoto(question)">Delete Photo</ion-button>
           <!-- Display the photo -->
           <img *ngIf="question.model" [src]="question.model" alt="Taken Photo" />
         </ion-segment>

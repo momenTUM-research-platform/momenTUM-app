@@ -36,9 +36,10 @@ export class SurveyCacheService {
       // Download the file and get its local URL
       const file = await FileDownload.download({
         url: url,
-        fileName:  fileName,
+        fileName: fileName,
       });
 
+      console.log('Downloaded file: ' + file);
       // Return the local URL of the downloaded file
       return file.path;
     } catch (error) {

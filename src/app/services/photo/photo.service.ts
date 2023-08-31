@@ -6,7 +6,7 @@ import {
   Photo,
 } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Preferences } from '@capacitor/preferences';
+
 
 @Injectable({
   providedIn: 'root',
@@ -31,22 +31,17 @@ export class PhotoService {
   async takePhoto() {
     try {
       const photo: Photo = await Camera.getPhoto({
-        resultType: CameraResultType.Uri,
+        resultType: CameraResultType.Base64,
         source: CameraSource.Camera,
         quality: 90,
       });
 
-      // Save photo file to a specific directory
-      const savedPhoto = await this.savePhotoFile(photo);
-      return savedPhoto;
+      return  photo;
     } catch (error) {
       console.error('Error taking photo:', error);
       return null;
     }
   }
-
-
-
 
   async savePhotoFile(photo: Photo) {
     const fileName = new Date().getTime() + '.jpeg';
@@ -59,31 +54,4 @@ export class PhotoService {
   }
 
 
-  async getPhotoAsBlobString(photoFile: File): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event: any) => {
-        resolve(event.target.result);
-      };
-      reader.onerror = (error) => {
-        reject(error);
-      };
-      reader.readAsDataURL(photoFile);
-    });
-  }
-
-  async createImageFromBlobString(
-    blobString: string
-  ): Promise<HTMLImageElement> {
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        resolve(img);
-      };
-      img.onerror = (error) => {
-        reject(error);
-      };
-      img.src = blobString;
-    });
-  }
 }

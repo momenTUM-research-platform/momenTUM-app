@@ -298,7 +298,8 @@ var SurveyPage = /** @class */ (function () {
                     case 1:
                         savedPhoto = _a.sent();
                         if (savedPhoto) {
-                            question.model = savedPhoto.uri;
+                            question.model = 'data:image/jpeg;base64,' + savedPhoto.base64String;
+                            this.setAnswer(question);
                         }
                         return [3 /*break*/, 3];
                     case 2:
@@ -315,31 +316,6 @@ var SurveyPage = /** @class */ (function () {
             return __generator(this, function (_a) {
                 this.photoService.deletePhoto(question);
                 return [2 /*return*/];
-            });
-        });
-    };
-    SurveyPage.prototype.viewPhoto = function (question) {
-        return __awaiter(this, void 0, void 0, function () {
-            var blobString, imageElement, modal;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!question.model) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.photoService.getPhotoAsBlobString(question.model)];
-                    case 1:
-                        blobString = _a.sent();
-                        return [4 /*yield*/, this.photoService.createImageFromBlobString(blobString)];
-                    case 2:
-                        imageElement = _a.sent();
-                        modal = document.getElementById('imageModal');
-                        if (modal) {
-                            modal.innerHTML = ''; // Clear any previous content
-                            modal.appendChild(imageElement);
-                            // Show the modal or perform your custom logic to display the image
-                        }
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
-                }
             });
         });
     };

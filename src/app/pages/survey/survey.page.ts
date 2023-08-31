@@ -289,7 +289,8 @@ export class SurveyPage implements OnInit {
     try {
       const savedPhoto = await this.photoService.takePhoto();
       if (savedPhoto) {
-        question.model = savedPhoto.uri;
+        question.model ='data:image/jpeg;base64,' + savedPhoto.base64String;
+        this.setAnswer(question);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
@@ -298,26 +299,6 @@ export class SurveyPage implements OnInit {
 
   async deletePhoto(question: any) {
     this.photoService.deletePhoto(question);
-  }
-
-  async viewPhoto(question: any) {
-    if (question.model) {
-      const blobString = await this.photoService.getPhotoAsBlobString(
-        question.model
-      );
-      const imageElement = await this.photoService.createImageFromBlobString(
-        blobString
-      );
-
-      // You can implement your logic to display the image, like opening a modal
-      // For example, assuming you have an element with id "imageModal"
-      const modal = document.getElementById('imageModal');
-      if (modal) {
-        modal.innerHTML = ''; // Clear any previous content
-        modal.appendChild(imageElement);
-        // Show the modal or perform your custom logic to display the image
-      }
-    }
   }
 
   /**

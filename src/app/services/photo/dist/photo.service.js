@@ -78,27 +78,24 @@ var PhotoService = /** @class */ (function () {
     };
     PhotoService.prototype.takePhoto = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var photo, savedPhoto, error_2;
+            var photo, error_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 3, , 4]);
+                        _a.trys.push([0, 2, , 3]);
                         return [4 /*yield*/, camera_1.Camera.getPhoto({
-                                resultType: camera_1.CameraResultType.Uri,
+                                resultType: camera_1.CameraResultType.Base64,
                                 source: camera_1.CameraSource.Camera,
                                 quality: 90
                             })];
                     case 1:
                         photo = _a.sent();
-                        return [4 /*yield*/, this.savePhotoFile(photo)];
+                        return [2 /*return*/, photo];
                     case 2:
-                        savedPhoto = _a.sent();
-                        return [2 /*return*/, savedPhoto];
-                    case 3:
                         error_2 = _a.sent();
                         console.error('Error taking photo:', error_2);
                         return [2 /*return*/, null];
-                    case 4: return [2 /*return*/];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -119,38 +116,6 @@ var PhotoService = /** @class */ (function () {
                         savedFile = _a.sent();
                         return [2 /*return*/, savedFile];
                 }
-            });
-        });
-    };
-    PhotoService.prototype.getPhotoAsBlobString = function (photoFile) {
-        return __awaiter(this, void 0, Promise, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var reader = new FileReader();
-                        reader.onload = function (event) {
-                            resolve(event.target.result);
-                        };
-                        reader.onerror = function (error) {
-                            reject(error);
-                        };
-                        reader.readAsDataURL(photoFile);
-                    })];
-            });
-        });
-    };
-    PhotoService.prototype.createImageFromBlobString = function (blobString) {
-        return __awaiter(this, void 0, Promise, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        var img = new Image();
-                        img.onload = function () {
-                            resolve(img);
-                        };
-                        img.onerror = function (error) {
-                            reject(error);
-                        };
-                        img.src = blobString;
-                    })];
             });
         });
     };
