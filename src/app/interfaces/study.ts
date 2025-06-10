@@ -83,41 +83,25 @@ export interface Module {
  * Definition of the scheduling of a study intervention.
  */
 export interface Alerts {
-  /** The title of the notifications of this module. */
   title: string;
-
-  /** The message in the notifications of this module. */
   message: string;
-
-  /**
-   * The number of days after which this the tasks should start being scheduled for this module.
-   * 0 means they will be scheduled for the day of enrolment.
-   */
-  start_offset: number;
-
-  /** The total number of days that the tasks should be scheduled for this module. */
-  duration: number;
-
-  /** A list of hours-minutes pairs which define the time of the day at which an intervention for this module will be scheduled. */
-  times: Time[];
-
-  /** Indicates whether the time of every intervention should be chosen randomly. */
+  startDateTime?: string;
+  rrule?: string;
+  recurrence?: {
+    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+    interval?: number;
+    byWeekday?: string[];
+    byMonthday?: number[];
+    byHour?: number;
+    byMinute?: number;
+    until?: string;
+  };
   random: boolean;
-
-  /** Defines a random interval in minutes for the randomization of the scheduling of tasks. */
-  random_interval: number;
-
-  /** Indicates whether the tasks should stay or disappear after being completed. */
+  randomInterval: number;
   sticky: boolean;
-
-  /** Defines a group name under which the tasks of this module should be grouped. */
-  sticky_label: string;
-
-  /** Indicates whether every task of this module should disappear after a specified amount of time. */
+  stickyLabel: string;
   timeout: boolean;
-
-  /** Defines the amount of time after which every task of this module should disappear, in milliseconds. */
-  timeout_after: number;
+  timeoutAfter: number;
 }
 
 /** Definition of a progress graph that will be displayed for each module in the progress page. */

@@ -1,14 +1,39 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
-import { LoadingService } from '../loading/loading-service.service';
-import { Study } from 'src/app/interfaces/study';
 import { Task } from 'src/app/interfaces/types';
+import { RRule, rrulestr } from 'rrule';
+import { Alerts } from 'src/app/interfaces/study';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudyTasksService {
   constructor(private storageService: StorageService) {}
+
+  private generateTaskDates(alerts: Alerts): Date[] {
+    if (alerts.startDateTime) {
+      return [new Date(alerts.startDateTime)];
+    }
+    if (alerts.rrule) {
+      const rule = rrulestr(alerts.rrule) as RRule;
+      return rule.all((_, i) => i < 30);
+    }
+    if (alerts.recurrence) {
+      const r = alerts.recurrence;
+      const rule = new RRule({
+        freq: RRule[r.frequency],
+        interval: r.interval || 1,
+        byweekday: r.byWeekday?.map(d => RRule[d]),
+        bymonthday: r.byMonthday,
+        dtstart: alerts.startDateTime ? new Date(alerts.startDateTime) : new Date(),
+        until: r.until ? new Date(r.until) : undefined,
+        byhour: r.byHour,
+        byminute: r.byMinute,
+      });
+      return rule.all((_, i) => i < 30);
+    }
+    return [];
+  }
 
   /**
    * Generates all the tasks (interventions) from the study.
@@ -34,83 +59,41 @@ export class StudyTasksService {
 
     for (const [i, mod] of study.modules.entries()) {
       if (mod.condition === condition || mod.condition === '*') {
-        const module_duration = mod.alerts.duration;
-        const module_offset = mod.alerts.start_offset;
-        const module_random = mod.alerts.random;
-        const module_randomInterval = mod.alerts.random_interval;
-        const module_times = mod.alerts.times;
+        const dates = this.generateTaskDates(mod.alerts);
+        let stickyCount = 0;
 
-        const startDay = new Date(); // set a date object for today
-        startDay.setHours(0, 0, 0, 0); // set the time to midnight
+        for (const taskTime of dates) {
+          const scheduledTime = new Date(taskTime);
+          if (mod.alerts.random) {
+            scheduledTime.setMinutes(scheduledTime.getMinutes() - mod.alerts.randomInterval);
+            const randomOffset = Math.random() * (mod.alerts.randomInterval * 2);
+            scheduledTime.setMinutes(scheduledTime.getMinutes() + randomOffset);
+          }
+          const localeOpts = {
+            weekday: 'short', year: 'numeric', month: 'long',
+            day: 'numeric', hour: 'numeric', minute: 'numeric'
+          } as const;
 
-        // add offset days to get first day of alerts
-        startDay.setDate(startDay.getDate() + module_offset);
-
-        // counter to be used when scheduling sticky tasks with notifications
-        let sticky_count = 0;
-
-        for (let numDays = 0; numDays < module_duration; numDays++) {
-          // for each alert time, get the hour and minutes and if necessary randomise it
-          module_times.forEach((module) => {
-            const taskTime = new Date(startDay.getTime());
-            taskTime.setHours(module.hours);
-            taskTime.setMinutes(module.minutes);
-
-            if (module_random) {
-              // remove the randomInterval from the time
-              taskTime.setMinutes(
-                taskTime.getMinutes() - module_randomInterval
-              );
-
-              // calc a random number between 0 and (randomInterval * 2)
-              // to account for randomInterval either side
-              const randomMinutes = Math.random() * (module_randomInterval * 2);
-
-              // add the random number of minutes to the dateTime
-              taskTime.setMinutes(taskTime.getMinutes() + randomMinutes);
-            }
-
-            // create a task object
-            const options = {
-              weekday: 'short',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-            } as const;
-
-            const task_obj: Task = {
-              uuid: mod.id,
-              index: i,
-              task_id: String(task_id),
-              name: mod.name,
-              type: mod.params.type,
-              hidden: !(mod.alerts.sticky && sticky_count === 0),
-              unlock_after:
-                mod.unlock_after === undefined ? [] : mod.unlock_after,
-              sticky: mod.alerts.sticky,
-              sticky_label: mod.alerts.sticky_label,
-              alert_title: mod.alerts.title,
-              alert_message: mod.alerts.message,
-              timeout: mod.alerts.timeout,
-              timeout_after: mod.alerts.timeout_after,
-              time: taskTime.toString(),
-              locale: taskTime.toLocaleString('en-US', options),
-              completed: false,
-            };
-
-            tasks.push(task_obj);
-
-            // increment task id
-            task_id++;
-
-            // increment the sticky count
-            sticky_count++;
-          });
-
-          // as a final step increment the date by 1 to set for next day
-          startDay.setDate(startDay.getDate() + 1);
+          const taskObj: Task = {
+            uuid: mod.id,
+            index: i,
+            task_id: String(task_id++),
+            name: mod.name,
+            type: mod.params.type,
+            hidden: !(mod.alerts.sticky && stickyCount === 0),
+            unlock_after: mod.unlock_after || [],
+            sticky: mod.alerts.sticky,
+            sticky_label: mod.alerts.stickyLabel,
+            alert_title: mod.alerts.title,
+            alert_message: mod.alerts.message,
+            timeout: mod.alerts.timeout,
+            timeout_after: mod.alerts.timeoutAfter,
+            time: scheduledTime.toString(),
+            locale: scheduledTime.toLocaleString('en-US', localeOpts),
+            completed: false,
+          };
+          tasks.push(taskObj);
+          stickyCount++;
         }
       }
     }
