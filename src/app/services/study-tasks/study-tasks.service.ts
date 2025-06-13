@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { Task } from 'src/app/interfaces/types';
-import { RRule, rrulestr } from 'rrule';
+import { RRule } from 'rrule';
 import { Alerts } from 'src/app/interfaces/study';
 
 @Injectable({
@@ -10,29 +10,43 @@ import { Alerts } from 'src/app/interfaces/study';
 export class StudyTasksService {
   constructor(private storageService: StorageService) {}
 
+  /**
+   * Generates dates for tasks based on the new 'repeat' and 'interval' fields,
+   * and logs the resulting dates for debugging.
+   */
   private generateTaskDates(alerts: Alerts): Date[] {
-    if (alerts.startDateTime) {
-      return [new Date(alerts.startDateTime)];
+    if (!alerts.startDateTime) {
+      console.log('generateTaskDates: no startDateTime, returning []');
+      return [];
     }
-    if (alerts.rrule) {
-      const rule = rrulestr(alerts.rrule) as RRule;
-      return rule.all((_, i) => i < 30);
+    const dtstart = new Date(alerts.startDateTime);
+
+    if (alerts.repeat === 'never') {
+      console.log('generateTaskDates (never):', dtstart);
+      return [dtstart];
     }
-    if (alerts.recurrence) {
-      const r = alerts.recurrence;
-      const rule = new RRule({
-        freq: RRule[r.frequency],
-        interval: r.interval || 1,
-        byweekday: r.byWeekday?.map(d => RRule[d]),
-        bymonthday: r.byMonthday,
-        dtstart: alerts.startDateTime ? new Date(alerts.startDateTime) : new Date(),
-        until: r.until ? new Date(r.until) : undefined,
-        byhour: r.byHour,
-        byminute: r.byMinute,
-      });
-      return rule.all((_, i) => i < 30);
+
+    const ruleOptions: any = {
+      dtstart,
+      freq: RRule[alerts.repeat.toUpperCase()],
+      interval: alerts.interval ?? 1,
+      until: alerts.until ? new Date(alerts.until) : undefined,
+    };
+
+    if (alerts.repeat === 'weekly') {
+      const weekdays = ['SU','MO','TU','WE','TH','FR','SA'];
+      ruleOptions.byweekday = [RRule[weekdays[dtstart.getUTCDay()]]];
+    } else if (alerts.repeat === 'monthly') {
+      ruleOptions.bymonthday = [dtstart.getUTCDate()];
+    } else if (alerts.repeat === 'yearly') {
+      ruleOptions.bymonth = [dtstart.getUTCMonth() + 1];
+      ruleOptions.bymonthday = [dtstart.getUTCDate()];
     }
-    return [];
+
+    const rule = new RRule(ruleOptions);
+    const allDates = rule.all((_, i) => i < 30);
+    console.log('generateTaskDates (' + alerts.repeat + '):', allDates);
+    return allDates;
   }
 
   /**

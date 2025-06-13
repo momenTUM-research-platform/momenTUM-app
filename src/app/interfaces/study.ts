@@ -85,17 +85,19 @@ export interface Module {
 export interface Alerts {
   title: string;
   message: string;
-  startDateTime?: string;
-  rrule?: string;
-  recurrence?: {
-    frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-    interval?: number;
-    byWeekday?: string[];
-    byMonthday?: number[];
-    byHour?: number;
-    byMinute?: number;
-    until?: string;
-  };
+
+  /** Initial notification date and time (ISO string). */
+  startDateTime: string;
+
+  /** How often to repeat this notification. */
+  repeat: 'never' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+
+  /** Only used if repeat ≠ 'never'; e.g. 3 → every 3 days/weeks/etc. */
+  interval: number;
+
+  /** Optional end date for repeating notifications (YYYY-MM-DD). */
+  until?: string;
+
   random: boolean;
   randomInterval: number;
   sticky: boolean;

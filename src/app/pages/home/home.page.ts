@@ -230,7 +230,7 @@ export class HomePage implements OnInit {
           handler: (response) => {
             // create URL for study
             const url =
-              'https://tuspl22-momentum.srv.mwn.de/api/v1/studies/' +
+              'http://localhost:8200/api/v2/studies/' +
               response.id;
             this.enrolInStudy(url);
           },
