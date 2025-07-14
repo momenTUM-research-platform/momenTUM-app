@@ -53,15 +53,41 @@
         <!--image type-->
         <ion-img *ngIf="question.type === 'media' && question.subtype === 'image'" style="width: 100%"
           [src]="question.src"></ion-img>
-        <!--short text input-->
-        <ion-input *ngIf="question.type === 'text' && question.subtype !== 'long'" [(ngModel)]="question.model"
-          (ionBlur)="setAnswer(question)" type="{{question.subtype === 'short' ? 'text' : 'number'}}" autocomplete="on"
-          autocorrect="on" placeholder="{{question.subtype === 'short' ? 'Enter response...' : 'Enter number...'}}"
-          pattern="{{question.subtype === 'short' ? undefined : '\d*'}}">
+        <!-- short text input -->
+        <ion-input
+        *ngIf="question.type === 'text' && question.subtype === 'short'"
+        [(ngModel)]="question.model"
+        (ionBlur)="setAnswer(question)"
+        type="text"
+        autocomplete="on"
+        autocorrect="on"
+        placeholder="Enter response..."
+        >
         </ion-input>
-        <!--long text input-->
-        <ion-textarea *ngIf="question.type === 'text' && question.subtype === 'long'" [(ngModel)]="question.model"
-          (ionBlur)="setAnswer(question)" placeholder="Enter response..." auto-grow="true" rows="3"></ion-textarea>
+        <!-- numeric text input -->
+        <ion-input
+        *ngIf="question.type === 'text' && question.subtype === 'numeric'"
+        [(ngModel)]="question.model"
+        (ionBlur)="setAnswer(question)"
+        type="number"
+        [min]="question.min_value"
+        [max]="question.max_value"
+        placeholder="Enter number…"
+        >
+        </ion-input>
+        <!-- inline validation message -->
+        <ion-text color="danger" *ngIf="question.errorMessage">
+          {{ question.errorMessage }}
+        </ion-text>
+        <!-- long text input -->
+        <ion-textarea
+        *ngIf="question.type === 'text' && question.subtype === 'long'"
+        [(ngModel)]="question.model"
+        (ionBlur)="setAnswer(question)"
+        placeholder="Enter response..."
+        auto-grow="true"
+        rows="3"
+        ></ion-textarea>
         <!--multi input-->
         <ion-list *ngIf="question.type === 'multi'">
           <!--radio-->

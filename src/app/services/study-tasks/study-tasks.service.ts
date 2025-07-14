@@ -1,217 +1,209 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 import { Task } from 'src/app/interfaces/types';
+import { Study, Alerts } from 'src/app/interfaces/study';
 import { RRule } from 'rrule';
-import { Alerts } from 'src/app/interfaces/study';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class StudyTasksService {
+  private readonly MAX_OCCURRENCES = 60;
+
   constructor(private storageService: StorageService) {}
 
-  /**
-   * Generates dates for tasks based on the new 'repeat' and 'interval' fields,
-   * and logs the resulting dates for debugging.
-   */
-  private generateTaskDates(alerts: Alerts): Date[] {
-    if (!alerts.startDateTime) {
-      console.log('generateTaskDates: no startDateTime, returning []');
-      return [];
-    }
-    const dtstart = new Date(alerts.startDateTime);
-
-    if (alerts.repeat === 'never') {
-      console.log('generateTaskDates (never):', dtstart);
-      return [dtstart];
+  /** Generate & save all tasks from the current study */
+  async generateStudyTasks(): Promise<void> {
+    const study: Study | null = await this.storageService.getStudy();
+    if (!study) {
+      console.warn('No study found, aborting task generation.');
+      return;
     }
 
-    const ruleOptions: any = {
-      dtstart,
-      freq: RRule[alerts.repeat.toUpperCase()],
-      interval: alerts.interval ?? 1,
-      until: alerts.until ? new Date(alerts.until) : undefined,
-    };
-
-    if (alerts.repeat === 'weekly') {
-      const weekdays = ['SU','MO','TU','WE','TH','FR','SA'];
-      ruleOptions.byweekday = [RRule[weekdays[dtstart.getUTCDay()]]];
-    } else if (alerts.repeat === 'monthly') {
-      ruleOptions.bymonthday = [dtstart.getUTCDate()];
-    } else if (alerts.repeat === 'yearly') {
-      ruleOptions.bymonth = [dtstart.getUTCMonth() + 1];
-      ruleOptions.bymonthday = [dtstart.getUTCDate()];
-    }
-
-    const rule = new RRule(ruleOptions);
-    const allDates = rule.all((_, i) => i < 30);
-    console.log('generateTaskDates (' + alerts.repeat + '):', allDates);
-    return allDates;
-  }
-
-  /**
-   * Generates all the tasks (interventions) from the study.
-   * - assigns the current participant to one of the random conditions.
-   * - iterates through all modules and
-   *
-   * @param study A JSON object that contains all data about a study
-   */
-  async generateStudyTasks() {
-    // get study from storage
-    const study = await this.storageService.getStudy();
-    if (study === null) return;
-
-    // allocate the participant to a study condition
+    // 1) Randomize participant condition
     const conditions = study.properties.conditions;
-    const random_index = Math.floor(Math.random() * conditions.length);
-    const condition: string = conditions[random_index];
-    this.storageService.saveCondition(condition);
+    const condition = conditions[Math.floor(Math.random() * conditions.length)];
+    console.log(`Selected condition: ${condition}`, conditions);
+    await this.storageService.saveCondition(condition);
 
-    // generate study tasks
     const tasks: Task[] = [];
-    let task_id = 101;
+    let nextId = 101;
 
-    for (const [i, mod] of study.modules.entries()) {
-      if (mod.condition === condition || mod.condition === '*') {
-        const dates = this.generateTaskDates(mod.alerts);
-        let stickyCount = 0;
+    // 2) For each module matching the condition, build dates + times
+    for (const [idx, mod] of (study.modules || []).entries()) {
+      if (mod.condition !== '*' && mod.condition !== condition) continue;
 
-        for (const taskTime of dates) {
-          const scheduledTime = new Date(taskTime);
-          if (mod.alerts.random) {
-            scheduledTime.setMinutes(scheduledTime.getMinutes() - mod.alerts.randomInterval);
-            const randomOffset = Math.random() * (mod.alerts.randomInterval * 2);
-            scheduledTime.setMinutes(scheduledTime.getMinutes() + randomOffset);
-          }
-          const localeOpts = {
-            weekday: 'short', year: 'numeric', month: 'long',
-            day: 'numeric', hour: 'numeric', minute: 'numeric'
-          } as const;
+      console.log(`Generating dates for module ${mod.id}`, mod.alerts);
+      const dates = this.generateTaskDates(mod.alerts);
+      console.log(` → raw dates (${dates.length}):`, dates);
 
-          const taskObj: Task = {
-            uuid: mod.id,
-            index: i,
-            task_id: String(task_id++),
-            name: mod.name,
-            type: mod.params.type,
-            hidden: !(mod.alerts.sticky && stickyCount === 0),
-            unlock_after: mod.unlock_after || [],
-            sticky: mod.alerts.sticky,
-            sticky_label: mod.alerts.stickyLabel,
-            alert_title: mod.alerts.title,
-            alert_message: mod.alerts.message,
-            timeout: mod.alerts.timeout,
-            timeout_after: mod.alerts.timeoutAfter,
-            time: scheduledTime.toString(),
-            locale: scheduledTime.toLocaleString('en-US', localeOpts),
-            completed: false,
-          };
-          tasks.push(taskObj);
-          stickyCount++;
+      let stickyCount = 0;
+      for (const dt of dates) {
+        this.pushTask(mod, idx, dt, stickyCount++, nextId++, tasks);
+        for (const hhmm of mod.alerts.times ?? []) {
+          const extraDate = this.mergeDateTime(dt, hhmm);
+          this.pushTask(mod, idx, extraDate, stickyCount++, nextId++, tasks);
         }
       }
     }
 
-    // sort the tasks
-    tasks.sort((a: Task, b: Task) => {
-      const dateA = new Date(a.time);
-      const dateB = new Date(b.time);
-
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    // save the tasks
+    // 3) Sort, log, & save
+    tasks.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    console.log(`Final tasks (${tasks.length}):`, tasks.map(t => t.time));
     await this.storageService.saveTasks(tasks);
   }
 
+  /** Build array of Dates from alerts.startDateTime + repeat/interval/until */
+  private generateTaskDates(alerts: Alerts): Date[] {
+    const { startDateTime, repeat, interval, until } = alerts;
+    const dtstart = new Date(startDateTime);
+    if (isNaN(dtstart.getTime())) {
+      console.error('Invalid startDateTime:', startDateTime);
+      return [];
+    }
+    if (repeat === 'never') {
+      return [dtstart];
+    }
+
+    const opts: any = {
+      dtstart,
+      freq: RRule[repeat.toUpperCase()],
+      interval: interval || 1,
+      // if no until provided, we’ll stop after 30 occurrences
+      until: until
+        ? new Date(until + 'T23:59:59')
+        : undefined,
+      count: until
+        ? undefined
+        : 60
+    };
+
+    try {
+      const rule = new RRule(opts);
+      if (!until) {
+        // cap unbounded recurrences
+        return rule.all((_, i) => i < this.MAX_OCCURRENCES);
+      }
+      return rule.all();
+    } catch (e) {
+      console.error('RRule error with options', opts, e);
+      return [];
+    }
+  }
+
   /**
-   * Returns all the tasks that have been created for a study
+   * Push a single Task into the list, applying random offset if needed.
    */
+  private pushTask(
+    mod: Study['modules'][0],
+    modIndex: number,
+    date: Date,
+    stickyCount: number,
+    idNum: number,
+    out: Task[]
+  ): void {
+    const scheduled = new Date(date);
+    if (mod.alerts.random) {
+      scheduled.setMinutes(scheduled.getMinutes() - mod.alerts.randomInterval);
+      scheduled.setMinutes(
+        scheduled.getMinutes() + Math.random() * mod.alerts.randomInterval * 2
+      );
+    }
+
+    const localeOpts = {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    } as const;
+
+    out.push({
+      uuid: mod.id,
+      index: modIndex,
+      task_id: String(idNum),
+      name: mod.name,
+      type: mod.params.type,
+      hidden: !(mod.alerts.sticky && stickyCount === 0),
+      unlock_after: mod.unlock_after ?? [],
+      sticky: mod.alerts.sticky,
+      sticky_label: mod.alerts.stickyLabel,
+      alert_title: mod.alerts.title,
+      alert_message: mod.alerts.message,
+      timeout: mod.alerts.timeout,
+      timeout_after: mod.alerts.timeoutAfter,
+      time: scheduled.toISOString(),
+      locale: scheduled.toLocaleString('en-US', localeOpts),
+      completed: false,
+    });
+  }
+
+  /** Merge a Date’s YYYY-MM-DD with an “HH:mm” or “HH:mm:ss” string */
+  private mergeDateTime(base: Date, hm: string): Date {
+    const parts = hm.split(':').map(Number);
+    const [h, m] = parts;
+    if (parts.length < 2 || isNaN(h) || isNaN(m)) {
+      console.warn('Invalid time string:', hm);
+      return new Date(base);
+    }
+    const d = new Date(base);
+    d.setHours(h, m, 0, 0);
+    return d;
+  }
+
+  /** Retrieve all tasks (raw) */
   async getAllTasks(): Promise<Task[]> {
-    const tasks: Task[] = await this.storageService.getTasks();
-    return tasks;
+    return (await this.storageService.getTasks()) ?? [];
   }
 
-  /**
-   * Gets the tasks that are currently available for the user to complete
-   */
-  async getToDos(): Promise<Task[]> {
-    const tasks: Task[] = await this.storageService.getTasks();
-    let todos = [];
-    const sticky_tasks = [];
-    const time_tasks = [];
-    let last_header = '';
-    for (const task of tasks) {
-      // check if task has a pre_req
-      const unlocked = this.checkTaskIsUnlocked(task, tasks);
-      const alertTime = new Date(Date.parse(task.time));
-      const now = new Date();
+/** Retrieve only unlocked, non-expired tasks */
+async getToDos(): Promise<Task[]> {
+  const tasks = (await this.storageService.getTasks()) ?? [];
+  const now = new Date();
+  const sticky: any[] = [];
+  const timed: any[] = [];
+  let lastLabel = '';
 
-      if (now > alertTime && unlocked) {
-        if (task.sticky) {
-          if (!task.hidden) {
-            if (last_header !== task.sticky_label) {
-              // push a new header into the sticky_tasks array
-              const header = { type: 'header', label: task.sticky_label };
-              sticky_tasks.push(header);
-              last_header = task.sticky_label;
-            }
-            // push the sticky task
-            sticky_tasks.push(task);
-          }
-        } else {
-          // check if task is set to timeout
-          if (task.timeout) {
-            let timeoutTime = new Date(Date.parse(task.time));
-            timeoutTime = new Date(timeoutTime.getTime() + task.timeout_after);
+  for (const t of tasks) {
+    const alertTime = new Date(t.time);
+    if (!this.checkUnlocked(t, tasks) || alertTime > now) continue;
 
-            if (now < timeoutTime && !task.completed) {
-              time_tasks.push(task);
-            }
-          } else if (!task.completed) {
-            time_tasks.push(task);
-          }
+    if (t.sticky) {
+      // ← skip sticky tasks that are already completed
+      if (t.completed) continue;
+
+      if (!t.hidden) {
+        if (lastLabel !== t.sticky_label) {
+          sticky.push({ type: 'header', label: t.sticky_label });
+          lastLabel = t.sticky_label;
         }
+        sticky.push(t);
+      }
+    } else {
+      if (t.completed) continue;   // ← non-sticky also skip completed
+      if (t.timeout) {
+        const expire = new Date(alertTime.getTime() + t.timeout_after);
+        if (now < expire) timed.push(t);
+      } else {
+        timed.push(t);
       }
     }
-    // reverse the time_tasks list so newest is displayed first
-    if (time_tasks.length > 0) {
-      time_tasks.reverse();
-      const header_1 = { type: 'header', label: 'Recent' };
-      time_tasks.unshift(header_1);
-    }
-    // merge the time_tasks array with the sticky_tasks array
-    todos = time_tasks.concat(sticky_tasks);
-    // return the tasks list reversed to ensure correct order
-    return todos;
   }
 
-  /**
-   * Checks if this task has already been unlocked.
-   * A task is unlocked, once all the required tasks are completed.
-   *
-   * @param task
-   * @param taskList
-   */
-  checkTaskIsUnlocked(task: Task, taskList: Task[]) {
-    // get a set of completed task uuids
-    const completedUUIDs = new Set();
-    for (const study_task of taskList) {
-      if (study_task.completed) {
-        completedUUIDs.add(study_task.uuid);
-      }
-    }
+  if (timed.length) {
+    timed.reverse();
+    timed.unshift({ type: 'header', label: 'Recent' });
+  }
+  return timed.concat(sticky);
+}
 
-    // get the list of prereqs from the task
-    const prereqs = task.unlock_after;
-    let unlock = true;
-    for (const prereq of prereqs) {
-      if (!completedUUIDs.has(prereq)) {
-        unlock = false;
-        break;
-      }
-    }
+  /** Public alias for unlock check */
+  public checkTaskIsUnlocked(task: Task, taskList: Task[]): boolean {
+    return this.checkUnlocked(task, taskList);
+  }
 
-    return unlock;
+  /** Internal prereq-unlock check */
+  private checkUnlocked(task: Task, list: Task[]): boolean {
+    const done = new Set(list.filter((t) => t.completed).map((t) => t.uuid));
+    return (task.unlock_after ?? []).every((pr) => done.has(pr));
   }
 }

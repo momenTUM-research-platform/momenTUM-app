@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, NgZone } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { NavController, AlertController } from '@ionic/angular';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { AlertController } from '@ionic/angular';
+import { SplashScreen } from '@capacitor/splash-screen';
+import { App as CapacitorApp } from '@capacitor/app';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { Capacitor } from '@capacitor/core';
+
 import { DataService } from '../../services/data/data.service';
 import { StudyTasksService } from '../../services/study-tasks/study-tasks.service';
 import { SurveyCacheService } from '../../services/survey-cache/survey-cache.service';
 import { LoadingService } from '../../services/loading/loading-service.service';
 import { NotificationsService } from '../../services/notification/notifications.service';
-import { TranslateService } from '@ngx-translate/core';
 import { StorageService } from '../../services/storage/storage.service';
-import { NavController } from '@ionic/angular';
-import { ActivatedRoute } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+
 import { Task } from 'src/app/interfaces/types';
 import { Study } from 'src/app/interfaces/study';
-import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-home',
@@ -21,276 +24,228 @@ import { SplashScreen } from '@capacitor/splash-screen';
   styleUrls: ['./home.page.scss'],
 })
 export class HomePage implements OnInit {
-  showLogin = true; // Used for showing / hiding elements
-  enrolled = false; // Used for determining whether the user is enrolled in a study or not
-  tasks: Task[] = []; // Stores the list of tasks to be completed by the user
-  bannerURL: string; // The URL from which the banner is loaded
-  emptyMessage: string; // A message that is shown if no tasks are available
-  themeIconName: 'sunny' | 'moon'; // the name of the theme toggle icon
-  typeToIcon = {
-    survey: 'checkmark-circle-outline',
-    pvt: 'alarm-outline',
-  };
+  showLogin = true;
+  enrolled = false;
+  tasks: Task[] = [];
+  bannerURL = '';
+  emptyMessage = '';
+  showEmpty = false; // show when no tasks
+  themeIconName: 'sunny' | 'moon';
+  typeToIcon = { survey: 'checkmark-circle-outline', pvt: 'alarm-outline' };
+
+  // Base URL parts for study API
+  private readonly DOMAIN     = 'https://designer.momentumresearch.eu';
+  private readonly API_PREFIX = '/api/v2/studies';
 
   constructor(
     private surveyDataService: DataService,
-    private notificationsService: NotificationsService,
-    private surveyCacheService: SurveyCacheService,
     private studyTasksService: StudyTasksService,
-    private navController: NavController,
-    private route: ActivatedRoute,
-    private router: Router,
+    private surveyCacheService: SurveyCacheService,
+    private notificationsService: NotificationsService,
     private loadingService: LoadingService,
-    private alertController: AlertController,
     private storageService: StorageService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private alertController: AlertController,
+    private navController: NavController,
+    private router: Router,
+    private route: ActivatedRoute,
+    private ngZone: NgZone                
   ) {}
 
-  /**
-   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
-   * Executed only once upon creation of the component but before rendering of the component.
-   *
-   * Subscribes to a queryParameter event, such that when the Barcode page sends the URL it logs into the study.
-   */
-  async ngOnInit() {
-    // needed for the barcode page to communicate a study link
-    this.route.queryParams.subscribe(async () => {
-      if (this.router.getCurrentNavigation()?.extras.state) {
-        const url = this.router.getCurrentNavigation()?.extras.state.qrURL;
-        await this.enrolInStudy(url);
+  ngOnInit(): void {
+    // 1) Whenever a notification is delivered in-app, refresh the home list
+    this.notificationsService.onDelivered$.subscribe(() => {
+      console.log('[HomePage] notification delivered → reloading tasks');
+      this.initialize();
+    });
+
+    // 2) When the app returns from background (e.g. user tapped the notification),
+    //    re-load tasks so new modules show up immediately.
+    CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        console.log('[HomePage] app resumed → reloading tasks');
+        this.ngZone.run(() => this.initialize());
+      }
+    });
+
+    // Handle QR-scanner return
+    this.route.queryParams.subscribe(() => {
+      const nav = this.router.getCurrentNavigation();
+      const raw = nav?.extras?.state?.qrURL as string;
+      if (raw) {
+        this.enrolInStudy(raw);
       }
     });
   }
 
-  /**
-   * Angular component lifecycle method: [Docs](https://angular.io/guide/lifecycle-hooks).
-   * Executed every time the component's view is entered.
-   */
-  async ionViewWillEnter() {
+  /** Debug helper: fire a test notification 5s from now */
+  public async testImmediateNotif(): Promise<void> {
     await this.notificationsService.requestPermissions();
-    await this.initialize();
-    SplashScreen.hide();
-
-    // Log page visit
-    if (!this.enrolled) return;
+    await this.notificationsService.initialize();
+    const at = new Date(Date.now() + 5000);
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: 9999,
+        title: 'Test Notification',
+        body: `Fired at ${at.toLocaleTimeString()}`,
+        channelId: 'default',
+        schedule: { at },
+        extra: { test: true }
+      }]
+    });
+    console.log('Scheduled test notification at', at);
   }
 
-  /**
-   * Initializes the variables.
-   */
-  async initialize() {
-    // set theme
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-    this.themeIconName = prefersDark.matches ? 'moon' : 'sunny';
+  async ionViewWillEnter(): Promise<void> {
+    if (Capacitor.getPlatform() !== 'web') {
+      try {
+        await this.notificationsService.requestPermissions();
+      } catch (e) {
+        console.warn('Notifications plugin unavailable on web', e);
+      }
+    }
 
-    // check whether enrolled or not
+    await this.initialize();
+
+    if (Capacitor.getPlatform() !== 'web') {
+      try {
+        await SplashScreen.hide();
+        await StatusBar.setStyle({
+          style: this.themeIconName === 'sunny' ? Style.Dark : Style.Light
+        });
+      } catch (e) {
+        console.warn('StatusBar/SplashScreen plugin unavailable', e);
+      }
+    }
+  }
+
+  /** Load theme, banner, and pending tasks */
+  private async initialize(): Promise<void> {
+    // Set theme icon
+    this.themeIconName = window.matchMedia('(prefers-color-scheme: dark)')
+      .matches
+      ? 'moon'
+      : 'sunny';
+
+    // Load saved study
     const study = await this.storageService.getStudy();
-
-    // set state variables if not enrolled
-    if (study === null) {
+    if (!study) {
       this.enrolled = false;
       this.showLogin = true;
       this.tasks = [];
-      this.bannerURL = '';
-      this.emptyMessage = '';
       return;
     }
 
-    // set state variables if enrolled
-    await this.loadingService.present(
-      await this.translate.get('label_loading').toPromise()
-    );
-    this.bannerURL = study.properties.banner_url;
+    // Display banner & tasks
+    this.bannerURL    = study.properties.banner_url;
     this.emptyMessage = study.properties.empty_msg;
-    this.enrolled = true;
-    this.showLogin = false;
-    this.tasks = await this.studyTasksService.getToDos();
-    await this.loadingService.dismiss();
+    this.enrolled     = true;
+    this.showLogin    = false;
+    this.tasks        = await this.studyTasksService.getToDos();
+    this.showEmpty    = this.tasks.length === 0;
   }
 
-  /**
-   * Handles the "Theme Toggle" button.
-   * Performs a theme change,
-   * read the [ionic docs](https://ionicframework.com/docs/theming/dark-mode) for how theme changes work in ionic.
-   */
-  async toggleTheme() {
-    const toDark = this.themeIconName === 'sunny'; // Check if toggle from light to dark
-    document.body.classList.toggle('dark'); // toggle
-    this.themeIconName = toDark ? 'moon' : 'sunny'; // Update icon
-    StatusBar.setStyle({ style: toDark ? Style.Dark : Style.Light }).catch(
-      (e) => {
-        console.log(e);
-      }
-    ); // Update statusbar
+  /** Toggle dark/light mode */
+  async toggleTheme(): Promise<void> {
+    const toDark = this.themeIconName === 'sunny';
+    document.body.classList.toggle('dark');
+    this.themeIconName = toDark ? 'moon' : 'sunny';
+    await StatusBar.setStyle({ style: toDark ? Style.Dark : Style.Light });
   }
 
-  /**
-   * Handles the "QR Code" button.
-   */
-  async scanQR() {
+  /** Go to QR scanner */
+  scanQR(): Promise<boolean> {
     return this.navController.navigateForward('/scanner');
   }
 
-  /**
-   * Handles the enrol buttons.
-   *
-   * @param url The URL to attempt to download a study from
-   */
-  async enrolInStudy(url: string) {
-    // show loading bar
+  /** Prompt for full URL enrollment */
+  async enterURL(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: await this.translate.get('btn_enter_url').toPromise(),
+      inputs: [{ name: 'url', type: 'url', placeholder: 'https://…' }],
+      buttons: [
+        { text: await this.translate.get('btn_cancel').toPromise(), role: 'cancel' },
+        { text: await this.translate.get('btn_enrol').toPromise(),
+          handler: data => this.enrolInStudy(data.url) }
+      ]
+    });
+    await alert.present();
+  }
+
+  /** Prompt for Study ID enrollment */
+  async enterStudyID(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: await this.translate.get('btn_study_id').toPromise(),
+      inputs: [{ name: 'id', type: 'text', placeholder: 'e.g. STUDY01' }],
+      buttons: [
+        { text: await this.translate.get('btn_cancel').toPromise(), role: 'cancel' },
+        { text: await this.translate.get('btn_enrol').toPromise(),
+          handler: data => this.enrolInStudy(data.id) }
+      ]
+    });
+    await alert.present();
+  }
+
+  /** Enrollment flow */
+  private async enrolInStudy(raw: string): Promise<void> {
+    const url = this.normalizeUrl(raw);
     this.loadingService.isCaching = false;
-    await this.loadingService.present(
-      await this.translate.get('label_loading').toPromise()
-    );
+    const label = await this.translate.get('label_loading').toPromise();
+    await this.loadingService.present(label);
 
     try {
-      // download the study
       const study: Study = await this.surveyDataService.downloadStudy(url);
       await this.storageService.saveStudy(study);
       await this.storageService.setEnrolmentDate(new Date());
 
-      // cache all media files if this study has set this property to true
       if (study.properties.cache) {
-        this.loadingService.dismiss().then(async () => {
-          this.loadingService.isCaching = true;
-          this.loadingService.present(
-            await this.translate.get('label_loading').toPromise()
-          );
-        });
-        this.surveyCacheService.cacheAllMedia(study);
+        this.loadingService.isCaching = true;
+        await this.surveyCacheService.cacheAllMedia(study);
+        this.loadingService.isCaching = false;
       }
+
       await this.studyTasksService.generateStudyTasks();
       await this.notificationsService.setNext30Notifications();
       await this.initialize();
+    } catch (error: any) {
+      const isURLproblem  = error.message !== 'InvalidStudyError';
+      const isJSONinvalid = !isURLproblem;
+      this.displayEnrolError(isJSONinvalid, isURLproblem);
+    } finally {
       await this.loadingService.dismiss();
-    } catch (error) {
-      // handle download errors
-      await this.loadingService.dismiss();
-      const invalidHTTPError = error !== 'InvalidStudyError';
-      const invalidJSONError = !invalidHTTPError;
-      this.displayEnrolError(invalidJSONError, invalidHTTPError);
-      console.log(error);
-      return;
     }
   }
 
-  /**
-   * Handles the alert dialog to enrol via URL
-   */
-  async enterURL() {
-    const alert = await this.alertController.create({
-      header: await this.translate.get('btn_enter_url').toPromise(),
-      inputs: [
-        {
-          name: 'url',
-          type: 'url',
-          placeholder: 'e.g. https://bit.ly/2Q4O9jI',
-        },
-      ],
-      buttons: [
-        {
-          text: await this.translate.get('btn_cancel').toPromise(),
-          role: 'cancel',
-          cssClass: 'secondary',
-        },
-        {
-          text: await this.translate.get('btn_enrol').toPromise(),
-          handler: (response) => {
-            this.enrolInStudy(response.url);
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  /**
-   *
-   * Handles the alert dialog to enrol via Study ID
-   */
-  async enterStudyID() {
-    const alert = await this.alertController.create({
-      header: await this.translate.get('btn_study_id').toPromise(),
-      inputs: [
-        {
-          name: 'id',
-          type: 'text',
-          placeholder: 'e.g. STUDY01',
-        },
-      ],
-      buttons: [
-        {
-          text: await this.translate.get('btn_cancel').toPromise(),
-          role: 'cancel',
-          cssClass: 'secondary',
-        },
-        {
-          text: await this.translate.get('btn_enrol').toPromise(),
-          handler: (response) => {
-            // create URL for study
-            const url =
-              'http://localhost:8200/api/v2/studies/' +
-              response.id;
-            this.enrolInStudy(url);
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  /**
-   * Displays an alert to indicate that something went wrong during study enrolment
-   *
-   * @param isQRCode Denotes whether the error was caused via QR code enrolment
-   */
-  async displayEnrolError(isJSONinvalid: boolean, isURLproblem: boolean) {
-    let message = "We couldn't load your study.";
-
-    if (isJSONinvalid && !isURLproblem) {
-      message =
-        "We couldn't load your study. The downloaded study has an invalid format.";
-    } else if (!isJSONinvalid && isURLproblem) {
-      message =
-        "We couldn't load your study. The URL is invalid. Please ensure you are entering the correct URL.";
+  /** Build full API URL */
+  private normalizeUrl(raw: string): string {
+    raw = (raw || '').trim();
+    if (/^https?:\/\//i.test(raw)) return raw;
+    if (raw.match(new RegExp(`^${this.API_PREFIX.replace('/', '\\/')}`, 'i'))) {
+      return this.DOMAIN + (raw.startsWith('/') ? raw : `/${raw}`);
     }
+    return `${this.DOMAIN}${this.API_PREFIX}/${raw.replace(/^\/+/, '')}`;
+  }
 
+  /** Show an error if enrollment fails */
+  private async displayEnrolError(isJSONinvalid: boolean, isURLproblem: boolean): Promise<void> {
+    let msg = "We couldn't load your study.";
+    if (isJSONinvalid) msg = 'Invalid study format received.';
+    else if (isURLproblem) msg = 'Invalid URL. Please check and try again.';
     const alert = await this.alertController.create({
-      header: 'Oops...',
-      message: message,
-      buttons: ['Dismiss'],
+      header: 'Oops…',
+      message: msg,
+      buttons: ['Dismiss']
     });
     await alert.present();
   }
 
-  /**
-   * Displays a message when camera permission is not allowed
-   */
-  async displayBarcodeError() {
-    const alert: HTMLIonAlertElement = await this.alertController.create({
-      header: 'Permission Required',
-      message: await this.translate.get('msg_camera').toPromise(),
-      buttons: ['Dismiss'],
-    });
-    await alert.present();
+  /** Navigate into a specific task */
+  openTask(task: Task): void {
+    this.navController.navigateRoot(`/${task.type}/${task.task_id}`);
   }
 
-  /**
-   * Handler for when a user clicks on a specific task.
-   * Opens the task page for a specific task.
-   * @param task
-   */
-  async openTask(task: Task) {
-    const route = `/${task.type}/${task.task_id}`;
-    this.navController.navigateRoot(route);
-  }
-
-  /**
-   * Refreshes the state variables.
-   */
-  async refresh(event: any) {
+  /** Pull-to-refresh */
+  refresh(event: any): void {
     setTimeout(async () => {
       await this.initialize();
       event.target.complete();

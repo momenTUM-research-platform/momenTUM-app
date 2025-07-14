@@ -59,7 +59,7 @@
         <ion-label stacked class="title-label">{{task.label}}</ion-label>
       </ion-item>
     </div>
-    <ion-item lines="none" class="ion-text-center" [hidden]="tasks.length">
+    <ion-item *ngIf="tasks.length === 0" lines="none" class="ion-text-center">
       <ion-label class="ion-text-wrap">
         {{emptyMessage}}
         <br />

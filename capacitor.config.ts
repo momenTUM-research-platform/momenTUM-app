@@ -5,6 +5,15 @@ const config: CapacitorConfig = {
   appName: 'momenTUM',
   webDir: 'www',
   bundledWebRuntime: true,
+
+  version: '1.0.0',     
+  android: {
+    versionCode: 2       
+  },
+  ios: {
+    buildNumber: '2'     
+  },
+
   plugins: {
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',

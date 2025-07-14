@@ -8,7 +8,7 @@ import { Browser } from '@capacitor/browser';
 import * as moment from 'moment';
 import { StorageService } from '../../services/storage/storage.service';
 import { Capacitor } from '@capacitor/core';
-import { Survey, Question, Option } from 'src/app/interfaces/study';
+import { Survey, Question, Option, Text as TextQuestion } from 'src/app/interfaces/study';
 import { Response, SurveyResponse } from 'src/app/interfaces/types';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { PhotoService } from '../../services/photo/photo.service';
@@ -273,11 +273,38 @@ export class SurveyPage implements OnInit {
    * @param question The question that has been answered
    */
   setAnswer(question: Question) {
-    // save the response and hide error
-    question.response = question.model;
+    let answer = question.model;
+    question.errorMessage = '';              // clear any old error
+  
+    if (question.type === 'text' &&
+        (question as TextQuestion).subtype === 'numeric') {
+      const q = question as TextQuestion;
+      const v = Number(answer);
+  
+      // only allow blank or a valid number
+      if (answer === '' || isNaN(v)) {
+        question.errorMessage = 'Please enter a number.';
+        return;
+      }
+  
+      // validate bounds
+      if (q.min_value != null && v < q.min_value) {
+        question.errorMessage = `Value must be ≥ ${q.min_value}.`;
+        return;
+      }
+      if (q.max_value != null && v > q.max_value) {
+        question.errorMessage = `Value must be ≤ ${q.max_value}.`;
+        return;
+      }
+  
+      // if valid, normalize answer to a number
+      answer = v.toString();
+    }
+  
+    // save only if no error
+    question.model     = answer;
+    question.response  = answer;
     question.hideError = true;
-
-    // trigger any branching tied to this question
     this.toggleDynamicQuestions(question);
   }
 

@@ -89,13 +89,16 @@ export interface Alerts {
   /** Initial notification date and time (ISO string). */
   startDateTime: string;
 
+  /** Additional times of day for this alert. */
+  times?: string[];
+
   /** How often to repeat this notification. */
   repeat: 'never' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
   /** Only used if repeat ≠ 'never'; e.g. 3 → every 3 days/weeks/etc. */
   interval: number;
 
-  /** Optional end date for repeating notifications (YYYY-MM-DD). */
+  /** End date for repeating notifications (YYYY-MM-DD). */
   until?: string;
 
   random: boolean;
@@ -227,6 +230,9 @@ export interface Question {
   noToggle?: boolean;
   response?: any;
   value?: any;
+
+  // new field for inline validation
+  errorMessage?: string;
 }
 
 export interface Instruction extends Question {
@@ -246,6 +252,10 @@ export interface YesNo extends Question {
 export interface Text extends Question {
   type: 'text';
   subtype: 'short' | 'long' | 'numeric';
+  /** Only for numeric subtype: inclusive lower bound */
+  min_value?: number;
+  /** Only for numeric subtype: inclusive upper bound */
+  max_value?: number;
 }
 
 export interface DateTime extends Question {

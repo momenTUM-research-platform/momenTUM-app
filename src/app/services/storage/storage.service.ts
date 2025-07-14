@@ -234,10 +234,11 @@ export class StorageService {
   /**
    * @returns A boolean value indicating whether the notifications have are enabled or not.
    */
-  async notificationsEnabled() {
-    const key: string = this.keys.notifications_enabled;
-    const notificationsEnabled: boolean = await this.nStorage.get(key);
-    return notificationsEnabled;
+  async notificationsEnabled(): Promise<boolean> {
+    const key = this.keys.notifications_enabled;
+    const stored = await this.nStorage.get(key);
+    // If never set, default to true
+    return stored == null ? true : stored;
   }
 
   /**
