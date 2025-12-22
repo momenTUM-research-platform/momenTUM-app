@@ -13,8 +13,6 @@ export class NavMock {
 }
 
 
-
-
 export class ToastMock {
   public async create(options: any): Promise<void> {}
 }

@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-  namespace 'de.tum.sg.momentum'
-  compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace "de.tum.sg.momentum.android"
+    compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "de.tum.sg.momentum"
+        applicationId "de.tum.sg.momentum.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 17
-        versionName "1.0.1"
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

@@ -107,6 +107,8 @@ export class HomePage implements OnInit {
 
     await this.initialize();
 
+    await this.notificationsService.setNext30Notifications();
+
     if (Capacitor.getPlatform() !== 'web') {
       try {
         await SplashScreen.hide();
@@ -205,7 +207,7 @@ export class HomePage implements OnInit {
       }
 
       await this.studyTasksService.generateStudyTasks();
-      await this.notificationsService.setNext30Notifications();
+      await this.notificationsService.setNext30Notifications(true);
       await this.initialize();
     } catch (error: any) {
       const isURLproblem  = error.message !== 'InvalidStudyError';

@@ -79,28 +79,45 @@ export interface Module {
   params: Survey | Pvt;
 }
 
-/**
- * Definition of the scheduling of a study intervention.
- */
+/** Definition of the scheduling of a study intervention. */
 export interface Alerts {
+  /** ─── Mode selector ──────────────────────────────────────────────── */
+  /** Choose absolute (calendar) or relative (enrollment) scheduling */
+  scheduleMode: 'absolute' | 'relative';
+
+  /** Designer-only preview: assumed enrollment date (ignored by Ionic) */
+  expectedEnrollmentDate?: string;
+
+  /** ─── Absolute scheduling ───────────────────────────────────────── */
+  /** Initial notification date & time (ISO string) – absolute mode only */
+  startDateTime?: string;
+
+  /** ─── Relative scheduling ───────────────────────────────────────── */
+  /** Days after enrollment for first notification – relative mode only */
+  offsetDays?: number;
+  /** Time of day (HH:MM) on offset day for first notification */
+  offsetTime?: string;
+  /** Number of additional notifications after first (relative mode) */
+  repeatCount?: number;
+
+  /** ─── Notification content ──────────────────────────────────────── */
+  /** Notification title text */
   title: string;
+  /** Notification message/body text */
   message: string;
 
-  /** Initial notification date and time (ISO string). */
-  startDateTime: string;
-
-  /** Additional times of day for this alert. */
+  /** Extra times of day (HH:MM strings) */
   times?: string[];
 
-  /** How often to repeat this notification. */
+  /** ─── Repeat configuration ─────────────────────────────────────── */
+  /** Repeat frequency */
   repeat: 'never' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-
-  /** Only used if repeat ≠ 'never'; e.g. 3 → every 3 days/weeks/etc. */
+  /** Repeat interval count (e.g. every N days/weeks) */
   interval: number;
-
-  /** End date for repeating notifications (YYYY-MM-DD). */
+  /** End date for repeating notifications (YYYY-MM-DD) – absolute mode only */
   until?: string;
 
+  /** ─── Random / Sticky / Timeout ────────────────────────────────── */
   random: boolean;
   randomInterval: number;
   sticky: boolean;
@@ -233,6 +250,12 @@ export interface Question {
 
   // new field for inline validation
   errorMessage?: string;
+
+  /** Optional semantic role, e.g. participant_id */
+  role?: 'participant_id' | string;
+
+  /** Optional pop-up message after submitting the answer. */
+  post_confirm_message?: string;
 }
 
 export interface Instruction extends Question {

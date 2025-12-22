@@ -11,6 +11,9 @@ interface Task {
   sticky: boolean;
   sticky_label: string;
   alert_title: string;
+  reminder_times?: string[];
+  random?: boolean;           // NEW: whether jitter is enabled
+  random_interval?: number;   // NEW: jitter window in minutes
   alert_message: string;
   timeout: boolean;
   timeout_after: number;

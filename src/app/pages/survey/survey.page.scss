@@ -162,3 +162,119 @@ ion-datetime {
 ion-range {
   font-size: small;
 }
+
+
+/* EMA option block embedded inside ion-label [innerHTML] */
+ion-item .ion-text-wrap .ema-opt {
+  display: block;
+  padding: 10px 12px;
+  background: var(--ion-color-tertiary-contrast);
+  border-radius: 12px;
+}
+
+ion-item .ion-text-wrap .ema-opt .title {
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+}
+
+ion-item .ion-text-wrap .ema-opt .cols {
+  margin: 0;
+  padding-left: 1.25rem; /* bullet indent */
+  list-style: disc;
+}
+
+ion-item .ion-text-wrap .ema-opt .cols li {
+  margin: 2px 0;
+  line-height: 1.25;
+  word-break: normal;
+  hyphens: auto;
+}
+
+/* Only on wider screens do two columns make sense */
+@media (min-width: 480px) {
+  ion-item .ion-text-wrap .ema-opt .cols {
+    column-count: 2;
+    column-gap: 16px;
+  }
+}
+
+/* Tighten left spacing for multi-choice items with radio/checkbox */
+ion-item.radio-button-style {
+  --padding-start: 6px;        /* outer padding on the left */
+  --inner-padding-start: 8px;  /* content padding on the left */
+  align-items: flex-start;     /* keep the control aligned with the block */
+}
+
+ion-item.radio-button-style ion-radio,
+ion-item ion-checkbox {
+  --size: 18px;                
+  margin-right: 8px;        
+}
+
+ion-item .ion-text-wrap .ema-opt .cols {
+  list-style: disc inside;     /* bullets inside; reduces left indent */
+  padding-left: 0;             /* remove extra padding */
+  margin-left: 0;
+}
+
+/* === Multi-choice === */
+
+ion-list.multi-list {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* ---------- LIGHT THEME (default) ---------- */
+
+ion-item.multi-option {
+  --background: #ffffff;            
+  --border-radius: 12px;
+  --inner-padding-start: 12px;
+  --inner-padding-end: 12px;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #e0e0e0;
+  margin: 6px 0;
+}
+
+ion-item.multi-option:nth-child(even) {
+  --background: #f7f7f7;
+}
+
+ion-item.multi-option.option-selected {
+  --background: #e3f2fd;          
+  --border-color: #1976d2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- DARK THEME ---------- */
+
+:host-context(.dark) ion-item.multi-option {
+  --background: #2c2c2c;
+  --border-radius: 12px;
+  --inner-padding-start: 12px;
+  --inner-padding-end: 12px;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: #3a3a3a;
+  margin: 6px 0;
+}
+
+:host-context(.dark) ion-item.multi-option:nth-child(even) {
+  --background: #333333;
+}
+
+:host-context(.dark) ion-item.multi-option.option-selected {
+  --background: #283593;             
+  --border-color: #bbdefb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Shared text styling ---------- */
+
+ion-item.multi-option .ion-text-wrap {
+  white-space: normal !important;
+  font-size: 16px;
+  line-height: 1.4;
+}

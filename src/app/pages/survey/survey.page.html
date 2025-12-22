@@ -69,12 +69,12 @@
         *ngIf="question.type === 'text' && question.subtype === 'numeric'"
         [(ngModel)]="question.model"
         (ionBlur)="setAnswer(question)"
-        type="number"
-        [min]="question.min_value"
-        [max]="question.max_value"
+        type="text"
+        inputmode="numeric"
+        pattern="[0-9]*"
         placeholder="Enter number…"
-        >
-        </ion-input>
+      >
+      </ion-input>
         <!-- inline validation message -->
         <ion-text color="danger" *ngIf="question.errorMessage">
           {{ question.errorMessage }}
@@ -88,33 +88,76 @@
         auto-grow="true"
         rows="3"
         ></ion-textarea>
-        <!--multi input-->
-        <ion-list *ngIf="question.type === 'multi'">
-          <!--radio-->
-          <ion-radio-group *ngIf="!question.modal && question.radio" (ionChange)="setAnswer(question)"
-            [(ngModel)]="question.model">
-            <ion-item *ngFor="let option of question.optionsChecked" class="ion-margin radio-button-style" lines="none">
-              <ion-label class="ion-text-wrap" style="font-size: medium">{{option.text}}</ion-label>
-              <ion-radio slot="start" color="light" value="{{option.text}}"></ion-radio>
-            </ion-item>
-          </ion-radio-group>
-          <!--no radio-->
-          <ng-container *ngIf="!question.modal && !question.radio">
-            <ion-item *ngFor="let option of question.optionsChecked" lines="none">
-              <ion-label style="font-size: medium">{{option.text}}</ion-label>
-              <ion-checkbox color="secondary" (click)="changeCheckStatus(option, question)"
-                [(ngModel)]="option.checked"></ion-checkbox>
-            </ion-item>
-          </ng-container>
-          <!--modal-->
-          <ion-select *ngIf="question.modal" style="width: 100%; max-width: 100%" (ionChange)="setAnswer(question)"
-            [(ngModel)]="question.model" placeholder="Select..." okText="Select" cancelText="Dismiss"
-            multiple="{{!question.radio}}">
-            <ion-select-option color="tertiary" *ngFor="let option of question.optionsChecked">
-              {{option.text}}
-            </ion-select-option>
-          </ion-select>
-        </ion-list>
+       <!-- multi input -->
+       <ion-list *ngIf="question.type === 'multi'" class="multi-list">
+        <!-- radio -->
+        <ion-radio-group
+          *ngIf="!question.modal && question.radio"
+          (ionChange)="setAnswer(question)"
+          [(ngModel)]="question.model"
+        >
+          <ion-item
+            *ngFor="let option of question.optionsChecked"
+            class="multi-option"
+            [class.option-selected]="question.model === option.code"
+            lines="none"
+          >
+            <ion-label
+              class="ion-text-wrap"
+              style="font-size: medium"
+              [innerHTML]="option.safeHtml"
+            ></ion-label>
+            <ion-radio
+              slot="start"
+              color="secondary"
+              [value]="option.code"
+              style="--size:18px; margin-right:8px;"
+            ></ion-radio>
+          </ion-item>
+        </ion-radio-group>
+
+        <!-- no radio (checkboxes) -->
+        <ng-container *ngIf="!question.modal && !question.radio">
+          <ion-item
+            *ngFor="let option of question.optionsChecked"
+            class="multi-option"
+            [class.option-selected]="option.checked"
+            lines="none"
+          >
+            <ion-label
+              class="ion-text-wrap"
+              style="font-size: medium"
+              [innerHTML]="option.safeHtml"
+            ></ion-label>
+            <ion-checkbox
+              color="secondary"
+              (click)="changeCheckStatus(option, question)"
+              [(ngModel)]="option.checked"
+              style="--size:18px; margin-right:8px;"
+            ></ion-checkbox>
+          </ion-item>
+        </ng-container>
+
+        <!-- modal select -->
+        <ion-select
+          *ngIf="question.modal"
+          style="width: 100%; max-width: 100%"
+          (ionChange)="setAnswer(question)"
+          [(ngModel)]="question.model"
+          placeholder="Select..."
+          okText="Select"
+          cancelText="Dismiss"
+          [multiple]="!question.radio"
+        >
+          <ion-select-option
+            color="tertiary"
+            *ngFor="let option of question.optionsChecked"
+            [value]="option.code"
+          >
+            {{ option.plain }}
+          </ion-select-option>
+        </ion-select>
+      </ion-list>
         <!--yes no-->
         <ion-segment *ngIf="question.type === 'yesno'" [(ngModel)]="question.model" (ionChange)="setAnswer(question)">
           <ion-segment-button value="{{question.yes_text}}" layout="icon-start">

@@ -6,12 +6,12 @@ const config: CapacitorConfig = {
   webDir: 'www',
   bundledWebRuntime: true,
 
-  version: '1.0.0',     
+  version: '1.1.2',     
   android: {
-    versionCode: 2       
+    versionCode: 3       
   },
   ios: {
-    buildNumber: '2'     
+    buildNumber: '7'     
   },
 
   plugins: {
@@ -21,7 +21,7 @@ const config: CapacitorConfig = {
       sound: 'beep.wav',
     },
     SplashScreen: {
-      launchAutoHide: false,
+      launchAutoHide: true,
     },
   },
 };

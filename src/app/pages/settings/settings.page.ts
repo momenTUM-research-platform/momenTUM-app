@@ -76,17 +76,17 @@ export class SettingsPage {
   async withdrawFromStudy() {
     const alert = await this.alertController.create({
       header: 'Are you sure?',
-      message: 'By withdrawing, you will lose all progress.',
+      message: 'Please only end when you are no longer receiving the survey notifications.',
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
         },
         {
-          text: 'Withdraw',
+          text: 'End',
           handler: async () => {
             // log a withdraw event to the server
-            await this.loadingService.present('Withdrawing...');
+            await this.loadingService.present('Ending...');
             // upload any pending logs and data
             try {
               await this.surveyDataService.uploadPendingData('log');

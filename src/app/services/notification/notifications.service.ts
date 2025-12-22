@@ -15,10 +15,16 @@ import { Task } from 'src/app/interfaces/types';
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   private readonly CHANNEL_ID = 'default';
-  private readonly MAX_SCHEDULE = 30;
-  
-  private deliveredSub = new Subject<void>();
+  private readonly MAX_SCHEDULE = 64;
 
+  // Base notifications use Number(task.task_id).
+  // Reminders: baseId * REMINDER_MULTIPLIER + i
+  private readonly REMINDER_MULTIPLIER = 100;
+
+  // Immediate catch-up pings: baseId * IMMEDIATE_OFFSET + 1
+  private readonly IMMEDIATE_OFFSET = 1000;
+
+  private deliveredSub = new Subject<void>();
   public onDelivered$ = this.deliveredSub.asObservable();
 
   constructor(
@@ -27,27 +33,16 @@ export class NotificationsService {
     private router: Router,
     private ngZone: NgZone
   ) {
-    // Auto-start: ask for permissions, create channel, and hook tap-handler
     this.initialize();
 
-    // listen for delivery (fired when a local notification actually appears)
-    LocalNotifications.addListener(
-      'localNotificationReceived',
-      () => {
-        // run inside Angular zone so subscribers see the update
-        this.ngZone.run(() => {
-          console.log('[Notif] → delivered one');
-          this.deliveredSub.next();
-        });
-      }
-    );
+    LocalNotifications.addListener('localNotificationReceived', () => {
+      this.ngZone.run(() => {
+        console.log('[Notif] delivered');
+        this.deliveredSub.next();
+      });
+    });
   }
 
-  /**
-   * 1) Ask OS for notification permission
-   * 2) Create Android channel
-   * 3) Wire up tap handler
-   */
   public async initialize(): Promise<void> {
     await this.requestPermissions();
     await LocalNotifications.createChannel({
@@ -59,7 +54,6 @@ export class NotificationsService {
     this.addListenerOnClick();
   }
 
-  /** Ask the user (iOS & Android 13+) for notification permission */
   public async requestPermissions(): Promise<void> {
     const perm = await LocalNotifications.checkPermissions();
     if (perm.display !== 'granted') {
@@ -67,11 +61,14 @@ export class NotificationsService {
     }
   }
 
-  /**
-   * When the user taps a notification:
-   * └─ we read both task_id and task_type and navigate accordingly
-   * └─ run inside Angular’s zone so the UI actually updates
-   */
+  private jitter(date: Date, minutes: number): Date {
+    if (!minutes || minutes <= 0) return date;
+    const d = new Date(date);
+    const delta = Math.floor(Math.random() * (minutes * 2 + 1)) - minutes; // [-m..+m]
+    d.setMinutes(d.getMinutes() + delta);
+    return d;
+  }
+
   private addListenerOnClick(): void {
     LocalNotifications.removeAllListeners();
     LocalNotifications.addListener(
@@ -81,19 +78,14 @@ export class NotificationsService {
           task_id?: string;
           task_type?: 'survey' | 'pvt';
         };
-        const id   = extra.task_id;
-        const type = extra.task_type;
-
-        if (!id) {
-          return; // nothing to navigate to
-        }
+        const id = extra?.task_id;
+        const type = extra?.task_type;
+        if (!id) return;
 
         this.ngZone.run(() => {
           if (type === 'pvt') {
-            // route into your PVT page
             this.router.navigateByUrl(`/pvt/${id}`);
           } else {
-            // default to survey
             this.router.navigateByUrl(`/survey/${id}`);
           }
         });
@@ -102,10 +94,27 @@ export class NotificationsService {
   }
 
   /**
-   * Schedule one notification.
-   * autoCancel: true → clears only that one when tapped
+   * Cancel pending notifications (base + reminders) for a single task.
+   * Matches by extra.task_id to catch base and reminder IDs.
    */
-  public async scheduleNotification(task: Task): Promise<void> {
+  public async cancelPendingForBaseTask(taskId: string): Promise<number> {
+    try {
+      const { notifications } = await LocalNotifications.getPending();
+      const toCancel = notifications
+        .filter(n => String((n as any)?.extra?.task_id) === String(taskId))
+        .map(n => ({ id: n.id }));
+
+      if (!toCancel.length) return 0;
+      await LocalNotifications.cancel({ notifications: toCancel } as CancelOptions);
+      return toCancel.length;
+    } catch (err) {
+      console.error('[Notif] cancelPendingForBaseTask failed for', taskId, err);
+      return 0;
+    }
+  }
+
+  /** Schedule one base notification for a task. */
+  private async scheduleNotification(task: Task): Promise<void> {
     try {
       await LocalNotifications.schedule({
         notifications: [
@@ -116,15 +125,15 @@ export class NotificationsService {
             smallIcon: 'res://notification_icon',
             largeIcon: 'res://notification_icon',
             extra: {
-              task_id:   task.task_id,
-              task_type: task.type
+              task_id: task.task_id,
+              task_type: task.type,
             },
-            ongoing:    false,
+            ongoing: false,
             autoCancel: true,
-            channelId:  this.CHANNEL_ID,
+            channelId: this.CHANNEL_ID,
             schedule: {
-              at:              new Date(task.time),
-              allowWhileIdle:  true,
+              at: new Date(task.time),
+              allowWhileIdle: true,
             },
           },
         ],
@@ -135,9 +144,77 @@ export class NotificationsService {
   }
 
   /**
-   * Cancel *only* pending notifications.
-   * Delivered ones remain in the shade until the user taps them.
+   * For sticky tasks: schedule reminder pings for the same task.
+   * Uses unique IDs (baseId*REMINDER_MULTIPLIER + i).
    */
+  private async scheduleStickyReminders(task: Task, remainingSlots: number): Promise<number> {
+    if (!task.sticky || !task.reminder_times?.length) return 0;
+  
+    const baseDate = new Date(task.time);
+    const baseId = Number(task.task_id);
+    const now = Date.now();
+    const jitterMinutes = task.random ? (task.random_interval ?? 0) : 0;
+  
+    const notifs: LocalNotificationSchema[] = [];
+    for (let i = 0; i < task.reminder_times.length; i++) {
+      if (notifs.length >= remainingSlots) break;
+  
+      const hm = task.reminder_times[i];
+      let at = this.combineDateWithHM(baseDate, hm);
+  
+      // apply jitter to reminder time (if enabled)
+      if (jitterMinutes > 0) {
+        at = this.jitter(at, jitterMinutes);
+      }
+  
+      if (at.getTime() <= now) continue; // don’t schedule past times
+  
+      notifs.push({
+        id: baseId * this.REMINDER_MULTIPLIER + (i + 1),
+        title: task.alert_title,
+        body: task.alert_message,
+        smallIcon: 'res://notification_icon',
+        largeIcon: 'res://notification_icon',
+        extra: { task_id: task.task_id, task_type: task.type },
+        ongoing: false,
+        autoCancel: true,
+        channelId: this.CHANNEL_ID,
+        schedule: { at, allowWhileIdle: true },
+      });
+    }
+  
+    if (!notifs.length) return 0;
+    try {
+      await LocalNotifications.schedule({ notifications: notifs });
+      return notifs.length;
+    } catch (err) {
+      console.error('Failed to schedule sticky reminders for task', task.task_id, err);
+      return 0;
+    }
+  }
+
+  /** Fire a single immediate notification for an overdue task. */
+  private async scheduleImmediatePing(task: Task): Promise<void> {
+    const baseId = Number(task.task_id);
+    const at = new Date(Date.now() + 1000);
+
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: baseId * this.IMMEDIATE_OFFSET + 1,
+        title: task.alert_title,
+        body: task.alert_message,
+        smallIcon: 'res://notification_icon',
+        largeIcon: 'res://notification_icon',
+        extra: { task_id: task.task_id, task_type: task.type },
+        ongoing: false,
+        autoCancel: true,
+        channelId: this.CHANNEL_ID,
+        schedule: { at, allowWhileIdle: true },
+      }],
+    });
+  }
+
+  /** Cancel all pending notifications. */
   public async cancelAll(): Promise<void> {
     const pending = await this.getPending();
     if (pending.length) {
@@ -147,28 +224,30 @@ export class NotificationsService {
     }
   }
 
-  /** Return the array of pending (scheduled but not yet delivered) notifications */
+  /** Get pending (scheduled but not yet delivered) notifications. */
   public async getPending(): Promise<LocalNotificationSchema[]> {
     const { notifications } = await LocalNotifications.getPending();
     return notifications.map((p: PendingLocalNotificationSchema) => ({
-      id:       p.id,
-      title:    p.title,
-      body:     p.body,
+      id: p.id,
+      title: p.title,
+      body: p.body,
       schedule: p.schedule,
-      extra:    p.extra,
+      extra: p.extra,
     }));
   }
 
   /**
-   * Main entry: clear pending, then schedule up to MAX_SCHEDULE future alerts
-   * for any unlocked tasks whose time is still in the future.
+   * Clear pending, then schedule up to MAX_SCHEDULE future alerts.
+   * - Non-sticky: each task is its own alert.
+   * - Sticky: schedule base + same-day reminders.
+   * - If fireOverdueNow is true, also emit one immediate ping per module for the latest overdue task.
    */
-  public async setNext30Notifications(): Promise<void> {
-    console.log('[Notif] setNext30Notifications');
+  public async setNext30Notifications(fireOverdueNow = false): Promise<void> {
+    console.log('[Notif] setNext30Notifications', { fireOverdueNow });
     await this.cancelAll();
 
     if (!(await this.storage.notificationsEnabled())) {
-      console.log('[Notif] in-app notifications disabled');
+      console.log('[Notif] disabled in app settings');
       return;
     }
 
@@ -178,20 +257,90 @@ export class NotificationsService {
       return;
     }
 
-    const tasks     = (await this.storage.getTasks()) ?? [];
-    let scheduled   = 0;
-    const now       = Date.now();
+    const tasks = (await this.storage.getTasks()) ?? [];
+    const now = Date.now();
+    let scheduled = 0;
 
-    for (const t of tasks) {
-      const ms = new Date(t.time).getTime();
-      if (ms <= now) continue;
-      if (!this.studyTasks.checkTaskIsUnlocked(t, tasks)) continue;
+    // Immediate catch-up for overdue tasks (one per module)
+    if (fireOverdueNow) {
+      const latestOverdueByModule = new Map<string, Task>();
+      for (const t of tasks) {
+        if (t.hidden) continue;
+        if (t.completed) continue;
+        if (!this.studyTasks.checkTaskIsUnlocked(t, tasks)) continue;
 
-      console.log(`[Notif] scheduling ${t.task_id} @ ${t.time}`);
-      await this.scheduleNotification(t);
-      if (++scheduled >= this.MAX_SCHEDULE) break;
+        const ms = new Date(t.time).getTime();
+        if (ms > now) continue;
+
+        const prev = latestOverdueByModule.get(t.uuid);
+        if (!prev || new Date(prev.time).getTime() < ms) {
+          latestOverdueByModule.set(t.uuid, t);
+        }
+      }
+
+      for (const t of latestOverdueByModule.values()) {
+        if (scheduled >= this.MAX_SCHEDULE) break;
+        console.log(`[Notif] immediate catch-up for overdue ${t.task_id}`);
+        await this.scheduleImmediatePing(t);
+        scheduled++;
+      }
     }
 
-    console.log(`[Notif] pending after schedule: ${(await this.getPending()).length}`);
+    // Future notifications (base + optional reminders)
+    const now2 = Date.now();
+    for (const t of tasks) {
+      if (t.completed) continue;
+      if (t.hidden) continue;
+      if (!this.studyTasks.checkTaskIsUnlocked(t, tasks)) continue;
+      if (scheduled >= this.MAX_SCHEDULE) break;
+
+      const baseMs = new Date(t.time).getTime();
+
+      if (!t.sticky) {
+        // Non-sticky: only schedule if the task time is in the future
+        if (baseMs <= now2) continue;
+
+        console.log(`[Notif] scheduling base ${t.task_id} @ ${t.time}`);
+        await this.scheduleNotification(t);
+        scheduled++;
+        continue;
+      }
+
+      // Sticky:
+      if (baseMs > now2) {
+        // Base time still in the future → schedule base + reminders
+        console.log(`[Notif] scheduling base (sticky) ${t.task_id} @ ${t.time}`);
+        await this.scheduleNotification(t);
+        scheduled++;
+
+        if (scheduled < this.MAX_SCHEDULE) {
+          const room = this.MAX_SCHEDULE - scheduled;
+          const added = await this.scheduleStickyReminders(t, room);
+          scheduled += added;
+        }
+      } else {
+        // Base time already passed → schedule *reminders only* that are still in the future
+        if (scheduled < this.MAX_SCHEDULE) {
+          const room = this.MAX_SCHEDULE - scheduled;
+          const added = await this.scheduleStickyReminders(t, room);
+          if (added > 0) {
+            console.log(`[Notif] scheduled ${added} sticky reminders for overdue ${t.task_id}`);
+          }
+          scheduled += added;
+        }
+      }
+    }
+
+    const pendingCount = (await this.getPending()).length;
+    console.log(`[Notif] pending after schedule: ${pendingCount}`);
+  }
+
+  /** Combine Y-M-D from base with HH:mm string. */
+  private combineDateWithHM(base: Date, hm: string): Date {
+    const [h, m] = (hm || '').split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return new Date(base);
+    const d = new Date(base);
+    d.setHours(h, m, 0, 0);
+    return d;
   }
 }

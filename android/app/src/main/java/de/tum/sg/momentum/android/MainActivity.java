@@ -1,4 +1,4 @@
-package de.tum.sg.momentum;
+package de.tum.sg.momentum.android;
 
 import com.getcapacitor.BridgeActivity;
 
